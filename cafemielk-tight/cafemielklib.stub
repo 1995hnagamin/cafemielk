@@ -1,0 +1,17 @@
+;;;
+;;; cafemielklib.stub
+;;;
+
+(declcode
+ (.include "cafemielk.h"))
+
+;; The following entry is a dummy one.
+;; Replace it for your definitions.
+
+(define-cproc test-cafemielk ()
+  (return (test_cafemielk)))
+
+
+;; Local variables:
+;; mode: scheme
+;; end:
