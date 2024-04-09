@@ -4,6 +4,7 @@
 
 (define-module cafemielk
   (export test-cafemielk ;; dummy
+          *magic-number*
           )
   )
 (select-module cafemielk)
@@ -14,3 +15,5 @@
 ;;
 ;; Put your Scheme definitions here
 ;;
+
+(define *magic-number* 42)
