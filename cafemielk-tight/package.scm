@@ -5,15 +5,15 @@
 (define-gauche-package "cafemielk"
   ;; Repository URL, e.g. github
   ;;  This URL uniquely identifies the package.
-  :repository "http://example.com/cafemielk.git"
+  :repository "https://github.com/1995hnagamin/cafemielk.git"
 
   ;;
-  :version "1.0"
+  :version "0.1"
 
   ;; Description of the package.  The first line is used as a short
   ;; summary.
-  :description "Sample package.scm\n\
-                Write your package description here."
+  :description "Cafemielk: Another FEM Implementation for Electromagntic Field Computation\n\
+                Framework for electromagnetic finite element analyses."
 
   ;; List of dependencies.
   ;; Example:
@@ -42,5 +42,5 @@
   :licenses ()
 
   ;; Homepage URL, if any.
-  ; :homepage "http://example.com/cafemielk/"
+  ; :homepage "https://github.com/1995hnagamin/cafemielk/"
   )

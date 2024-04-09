@@ -1,0 +1,7 @@
+# auto-generated files
+Makefile
+VERSION
+*.gpd
+*.log
+*.o
+*.so
