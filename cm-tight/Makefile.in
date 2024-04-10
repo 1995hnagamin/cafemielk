@@ -31,7 +31,7 @@ LOCAL_PATHS = "@LOCAL_PATHS@"
 PACKAGE   = cafemielk
 
 ARCHFILES = cafemielk.$(SOEXT)
-SCMFILES  = $(srcdir)/cafemielk.scm
+SCMFILES  = $(srcdir)/cafemielk.scm $(srcdir)/cafemielk/linalg.scm
 HEADERS   =
 
 TARGET    = $(ARCHFILES)
