@@ -13,8 +13,6 @@
 (test* "test-cafemielk" "cafemielk is working"
        (test-cafemielk))
 
-(test* "magic number is 42" *magic-number* 42)
-
 ;; If you don't want `gosh' to exit with nonzero status even if
 ;; the test fails, pass #f to :exit-on-failure.
 (test-end :exit-on-failure #t)
