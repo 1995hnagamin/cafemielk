@@ -18,6 +18,7 @@ SCM_DECL_BEGIN
 
 extern ScmObj test_cafemielk(void);
 extern ScmObj square_point_vec(ScmObj xvec, ScmObj yvec);
+extern ScmObj square_triangle_vec(int nx, int ny);
 
 
 /* Epilogue */

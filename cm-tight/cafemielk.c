@@ -28,6 +28,34 @@ ScmObj square_point_vec(ScmObj xvec, ScmObj yvec)
   return rvec;
 }
 
+ScmObj square_triangle_vec(int nx, int ny)
+{
+  ScmObj rvec = Scm_MakeVector(6 * (nx - 1) * (ny - 1), SCM_NIL);
+  ScmObj *prv = SCM_VECTOR_ELEMENTS(rvec);
+  for (int j = 0; j < ny - 1; ++j) {
+    int offset = nx * j;
+    for (int i = 0; i < nx - 1; ++i) {
+      /*
+       * a+nx a+nx+1
+       *  #---#
+       *  |  /|
+       *  | / |
+       *  |/  |
+       *  #---#
+       *  a  a+1
+       */
+      int a = offset + i;
+      *(prv++) = SCM_MAKE_INT(a + nx);
+      *(prv++) = SCM_MAKE_INT(a);
+      *(prv++) = SCM_MAKE_INT(a + nx + 1);
+      *(prv++) = SCM_MAKE_INT(a + 1);
+      *(prv++) = SCM_MAKE_INT(a + nx + 1);
+      *(prv++) = SCM_MAKE_INT(a);
+    }
+  }
+  return rvec;
+}
+
 /*
  * Module initialization function.
  */
