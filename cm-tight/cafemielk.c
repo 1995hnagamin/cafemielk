@@ -19,6 +19,20 @@ ScmObj nil_vector(void)
   return Scm_MakeVector(3, SCM_NIL);
 }
 
+ScmObj square_point_vec(ScmObj xvec, ScmObj yvec)
+{
+  int nx = SCM_VECTOR_SIZE(xvec), ny = SCM_VECTOR_SIZE(yvec);
+  ScmObj rvec = Scm_MakeVector(2 * nx * ny, SCM_NIL);
+  ScmObj *prv = SCM_VECTOR_ELEMENTS(rvec);
+  for (int j = 0; j < ny; ++j) {
+    for (int i = 0; i < nx; ++i) {
+      *(prv++) = SCM_VECTOR_ELEMENT(xvec, i);
+      *(prv++) = SCM_VECTOR_ELEMENT(yvec, j);
+    }
+  }
+  return rvec;
+}
+
 /*
  * Module initialization function.
  */

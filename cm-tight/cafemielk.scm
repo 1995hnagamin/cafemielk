@@ -5,6 +5,7 @@
 (define-module cafemielk
   (export test-cafemielk ;; dummy
 	  nil-vector
+	  square-point-vec
           )
   )
 (select-module cafemielk)

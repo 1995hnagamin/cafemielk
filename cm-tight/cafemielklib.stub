@@ -14,6 +14,9 @@
 (define-cproc nil-vector ()
   (return (nil_vector)))
 
+(define-cproc square-point-vec (xvec yvec)
+  (return (square_point_vec xvec yvec)))
+
 
 ;; Local variables:
 ;; mode: scheme
