@@ -14,6 +14,11 @@ ScmObj test_cafemielk(void)
     return SCM_MAKE_STR("cafemielk is working");
 }
 
+ScmObj nil_vector(void)
+{
+  return Scm_MakeVector(3, SCM_NIL);
+}
+
 /*
  * Module initialization function.
  */

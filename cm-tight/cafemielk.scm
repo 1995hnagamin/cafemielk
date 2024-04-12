@@ -4,6 +4,7 @@
 
 (define-module cafemielk
   (export test-cafemielk ;; dummy
+	  nil-vector
           )
   )
 (select-module cafemielk)

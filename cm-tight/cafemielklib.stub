@@ -11,6 +11,9 @@
 (define-cproc test-cafemielk ()
   (return (test_cafemielk)))
 
+(define-cproc nil-vector ()
+  (return (nil_vector)))
+
 
 ;; Local variables:
 ;; mode: scheme
