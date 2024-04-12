@@ -11,9 +11,6 @@
 (define-cproc test-cafemielk ()
   (return (test_cafemielk)))
 
-(define-cproc nil-vector ()
-  (return (nil_vector)))
-
 (define-cproc square-point-vec (xvec yvec)
   (return (square_point_vec xvec yvec)))
 

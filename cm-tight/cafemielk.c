@@ -14,11 +14,6 @@ ScmObj test_cafemielk(void)
     return SCM_MAKE_STR("cafemielk is working");
 }
 
-ScmObj nil_vector(void)
-{
-  return Scm_MakeVector(3, SCM_NIL);
-}
-
 ScmObj square_point_vec(ScmObj xvec, ScmObj yvec)
 {
   int nx = SCM_VECTOR_SIZE(xvec), ny = SCM_VECTOR_SIZE(yvec);
