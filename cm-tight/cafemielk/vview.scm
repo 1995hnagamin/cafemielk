@@ -3,7 +3,7 @@
 ;;;
 
 (define-module cafemielk.vview
-  (export <cm-vview>
+  (export <vview>
 	  make-vview
 	  vview-cut
 	  vview-length
@@ -21,7 +21,7 @@
 (use scheme.vector)
 (use gauche.sequence)
 
-(define-class <cm-vview> ()
+(define-class <vview> ()
   ((vec :init-keyword :vec)
    (start :init-keyword :start)
    (shape :init-keyword :shape)
@@ -34,7 +34,7 @@
        (acc 1 (* acc (vector-ref shape i))))
       ((< i 0) #f)
     (vector-set! steps i acc))
-  (make <cm-vview> :vec vec :start start :shape shape :steps steps))
+  (make <vview> :vec vec :start start :shape shape :steps steps))
 
 (define (vview-shape vv)
   (slot-ref vv 'shape))
