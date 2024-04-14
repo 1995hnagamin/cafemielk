@@ -4,22 +4,22 @@
 ;;;
 
 (define-module cafemielk.linalg
-  (export <crs>
-	  crs-addmv!
-	  crs-mv
+  (export <csr>
+	  csr-addmv!
+	  csr-mv
 	  )
   )
 
 (select-module cafemielk.linalg)
 
-(define-class <crs> ()
+(define-class <csr> ()
   ((nrows :init-keyword :nrows)
    (ncols :init-keyword :ncols)
    (vals :init-keyword :vals)
    (rowptr :init-keyword :rowptr)
    (colind :init-keyword :colind)))
 
-(define (crs-addmv! y A x)
+(define (csr-addmv! y A x)
   ; y += A*x
   (define m (vector-length y))
   (define n (vector-length x))
@@ -34,7 +34,7 @@
 	     (vector-ref x (vector-ref (slot-ref A 'colind) j))))))))
 
 
-(define (crs-mv A x)
+(define (csr-mv A x)
   (define y (make-vector (slot-ref A 'nrows) 0))
-  (crs-addmv! y A x)
+  (csr-addmv! y A x)
   y)
