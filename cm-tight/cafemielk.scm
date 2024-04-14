@@ -3,7 +3,12 @@
 ;;;
 
 (define-module cafemielk
-  (export test-cafemielk ;; dummy
+  (export <mesh2d>
+	  make-mesh2d
+	  mesh2d-nodes
+	  mesh2d-nodes-length
+	  mesh2d-nodes-ref
+	  mesh2d-triangles
 	  square
           )
   )
@@ -36,6 +41,9 @@
 
 (define (mesh2d-nodes-length mesh)
   (vview-length (mesh2d-nodes mesh) 0))
+
+(define (mesh2d-nodes-ref mesh i)
+  (vview-cut (mesh2d-nodes mesh) (vector i)))
 
 (define (square nx ny)
   (define ns (square-point-vec (vector-linspace 0. 1. nx)
