@@ -1,6 +1,4 @@
 (use cafemielk :prefix cm:)
-(use cafemielk.util :prefix cm:)
-(use cafemielk.vview :prefix cm:)
 
 ; \int_\Omega \nu (\grad w)\cdot(\grad A)dS = \int_\Omega w J_0 dS
 
