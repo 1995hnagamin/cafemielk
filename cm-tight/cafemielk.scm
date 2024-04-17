@@ -105,10 +105,10 @@
    (vector-copy (coo-vals coo))
    (let loop ((i 0) (r -1))
      (cond
-      ((= r (+ 1 nrows))
+      ((= r nrows)
        rowptr)
       ((= i nnz)
-       (vector-set! rowptr r nnz)
+       (vector-set! rowptr (+ r 1) nnz)
        (loop nnz (+ r 1)))
       ((> (row-of i) r)
        (vector-set! rowptr (+ r 1) i)
