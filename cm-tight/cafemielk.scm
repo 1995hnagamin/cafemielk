@@ -5,18 +5,31 @@
 (define-module cafemielk
   (extend cafemielk.util
 	  cafemielk.vview)
-  (export <csr>
-	  csr-addmv!
-	  csr-mv
-	  <mesh2d>
-	  func->fel
-	  make-mesh2d
-	  mesh2d-nodes
-	  mesh2d-nodes-length
-	  mesh2d-nodes-ref
-	  mesh2d-triangles
-	  square
-          )
+  (export
+   <coo>
+   <csr>
+   <mesh2d>
+   coo-cols
+   coo-rows
+   coo-vals
+   coo->csr
+   coom->csrm
+   csr-addmv!
+   csr-mv
+   func->fel
+   make-coo
+   make-csr
+   make-matrix
+   make-mesh2d
+   matrix-data
+   mesh2d-nodes
+   mesh2d-nodes-length
+   mesh2d-nodes-ref
+   mesh2d-triangles
+   ncols
+   nrows
+   square
+   )
   )
 (select-module cafemielk)
 
@@ -30,12 +43,27 @@
 
 ;; cafemielk.linalg
 
-(define-class <csr> ()
+(define-class <matrix> ()
   ((nrows :init-keyword :nrows)
    (ncols :init-keyword :ncols)
-   (vals :init-keyword :vals)
+   (data :init-keyword :data)))
+
+(define (make-matrix nrows ncols data)
+  (make <matrix>
+    :nrows nrows :ncols ncols :data data))
+
+(define (nrows matrix) (slot-ref matrix 'nrows))
+(define (ncols matrix) (slot-ref matrix 'ncols))
+(define (matrix-data matrix) (slot-ref matrix 'data))
+
+(define-class <csr> ()
+  ((vals :init-keyword :vals)
    (rowptr :init-keyword :rowptr)
    (colind :init-keyword :colind)))
+
+(define (make-csr vals rowptr colind)
+  (make <csr>
+    :vals vals :rowptr rowptr :colind colind))
 
 (define (csr-addmv! y A x)
   ; y += A*x
@@ -56,6 +84,44 @@
   (csr-addmv! y A x)
   y)
 
+(define-class <coo> ()
+  ((vals :init-keyword :vals)
+   (rows :init-keyword :rows)
+   (cols :init-keyword :cols)))
+
+(define (make-coo vals rows cols)
+  (make <coo> :vals vals :rows rows :cols cols))
+
+(define (coo-vals coo) (slot-ref coo 'vals))
+(define (coo-rows coo) (slot-ref coo 'rows))
+(define (coo-cols coo) (slot-ref coo 'cols))
+(define (coo-nnz coo) (vector-length (coo-vals coo)))
+
+(define (coo->csr nrows coo)
+  (define rowptr (make-vector (+ nrows 1)))
+  (define (row-of i) (vector-ref (coo-rows coo) i))
+  (define nnz (vector-length (coo-rows coo)))
+  (make-csr
+   (vector-copy (coo-vals coo))
+   (let loop ((i 0) (r -1))
+     (cond
+      ((= r (+ 1 nrows))
+       rowptr)
+      ((= i nnz)
+       (vector-set! rowptr r nnz)
+       (loop nnz (+ r 1)))
+      ((> (row-of i) r)
+       (vector-set! rowptr (+ r 1) i)
+       (loop i (+ r 1)))
+      (else
+       (loop (+ i 1) r))))
+   (vector-copy (coo-cols coo))))
+
+(define (coom->csrm coom)
+  (make-matrix
+   (nrows coom)
+   (ncols coom)
+   (coo->csr (nrows coom) (matrix-data coom))))
 
 ;; cafemielk.mesh
 
@@ -88,3 +154,14 @@
   (make-mesh2d
    (make-vview ns 0 (vector (* nx ny) 2))
    (make-vview ts 0 (vector (* 2 (- nx 1) (- ny 1)) 3))))
+
+
+;; cafemielk.fel
+
+(define (func->fel Th func)
+  (vector-tabulate
+   (mesh2d-nodes-length Th)
+   (lambda (i)
+     (let ((p (mesh2d-nodes-ref Th i)))
+       (func (vview-ref p #(0))
+	     (vview-ref p #(1)))))))
