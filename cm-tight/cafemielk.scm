@@ -16,6 +16,7 @@
    coom->csrm
    csr-addmv!
    csr-mv
+   dokm->coom
    func->fel
    make-coo
    make-csr
@@ -56,6 +57,8 @@
 (define (ncols matrix) (slot-ref matrix 'ncols))
 (define (matrix-data matrix) (slot-ref matrix 'data))
 
+; CSR (compressed sparse row)
+
 (define-class <csr> ()
   ((vals :init-keyword :vals)
    (rowptr :init-keyword :rowptr)
@@ -81,6 +84,8 @@
   (define y (make-vector nr 0))
   (csr-addmv! nr nc A x y)
   y)
+
+; COO (coordinate format)
 
 (define-class <coo> ()
   ((vals :init-keyword :vals)
@@ -119,6 +124,25 @@
    (nrows coom)
    (ncols coom)
    (coo->csr (nrows coom) (matrix-data coom))))
+
+; DOK (dictionary of keys)
+
+(define (dokm->coom dokm)
+  (define dok (matrix-data dokm))
+  (define nnz (hash-table-size dok))
+  (let ((vals (make-vector nnz))
+	(rows (make-vector nnz))
+	(cols (make-vector nnz)))
+    (for-each-with-index
+     (lambda (i kv)
+       (vector-set! vals i (cdr kv))
+       (vector-set! rows i (vector-ref (car kv) 0))
+       (vector-set! cols i (vector-ref (car kv) 1)))
+     (sort (hash-table->alist dok)))
+    (make-matrix
+     (nrows dokm)
+     (ncols dokm)
+     (make-coo vals rows cols))))
 
 
 ;; cafemielk.mesh

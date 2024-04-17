@@ -11,23 +11,6 @@
   (- (* (vector-ref u 0) (vector-ref v 1))
      (* (vector-ref u 1) (vector-ref v 0))))
 
-(define (dokm->coom dokm)
-  (define dok (cm:matrix-data dokm))
-  (define nnz (hash-table-size dok))
-  (let ((vals (make-vector nnz))
-	(rows (make-vector nnz))
-	(cols (make-vector nnz)))
-    (for-each-with-index
-     (lambda (i kv)
-       (vector-set! vals i (cdr kv))
-       (vector-set! rows i (vector-ref (car kv) 0))
-       (vector-set! cols i (vector-ref (car kv) 1)))
-     (sort (hash-table->alist dok)))
-    (cm:make-matrix
-     (cm:nrows dokm)
-     (cm:ncols dokm)
-     (cm:make-coo vals rows cols))))
-
 (define nu 1)
 
 (define (make-matrix Th)
