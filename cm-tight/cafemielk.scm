@@ -9,6 +9,7 @@
    <coo>
    <csr>
    <mesh2d>
+   <rmaj>
    coo-cols
    coo-rows
    coo-vals
@@ -22,6 +23,7 @@
    make-csr
    make-matrix
    make-mesh2d
+   make-rmaj
    matrix-data
    mesh2d-nodes
    mesh2d-nodes-length
@@ -30,6 +32,8 @@
    mv
    ncols
    nrows
+   rmaj-addmv!
+   rmaj-mv
    square
    )
   )
@@ -151,6 +155,30 @@
      (ncols dokm)
      (make-coo vals rows cols))))
 
+; row-major dense matrix
+
+(define-class <rmaj> () ((vals :init-keyword :vals)))
+
+(define (make-rmaj vals)
+  (make <rmaj> :vals vals))
+
+(define (rmaj-addmv! nr nc A x y)
+  ; y += A*x
+  (do ((i 0 (+ i 1))) ((= i nr) #f)
+    (do ((j 0 (+ j 1))) ((= j nc) #f)
+      (let ((ij (+ (* i nr) j)))
+	(vector-set!
+	 y i
+	 (+ (vector-ref y i)
+	    (* (vector-ref A ij) (vector-ref x j))))))))
+
+(define (rmaj-mv nr nc A x)
+  (define y (make-vector nr 0))
+  (rmaj-addmv! nr nc A x y)
+  y)
+
+(define-method mv (nr nc (A <rmaj>) v)
+  (rmaj-mv nr nc A v))
 
 ;; cafemielk.mesh
 
