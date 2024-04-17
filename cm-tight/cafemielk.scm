@@ -48,9 +48,9 @@
    (ncols :init-keyword :ncols)
    (data :init-keyword :data)))
 
-(define (make-matrix nrows ncols data)
+(define (make-matrix nr nc data)
   (make <matrix>
-    :nrows nrows :ncols ncols :data data))
+    :nrows nr :ncols nc :data data))
 
 (define (nrows matrix) (slot-ref matrix 'nrows))
 (define (ncols matrix) (slot-ref matrix 'ncols))
@@ -97,20 +97,19 @@
 (define (coo-cols coo) (slot-ref coo 'cols))
 (define (coo-nnz coo) (vector-length (coo-vals coo)))
 
-(define (coo->csr nrows coo)
-  (define rowptr (make-vector (+ nrows 1)))
-  (define (row-of i) (vector-ref (coo-rows coo) i))
+(define (coo->csr nr coo)
+  (define rowptr (make-vector (+ nr 1)))
   (define nnz (vector-length (coo-rows coo)))
   (make-csr
    (vector-copy (coo-vals coo))
    (let loop ((i 0) (r -1))
      (cond
-      ((= r nrows)
+      ((= r nr)
        rowptr)
       ((= i nnz)
        (vector-set! rowptr (+ r 1) nnz)
        (loop nnz (+ r 1)))
-      ((> (row-of i) r)
+      ((> (vector-ref (coo-rows coo) i) r)
        (vector-set! rowptr (+ r 1) i)
        (loop i (+ r 1)))
       (else
@@ -122,6 +121,7 @@
    (nrows coom)
    (ncols coom)
    (coo->csr (nrows coom) (matrix-data coom))))
+
 
 ;; cafemielk.mesh
 
