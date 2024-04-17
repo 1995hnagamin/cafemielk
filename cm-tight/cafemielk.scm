@@ -27,6 +27,7 @@
    mesh2d-nodes-length
    mesh2d-nodes-ref
    mesh2d-triangles
+   mv
    ncols
    nrows
    square
@@ -57,6 +58,9 @@
 (define (ncols matrix) (slot-ref matrix 'ncols))
 (define (matrix-data matrix) (slot-ref matrix 'data))
 
+(define-method mv ((M <matrix>) v)
+  (mv (nrows M) (ncols M) (matrix-data M) v))
+
 ; CSR (compressed sparse row)
 
 (define-class <csr> ()
@@ -84,6 +88,9 @@
   (define y (make-vector nr 0))
   (csr-addmv! nr nc A x y)
   y)
+
+(define-method mv (nr nc (A <csr>) v)
+  (csr-mv nr nc A v))
 
 ; COO (coordinate format)
 
