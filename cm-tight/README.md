@@ -1,2 +1,8 @@
 Cafemielk
 =========
+
+
+```
+./configure
+make
+```
