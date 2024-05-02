@@ -81,12 +81,12 @@
   (do ((i 0 (+ i 1)))
       ((= i nr) #f)
     (do ((j (vector-ref (slot-ref A 'rowptr) i) (+ j 1)))
-	((= j (vector-ref (slot-ref A 'rowptr) (+ i 1))) #f)
+        ((= j (vector-ref (slot-ref A 'rowptr) (+ i 1))) #f)
       (vector-set!
        y i
        (+ (vector-ref y i)
-	  (* (vector-ref (slot-ref A 'vals) j)
-	     (vector-ref x (vector-ref (slot-ref A 'colind) j))))))))
+          (* (vector-ref (slot-ref A 'vals) j)
+             (vector-ref x (vector-ref (slot-ref A 'colind) j))))))))
 
 (define (csr-mv nr nc A x)
   (define y (make-vector nr 0))
@@ -142,8 +142,8 @@
   (define dok (matrix-data dokm))
   (define nnz (hash-table-size dok))
   (let ((vals (make-vector nnz))
-	(rows (make-vector nnz))
-	(cols (make-vector nnz)))
+        (rows (make-vector nnz))
+        (cols (make-vector nnz)))
     (for-each-with-index
      (lambda (i kv)
        (vector-set! vals i (cdr kv))
@@ -167,10 +167,10 @@
   (do ((i 0 (+ i 1))) ((= i nr) #f)
     (do ((j 0 (+ j 1))) ((= j nc) #f)
       (let ((ij (+ (* i nr) j)))
-	(vector-set!
-	 y i
-	 (+ (vector-ref y i)
-	    (* (vector-ref A ij) (vector-ref x j))))))))
+        (vector-set!
+         y i
+         (+ (vector-ref y i)
+            (* (vector-ref A ij) (vector-ref x j))))))))
 
 (define (rmaj-mv nr nc A x)
   (define y (make-vector nr 0))
