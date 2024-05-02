@@ -4,16 +4,16 @@
 
 (define-module cafemielk.vview
   (export <vview>
-	  make-vview
-	  vview-cut
-	  vview-length
-	  vview-rank
-	  vview-ref
-	  vview-shape
-	  vview-size
-	  vview-stratify
-	  vview->vector
-   )
+          make-vview
+          vview-cut
+          vview-length
+          vview-rank
+          vview-ref
+          vview-shape
+          vview-size
+          vview-stratify
+          vview->vector
+          )
   )
 
 (select-module cafemielk.vview)
@@ -70,19 +70,19 @@
 (define (vview-ref vv ij)
   (if (vector-every (lambda (i len) (<= 0 i (- len 1))) ij (vview-shape vv))
       (ref (vview-data vv)
-	   (ij->idx (vview-start vv) (vview-steps vv) ij))
+           (ij->idx (vview-start vv) (vview-steps vv) ij))
       (error "vview-ref index out of range:" ij)))
-  
+
 (define (vview-cut vv i~)
   (if (vector-every (lambda (i len) (<= 0 i (- len 1))) i~ (vview-shape vv))
       (make-vview (vview-data vv)
-		  (ij->idx (vview-start vv) (vview-steps vv) i~)
-		  (vector-copy (vview-shape vv) (vector-length i~)))
+                  (ij->idx (vview-start vv) (vview-steps vv) i~)
+                  (vector-copy (vview-shape vv) (vector-length i~)))
       (error "vview-ref index out of range:" i~)))
 
 (define (vview-stratify vv)
   (if (= (vview-rank vv) 1)
       (vview->vector vv)
       (vector-map (lambda (i)
-		    (vview-stratify (vview-cut vv (make-vector 1 i))))
-		  (vector-tabulate (vview-length vv 0) (lambda (i) i)))))
+                    (vview-stratify (vview-cut vv (make-vector 1 i))))
+                  (vector-tabulate (vview-length vv 0) (lambda (i) i)))))

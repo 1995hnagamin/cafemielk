@@ -4,7 +4,7 @@
 
 (define-module cafemielk
   (extend cafemielk.util
-	  cafemielk.vview)
+          cafemielk.vview)
   (export
    <coo>
    <csr>
@@ -65,7 +65,7 @@
 (define-method mv ((M <matrix>) v)
   (mv (nrows M) (ncols M) (matrix-data M) v))
 
-; CSR (compressed sparse row)
+;; CSR (compressed sparse row)
 
 (define-class <csr> ()
   ((vals :init-keyword :vals)
@@ -77,7 +77,7 @@
     :vals vals :rowptr rowptr :colind colind))
 
 (define (csr-addmv! nr nc A x y)
-  ; y += A*x
+  ;; y += A*x
   (do ((i 0 (+ i 1)))
       ((= i nr) #f)
     (do ((j (vector-ref (slot-ref A 'rowptr) i) (+ j 1)))
@@ -96,7 +96,7 @@
 (define-method mv (nr nc (A <csr>) v)
   (csr-mv nr nc A v))
 
-; COO (coordinate format)
+;; COO (coordinate format)
 
 (define-class <coo> ()
   ((vals :init-keyword :vals)
@@ -136,7 +136,7 @@
    (ncols coom)
    (coo->csr (nrows coom) (matrix-data coom))))
 
-; DOK (dictionary of keys)
+;; DOK (dictionary of keys)
 
 (define (dokm->coom dokm)
   (define dok (matrix-data dokm))
@@ -155,7 +155,7 @@
      (ncols dokm)
      (make-coo vals rows cols))))
 
-; row-major dense matrix
+;; row-major dense matrix
 
 (define-class <rmaj> () ((vals :init-keyword :vals)))
 
@@ -163,7 +163,7 @@
   (make <rmaj> :vals vals))
 
 (define (rmaj-addmv! nr nc A x y)
-  ; y += A*x
+  ;; y += A*x
   (do ((i 0 (+ i 1))) ((= i nr) #f)
     (do ((j 0 (+ j 1))) ((= j nc) #f)
       (let ((ij (+ (* i nr) j)))
@@ -206,7 +206,7 @@
 
 (define (square nx ny)
   (define ns (square-point-vec (vector-linspace 0. 1. nx)
-	         	       (vector-linspace 0. 1. ny)))
+                               (vector-linspace 0. 1. ny)))
   (define ts (square-triangle-vec nx ny))
   (make-mesh2d
    (make-vview ns 0 (vector (* nx ny) 2))
@@ -221,4 +221,4 @@
    (lambda (i)
      (let ((p (mesh2d-nodes-ref Th i)))
        (func (vview-ref p #(0))
-	     (vview-ref p #(1)))))))
+             (vview-ref p #(1)))))))

@@ -4,8 +4,8 @@
 
 (define-module cafemielk.util
   (export linspace
-         vector-linspace
-         )
+          vector-linspace
+          )
   )
 
 (select-module cafemielk.util)
