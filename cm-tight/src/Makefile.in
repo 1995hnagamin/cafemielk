@@ -1,0 +1,46 @@
+# General info
+SHELL       = /bin/sh
+prefix      = /usr/local/Cellar/gauche/0.9.14_1
+exec_prefix = ${prefix}
+bindir      = ${exec_prefix}/bin
+libdir      = ${exec_prefix}/lib
+datadir     = ${datarootdir}
+datarootdir = ${prefix}/share
+srcdir      = .
+VPATH       = $(srcdir)
+
+# These may be overridden by make invocators
+DESTDIR        =
+GOSH           = "/usr/local/bin/gosh"
+GAUCHE_CONFIG  = "/usr/local/bin/gauche-config"
+GAUCHE_PACKAGE = "/usr/local/bin/gauche-package"
+INSTALL        = "/usr/local/bin/gauche-install" -C
+
+CFLAGS     = -g -O2 -Wall -Wextra -Wno-unused-label
+CPPFLAGS   =  
+LDFLAGS    = -L/usr/local/opt/bison/lib
+LIBS       = 
+
+# Other parameters
+SOEXT  = so
+OBJEXT = o
+EXEEXT = 
+LOCAL_PATHS = ""
+
+
+HDRS = $(srcdir)/trig2d.h \
+	$(srcdir)/vcalc.h
+
+SRCS = $(srcdir)/trig2d.c \
+	$(srcdir)/vcalc.c
+
+ARCHFILES = libcm.$(SOEXT)
+
+TARGET = $(ARCHFILES)
+
+all: $(TARGET)
+
+libcm.$(SOEXT) : $(SRCS)
+	$(GAUCHE_PACKAGE) compile --verbose \
+		--cflags="$(CFLAGS)" --ldflags="$(LDFLAGS)" --libs="$(OLIBS)" \
+		libcm $(SRCS)

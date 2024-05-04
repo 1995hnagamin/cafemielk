@@ -49,6 +49,7 @@ cafemielk_SRCS = $(srcdir)/cafemielk.c $(srcdir)/cafemielklib.stub
 cafemielk_HDRS = $(srcdir)/cafemielk.h
 
 all : $(TARGET)
+	cd src; $(MAKE) all
 
 cafemielk.$(SOEXT): $(cafemielk_SRCS) $(cafemielk_HDRS)
 	$(GAUCHE_PACKAGE) compile \
