@@ -7,6 +7,7 @@
 
 (define (f x y) (+ (* x x) (* y y)))
 
+(define fel (cm:func->fel Th f))
 
 (define nu 1)
 
