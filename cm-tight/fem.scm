@@ -7,9 +7,6 @@
 
 (define (f x y) (+ (* x x) (* y y)))
 
-(define (cross u v)
-  (- (* (vector-ref u 0) (vector-ref v 1))
-     (* (vector-ref u 1) (vector-ref v 0))))
 
 (define nu 1)
 
@@ -24,7 +21,7 @@
                 triangle))   ; v_i = (x_i, y_i)  [i = 0, 1, 2]
             (v01 (vector-map - (vector-ref v 1) (vector-ref v 0)))
             (v02 (vector-map - (vector-ref v 2) (vector-ref v 0)))
-            (S (/ (cross v01 v02) 2))   ; v0, v1, v2 are counter clock-wise
+            (S (/ (cm:cross2 v01 v02) 2))   ; v0, v1, v2 are counter clock-wise
             (b (vector-tabulate
                 3
                 (lambda (i)
