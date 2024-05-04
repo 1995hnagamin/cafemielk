@@ -39,7 +39,7 @@
 
   ;; List licenses
   ;; e.g. ("BSD")
-  :licenses ()
+  :licenses ("BSD")
 
   ;; Homepage URL, if any.
   ; :homepage "https://github.com/1995hnagamin/cafemielk/"
