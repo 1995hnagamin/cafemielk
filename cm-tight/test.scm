@@ -8,10 +8,10 @@
 (use cafemielk)
 (test-module 'cafemielk)
 
-;; The following is a dummy test code.
-;; Replace it for your tests.
-(test* "test-cafemielk" "cafemielk is working"
-       (test-cafemielk))
+(test*
+ "test-cafemielk"
+ #(b c d)
+ (vview->vector (make-vview #(a b c d) 1 #(3))))
 
 ;; If you don't want `gosh' to exit with nonzero status even if
 ;; the test fails, pass #f to :exit-on-failure.

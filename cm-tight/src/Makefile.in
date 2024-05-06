@@ -52,10 +52,6 @@ cafemielk.$(SOEXT) : $(cafemielk_SRCS) $(cafemielk_HDRS)
 	  --ldflags="$(LDFLAGS)" --libs="$(LIBS)" \
 	  --local=$(LOCAL_PATHS) --verbose cafemielk $(cafemielk_SRCS)
 
-check : all
-	@rm -f test.log
-	$(GOSH) -I.. -I$(srcdir) $(srcdir)/../test.scm > test.log
-
 install : all
 	$(INSTALL) -m 444 -T $(GAUCHE_PKGINCDIR) $(HEADERS)
 	$(INSTALL) -m 555 -T $(GAUCHE_PKGARCHDIR) $(ARCHFILES)
