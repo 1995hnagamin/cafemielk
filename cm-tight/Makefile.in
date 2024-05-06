@@ -12,31 +12,15 @@ VPATH       = $(srcdir)
 # These may be overridden by make invocators
 DESTDIR        =
 GOSH           = "@GOSH@"
-GAUCHE_CONFIG  = "@GAUCHE_CONFIG@"
-GAUCHE_PACKAGE = "@GAUCHE_PACKAGE@"
-INSTALL        = "@GAUCHE_INSTALL@" -C
-
-CFLAGS     = @CFLAGS@
-CPPFLAGS   = @CPPFLAGS@ @WINDOWS_UNICODE_FLAG@
-LDFLAGS    = @LDFLAGS@
-LIBS       = @LIBS@
-
-# Other parameters
-SOEXT  = @SOEXT@
-OBJEXT = @OBJEXT@
-EXEEXT = @EXEEXT@
-LOCAL_PATHS = "@LOCAL_PATHS@"
+INSTALL        = "@GAUCHE_INSTALL@" -S '$(srcdir)' -C
 
 # Module-specific stuff
 PACKAGE   = cafemielk
 
-ARCHFILES = cafemielk.$(SOEXT)
-SCMFILES  = $(srcdir)/cafemielk.scm \
-	    $(srcdir)/cafemielk/linalg.scm \
-	    $(srcdir)/cafemielk/vview.scm
-HEADERS   =
+SCMFILES  = cafemielk.scm \
+	    cafemielk/linalg.scm \
+	    cafemielk/vview.scm
 
-TARGET    = $(ARCHFILES)
 CLEANFILES =
 CONFIG_GENERATED = Makefile config.cache config.log config.status \
 		   configure.lineno autom4te*.cache $(PACKAGE).gpd
@@ -45,40 +29,29 @@ GAUCHE_PKGINCDIR  = "$(DESTDIR)@GAUCHE_PKGINCDIR@"
 GAUCHE_PKGLIBDIR  = "$(DESTDIR)@GAUCHE_PKGLIBDIR@"
 GAUCHE_PKGARCHDIR = "$(DESTDIR)@GAUCHE_PKGARCHDIR@"
 
-cafemielk_SRCS = $(srcdir)/cafemielk.c $(srcdir)/cafemielklib.stub
-cafemielk_HDRS = $(srcdir)/cafemielk.h
-
 all : $(TARGET)
 	cd src; $(MAKE) all
 
-cafemielk.$(SOEXT): $(cafemielk_SRCS) $(cafemielk_HDRS)
-	$(GAUCHE_PACKAGE) compile \
-	  --cppflags="$(CPPFLAGS)" --cflags="$(CFLAGS)" \
-	  --ldflags="$(LDFLAGS)" --libs="$(LIBS)" \
-	  --local=$(LOCAL_PATHS) --verbose cafemielk $(cafemielk_SRCS)
-
 check : all
-	@rm -f test.log
-	$(GOSH) -I. -I$(srcdir) $(srcdir)/test.scm > test.log
+	cd src; $(MAKE) check
 
 install : all
-	$(INSTALL) -m 444 -T $(GAUCHE_PKGINCDIR) $(HEADERS)
 	$(INSTALL) -m 444 -T $(GAUCHE_PKGLIBDIR) $(SCMFILES)
-	$(INSTALL) -m 555 -T $(GAUCHE_PKGARCHDIR) $(ARCHFILES)
-	$(INSTALL) -m 444 -T $(GAUCHE_PKGLIBDIR)/.packages $(PACKAGE).gpd
+	cd src; $(MAKE) install
 
 uninstall :
-	$(INSTALL) -U $(GAUCHE_PKGINCDIR) $(HEADERS)
 	$(INSTALL) -U $(GAUCHE_PKGLIBDIR) $(SCMFILES)
-	$(INSTALL) -U $(GAUCHE_PKGARCHDIR) $(ARCHFILES)
-	$(INSTALL) -U $(GAUCHE_PKGLIBDIR)/.packages $(PACKAGE).gpd
+	$(INSTALL) -m 444 -T $(GAUCHE_PKGLIBDIR)/.packages $(PACKAGE).gpd
+	cd src; $(MAKE) install
 
 clean :
-	$(GAUCHE_PACKAGE) compile --clean cafemielk $(cafemielk_SRCS)
-	rm -rf core $(TARGET) $(CLEANFILES) *~ test.log so_locations
+	cd src; $(MAKE) clean
+	rm -rf core $(CLEANFILES) *~ test.log so_locations
 
 distclean : clean
+	cd src; $(MAKE) distclean
 	rm -rf $(CONFIG_GENERATED)
 
 maintainer-clean : clean
+	cd src; $(MAKE) maintainer-clean
 	rm -rf $(CONFIG_GENERATED)  VERSION
