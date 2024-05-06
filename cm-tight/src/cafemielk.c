@@ -4,16 +4,6 @@
 
 #include "cafemielk.h"
 
-/*
- * The following function is a dummy one; replace it for
- * your C function definitions.
- */
-
-ScmObj test_cafemielk(void)
-{
-    return SCM_MAKE_STR("cafemielk is working");
-}
-
 ScmObj square_point_vec(ScmObj xvec, ScmObj yvec)
 {
   int nx = SCM_VECTOR_SIZE(xvec), ny = SCM_VECTOR_SIZE(yvec);

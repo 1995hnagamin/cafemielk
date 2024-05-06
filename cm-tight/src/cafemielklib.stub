@@ -8,9 +8,6 @@
 ;; The following entry is a dummy one.
 ;; Replace it for your definitions.
 
-(define-cproc test-cafemielk ()
-  (return (test_cafemielk)))
-
 (define-cproc square-point-vec (xvec yvec)
   (return (square_point_vec xvec yvec)))
 
