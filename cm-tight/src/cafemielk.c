@@ -4,8 +4,7 @@
 
 #include "cafemielk.h"
 
-ScmObj square_point_vec(ScmObj xvec, ScmObj yvec)
-{
+ScmObj square_point_vec(ScmObj xvec, ScmObj yvec) {
   int nx = SCM_VECTOR_SIZE(xvec), ny = SCM_VECTOR_SIZE(yvec);
   ScmObj rvec = Scm_MakeVector(2 * nx * ny, SCM_NIL);
   ScmObj *prv = SCM_VECTOR_ELEMENTS(rvec);
@@ -18,8 +17,7 @@ ScmObj square_point_vec(ScmObj xvec, ScmObj yvec)
   return rvec;
 }
 
-ScmObj square_triangle_vec(int nx, int ny)
-{
+ScmObj square_triangle_vec(int nx, int ny) {
   ScmObj rvec = Scm_MakeVector(6 * (nx - 1) * (ny - 1), SCM_NIL);
   ScmObj *prv = SCM_VECTOR_ELEMENTS(rvec);
   for (int j = 0; j < ny - 1; ++j) {
@@ -49,18 +47,17 @@ ScmObj square_triangle_vec(int nx, int ny)
 /*
  * Module initialization function.
  */
-extern void Scm_Init_cafemielklib(ScmModule*);
+extern void Scm_Init_cafemielklib(ScmModule *);
 
-void Scm_Init_cafemielk(void)
-{
-    ScmModule *mod;
+void Scm_Init_cafemielk(void) {
+  ScmModule *mod;
 
-    /* Register this DSO to Gauche */
-    SCM_INIT_EXTENSION(cafemielk);
+  /* Register this DSO to Gauche */
+  SCM_INIT_EXTENSION(cafemielk);
 
-    /* Create the module if it doesn't exist yet. */
-    mod = SCM_MODULE(SCM_FIND_MODULE("cafemielk", TRUE));
+  /* Create the module if it doesn't exist yet. */
+  mod = SCM_MODULE(SCM_FIND_MODULE("cafemielk", TRUE));
 
-    /* Register stub-generated procedures */
-    Scm_Init_cafemielklib(mod);
+  /* Register stub-generated procedures */
+  Scm_Init_cafemielklib(mod);
 }
