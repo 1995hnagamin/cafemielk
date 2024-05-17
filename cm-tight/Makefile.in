@@ -33,8 +33,7 @@ all : $(TARGET)
 	cd src; $(MAKE) all
 
 check : all
-	@rm -f test.log
-	$(GOSH) -I. -Isrc $(srcdir)/test.scm > test.log
+	cd src; $(MAKE) check
 
 install : all
 	$(INSTALL) -m 444 -T $(GAUCHE_PKGLIBDIR) $(SCMFILES)

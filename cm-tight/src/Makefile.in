@@ -6,7 +6,9 @@ bindir      = @bindir@
 libdir      = @libdir@
 datadir     = @datadir@
 datarootdir = @datarootdir@
+top_srcdir  = @top_srcdir@
 srcdir      = @srcdir@
+builddir    = @builddir@
 VPATH       = $(srcdir)
 
 # These may be overridden by make invocators
@@ -14,7 +16,7 @@ DESTDIR        =
 GOSH           = "@GOSH@"
 GAUCHE_CONFIG  = "@GAUCHE_CONFIG@"
 GAUCHE_PACKAGE = "@GAUCHE_PACKAGE@"
-INSTALL        = "@GAUCHE_INSTALL@" -C
+INSTALL        = "@GAUCHE_INSTALL@" -S '$(srcdir)' -C
 
 CFLAGS     = @CFLAGS@
 CPPFLAGS   = @CPPFLAGS@ @WINDOWS_UNICODE_FLAG@
@@ -41,16 +43,21 @@ GAUCHE_PKGINCDIR  = "$(DESTDIR)@GAUCHE_PKGINCDIR@"
 GAUCHE_PKGLIBDIR  = "$(DESTDIR)@GAUCHE_PKGLIBDIR@"
 GAUCHE_PKGARCHDIR = "$(DESTDIR)@GAUCHE_PKGARCHDIR@"
 
-cafemielk_SRCS = cafemielk.c cafemielklib.stub $(srcdir)/trig2d.c $(srcdir)/vcalc.c
-cafemielk_HDRS = $(srcdir)/cafemielk.h $(srcdir)/trig2d.h $(srcdir)/vcalc.h
+cafemielk_SRCS = cafemielk.c cafemielklib.stub trig2d.c vcalc.c
+cafemielk_HDRS = cafemielk.h trig2d.h vcalc.h
 
 all : $(TARGET)
 
 cafemielk.$(SOEXT) : $(cafemielk_SRCS) $(cafemielk_HDRS)
 	$(GAUCHE_PACKAGE) compile \
+	  --srcdir="$(srcdir)" \
 	  --cppflags="$(CPPFLAGS)" --cflags="$(CFLAGS)" \
 	  --ldflags="$(LDFLAGS)" --libs="$(LIBS)" \
 	  --local=$(LOCAL_PATHS) --verbose cafemielk $(cafemielk_SRCS)
+
+check : all
+	@rm -f test.log
+	$(GOSH) -I$(top_srcdir) -I$(srcdir) -I$(builddir) $(top_srcdir)/test.scm > test.log
 
 install : all
 	$(INSTALL) -m 444 -T $(GAUCHE_PKGINCDIR) $(HEADERS)
