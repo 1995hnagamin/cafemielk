@@ -54,8 +54,8 @@ HDR_FILES = \
 	trig2d.h \
 	vcalc.h
 
-cafemielk_SRCS = $(SRC_FILES)
-cafemielk_HDRS = $(HDR_FILES)
+cafemielk_SRCS = $(addprefix $(top_srcdir)/src/, $(SRC_FILES))
+cafemielk_HDRS = $(addprefix $(top_srcdir)/src/, $(HDR_FILES))
 
 all : $(TARGET)
 
