@@ -12,7 +12,7 @@
 
   ;; Description of the package.  The first line is used as a short
   ;; summary.
-  :description "Cafemielk: Another FEM Implementation for Electromagntic Field Computation\n\
+  :description "Cafemielk: Another FEM Implementation for Electromagnetic Field Computation\n\
                 Framework for electromagnetic finite element analyses."
 
   ;; List of dependencies.
