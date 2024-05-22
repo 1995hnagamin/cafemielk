@@ -10,9 +10,9 @@
    mesh2d-nodes
    mesh2d-nodes-length
    mesh2d-nodes-ref
+   mesh2d-square
    mesh2d-triangles
    mesh2d-triangles-ref
-   square
    )
   )
 
@@ -44,7 +44,7 @@
 (define (mesh2d-triangles-ref mesh i)
   (vview-cut (mesh2d-triangles mesh) (vector i)))
 
-(define (square nx ny)
+(define (mesh2d-square nx ny)
   (define ns (square-point-vec (vector-linspace 0. 1. nx)
                                (vector-linspace 0. 1. ny)))
   (define ts (square-triangle-vec nx ny))
