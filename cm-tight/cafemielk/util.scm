@@ -3,12 +3,13 @@
 ;;;
 
 (define-module cafemielk.util
-  (export linspace
-          vector-linspace
-          cross2
-          cross3
-          dot
-          )
+  (export
+   linspace
+   vector-linspace
+   cross2
+   cross3
+   dot
+   )
   )
 
 (select-module cafemielk.util)

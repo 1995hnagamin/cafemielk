@@ -3,17 +3,18 @@
 ;;;
 
 (define-module cafemielk.vview
-  (export <vview>
-          make-vview
-          vview-cut
-          vview-length
-          vview-rank
-          vview-ref
-          vview-shape
-          vview-size
-          vview-stratify
-          vview->vector
-          )
+  (export
+   <vview>
+   make-vview
+   vview-cut
+   vview-length
+   vview-rank
+   vview-ref
+   vview-shape
+   vview-size
+   vview-stratify
+   vview->vector
+   )
   )
 
 (select-module cafemielk.vview)
