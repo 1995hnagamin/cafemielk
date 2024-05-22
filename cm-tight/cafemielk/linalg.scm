@@ -33,6 +33,7 @@
 (select-module cafemielk.linalg)
 
 (use cafemielk.vview)
+(use gauche.sequence)
 
 (define-class <matrix> ()
   ((nrows :init-keyword :nrows)
@@ -129,7 +130,7 @@
   (let ((vals (make-vector nnz))
         (rows (make-vector nnz))
         (cols (make-vector nnz)))
-    (vector-for-each-with-index
+    (for-each-with-index
      (lambda (i kv)
        (vector-set! vals i (cdr kv))
        (vector-set! rows i (vector-ref (car kv) 0))
