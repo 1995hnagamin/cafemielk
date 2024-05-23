@@ -46,9 +46,9 @@
   (vview-cut (mesh2d-triangles mesh) (vector i)))
 
 (define (mesh2d-square nx ny)
-  (define ns (square-point-vec (vector-linspace 0. 1. nx)
-                               (vector-linspace 0. 1. ny)))
-  (define ts (square-triangle-vec nx ny))
+  (define ns (%square-point-vec (vector-linspace 0. 1. nx)
+                                (vector-linspace 0. 1. ny)))
+  (define ts (%square-triangle-vec nx ny))
   (make-mesh2d
    (make-vview ns 0 (vector (* nx ny) 2))
    (make-vview ts 0 (vector (* 2 (- nx 1) (- ny 1)) 3))))
