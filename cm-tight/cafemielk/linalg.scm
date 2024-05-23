@@ -4,6 +4,8 @@
 ;;;
 
 (define-module cafemielk.linalg
+  (use cafemielk.vview)
+  (use gauche.sequence)
   (export
    <csr>
    <coo>
@@ -31,9 +33,6 @@
   )
 
 (select-module cafemielk.linalg)
-
-(use cafemielk.vview)
-(use gauche.sequence)
 
 (define-class <matrix> ()
   ((nrows :init-keyword :nrows)

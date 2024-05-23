@@ -3,6 +3,8 @@
 ;;;
 
 (define-module cafemielk.vview
+  (use scheme.vector)
+  (use gauche.sequence)
   (export
    <vview>
    make-vview
@@ -18,9 +20,6 @@
   )
 
 (select-module cafemielk.vview)
-
-(use scheme.vector)
-(use gauche.sequence)
 
 (define-class <vview> ()
   ((vec :init-keyword :vec)

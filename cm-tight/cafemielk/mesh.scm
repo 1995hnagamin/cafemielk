@@ -4,6 +4,8 @@
 ;;;
 
 (define-module cafemielk.mesh
+  (use cafemielk.util)
+  (use cafemielk.vview)
   (export
    <mesh2d>
    make-mesh2d
@@ -19,8 +21,7 @@
 (select-module cafemielk.mesh)
 
 (dynamic-load "cafemielk")
-(use cafemielk.util)
-(use cafemielk.vview)
+
 
 (define-class <mesh2d> ()
   ((nodes :init-keyword :nodes)

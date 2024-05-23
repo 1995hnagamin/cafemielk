@@ -3,6 +3,7 @@
 ;;;
 
 (define-module cafemielk.util
+  (use srfi.133)
   (export
    linspace
    vector-linspace
@@ -13,8 +14,6 @@
   )
 
 (select-module cafemielk.util)
-
-(use srfi.133)
 
 
 (define (linspace min max size)
