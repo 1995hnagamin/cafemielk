@@ -17,10 +17,6 @@
 
 ;; Loads extension
 
-(use cafemielk.mesh)
-(use cafemielk.util)
-(use cafemielk.vview)
-
 ;; cafemielk.fel
 
 (define (func->fel Th func)
