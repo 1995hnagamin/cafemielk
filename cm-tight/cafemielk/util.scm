@@ -3,17 +3,17 @@
 ;;;
 
 (define-module cafemielk.util
-  (export linspace
-          vector-linspace
-          cross2
-          cross3
-          dot
-          )
+  (use srfi.133)
+  (export
+   linspace
+   vector-linspace
+   cross2
+   cross3
+   dot
+   )
   )
 
 (select-module cafemielk.util)
-
-(use srfi.133)
 
 
 (define (linspace min max size)

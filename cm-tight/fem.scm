@@ -3,7 +3,7 @@
 
 ;; \int_\Omega \nu (\grad w)\cdot(\grad A)dS = \int_\Omega w J_0 dS
 
-(define Th (cm:square 5 5))
+(define Th (cm:mesh2d-square 5 5))
 
 (define (f x y) (+ (* x x) (* y y)))
 
