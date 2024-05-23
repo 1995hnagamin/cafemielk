@@ -1,8 +1,8 @@
 /*
- * cafemielk.c
+ * cafemielk__mesh.c
  */
 
-#include "cafemielk.h"
+#include "cafemielk__mesh.h"
 
 ScmObj square_point_vec(ScmObj xvec, ScmObj yvec) {
   int nx = SCM_VECTOR_SIZE(xvec), ny = SCM_VECTOR_SIZE(yvec);
@@ -47,17 +47,17 @@ ScmObj square_triangle_vec(int nx, int ny) {
 /*
  * Module initialization function.
  */
-extern void Scm_Init_cafemielklib(ScmModule *);
+extern void Scm_Init_cafemielk__meshlib(ScmModule *);
 
-void Scm_Init_cafemielk(void) {
+void Scm_Init_cafemielk__mesh(void) {
   ScmModule *mod;
 
   /* Register this DSO to Gauche */
-  SCM_INIT_EXTENSION(cafemielk);
+  SCM_INIT_EXTENSION(cafemielk__mesh);
 
   /* Create the module if it doesn't exist yet. */
-  mod = SCM_MODULE(SCM_FIND_MODULE("cafemielk", TRUE));
+  mod = SCM_MODULE(SCM_FIND_MODULE("cafemielk.mesh", TRUE));
 
   /* Register stub-generated procedures */
-  Scm_Init_cafemielklib(mod);
+  Scm_Init_cafemielk__meshlib(mod);
 }

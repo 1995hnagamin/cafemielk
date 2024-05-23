@@ -16,7 +16,6 @@
 (select-module cafemielk)
 
 ;; Loads extension
-(dynamic-load "cafemielk")
 
 (use cafemielk.mesh)
 (use cafemielk.util)

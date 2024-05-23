@@ -1,11 +1,14 @@
 ;;;
-;;; cafemielklib.stub
+;;; cafemielk__meshlib.scm
 ;;;
 
-(inline-stub
- (declcode
-  (.include "cafemielk.h"))
+;; This line ensures defined bindings are inserted into cafemielk.mesh.
+(in-module cafemielk.mesh)
 
+(inline-stub
+ (.include "cafemielk__mesh.h")
+
+ ;; The 'define-cproc' forms exposes C functions to Scheme world.
  ;; The following entry is a dummy one.
  ;; Replace it for your definitions.
 
@@ -13,7 +16,8 @@
    (return (square_point_vec xvec yvec)))
 
  (define-cproc square-triangle-vec (nx::<int> ny::<int>)
-   (return (square_triangle_vec nx ny))))
+   (return (square_triangle_vec nx ny)))
+ )
 
 
 ;; Local variables:

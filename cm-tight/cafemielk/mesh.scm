@@ -20,7 +20,7 @@
 
 (select-module cafemielk.mesh)
 
-(dynamic-load "cafemielk")
+(dynamic-load "cafemielk__mesh")
 
 
 (define-class <mesh2d> ()
@@ -52,4 +52,3 @@
   (make-mesh2d
    (make-vview ns 0 (vector (* nx ny) 2))
    (make-vview ts 0 (vector (* 2 (- nx 1) (- ny 1)) 3))))
-
