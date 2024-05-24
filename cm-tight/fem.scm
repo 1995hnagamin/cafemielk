@@ -1,28 +1,28 @@
-(use cafemielk :prefix cm:)
+(use cafemielk)
 (use gauche.sequence)
 
 ;; \int_\Omega \nu (\grad w)\cdot(\grad A)dS = \int_\Omega w J_0 dS
 
-(define Th (cm:mesh2d-square 5 5))
+(define Th (mesh2d-square 5 5))
 
 (define (f x y) (+ (* x x) (* y y)))
 
-(define fel (cm:func->fel Th f))
+(define fel (func->fel Th f))
 
 (define nu 1)
 
-(define (make-matrix Th)
-  (define N (cm:mesh2d-nodes-length Th))
+(define (make-coeff-matrix Th)
+  (define N (mesh2d-nodes-length Th))
   (define dok (make-hash-table 'equal?))
   (vector-for-each
    (lambda (triangle)
      (let* ((v (vector-map
                 (lambda (k)
-                  (cm:vview->vector (cm:mesh2d-nodes-ref Th k)))
+                  (vview->vector (mesh2d-nodes-ref Th k)))
                 triangle))   ; v_i = (x_i, y_i)  [i = 0, 1, 2]
             (v01 (vector-map - (vector-ref v 1) (vector-ref v 0)))
             (v02 (vector-map - (vector-ref v 2) (vector-ref v 0)))
-            (S (/ (cm:cross2 v01 v02) 2))   ; v0, v1, v2 are counter clock-wise
+            (S (/ (cross2 v01 v02) 2))   ; v0, v1, v2 are counter clock-wise
             (b (vector-tabulate
                 3
                 (lambda (i)
@@ -48,5 +48,5 @@
               0))
            v))
         v)))
-   (cm:vview-stratify (cm:mesh2d-triangles Th)))
-  (cm:make-matrix N N dok))
+   (vview-stratify (mesh2d-triangles Th)))
+  (make-matrix N N dok))
