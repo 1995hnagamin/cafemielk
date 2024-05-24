@@ -18,6 +18,7 @@
    mesh2d-unit-square
    mesh2d-ith-triangle
    mesh2d-triangles
+   mesh2d-triangles-for-each
    mesh2d-triangles-length
    mesh2d-triangles-ref
    )
@@ -62,6 +63,15 @@
   (define (y_ i) (vview-ref (node i) #(1)))
   (vector (x_ 0) (x_ 1) (x_ 2)
           (y_ 0) (y_ 1) (y_ 2)))
+
+(define (mesh2d-triangles-for-each proc mesh)
+  (define N (mesh2d-triangles-length mesh))
+  (let loop ((t 0))
+    (cond
+     ((= t N) #f)
+     (else
+      (proc (mesh2d-ith-triangle mesh t))
+      (loop (+ t 1))))))
 
 ;; Geometric predicates
 
