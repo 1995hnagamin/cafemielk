@@ -35,6 +35,25 @@
        (x #(5 4 3 2 1)))
    (mv A x)))
 
+(test*
+ "test-func->fel-3x3:x"
+ #(0. 0.5 1. 0. 0.5 1. 0. 0.5 1.)
+ (func->fel (mesh2d-square 3 3) (lambda (x y) x)))
+
+(test*
+ "test-func->fel-3x3:y"
+ #(0. 0. 0. 0.5 0.5 0.5 1. 1. 1.)
+ (func->fel (mesh2d-square 3 3) (lambda (x y) y)))
+
+(let ((Th (mesh2d-square 5 5))
+      (x (lambda (x y) x))
+      (y (lambda (x y) y))
+      (x^2+y^2 (lambda (x y) (+ (* x x) (* y y)))))
+  (test*
+   "test-func->fel-5x5:(x^2+y^2)"
+   (vector-map x^2+y^2 (func->fel Th x) (func->fel Th y))
+   (func->fel Th x^2+y^2)))
+
 ;; If you don't want `gosh' to exit with nonzero status even if
 ;; the test fails, pass #f to :exit-on-failure.
 (test-end :exit-on-failure #t)
