@@ -23,16 +23,14 @@
             (v01 (vector-map - (vector-ref v 1) (vector-ref v 0)))
             (v02 (vector-map - (vector-ref v 2) (vector-ref v 0)))
             (S (/ (cross2d v01 v02) 2))   ; v0, v1, v2 are counter clock-wise
-            (b (vector-tabulate
-                3
-                (lambda (i)
-                  (- (vector-ref (vector-ref v (modulo (+ i 1) 3)) 1)
-                     (vector-ref (vector-ref v (modulo (+ i 2) 3)) 1)))))
-            (c (vector-tabulate
-                3
-                (lambda (i)
-                  (- (vector-ref (vector-ref v (modulo (+ i 2) 3)) 0)
-                     (vector-ref (vector-ref v (modulo (+ i 1) 3)) 0))))))
+            (b (vec3d-tabulate
+                (lambda (i j k)
+                  (- (vector-ref (vector-ref v j) 1)
+                     (vector-ref (vector-ref v k) 1)))))
+            (c (vec3d-tabulate
+                (lambda (i j k)
+                  (- (vector-ref (vector-ref v k) 0)
+                     (vector-ref (vector-ref v j) 0))))))
        (vector-for-each-with-index
         (lambda (i vi)
           (vector-for-each-with-index
