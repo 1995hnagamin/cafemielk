@@ -34,7 +34,7 @@
     (vector-tabulate 3 (lambda (i) (vector-ref (vector-ref nodes i) 0))))
   (define yt
     (vector-tabulate 3 (lambda (i) (vector-ref (vector-ref nodes i) 1))))
-  (define a (cross3 xt yt))
+  (define a (cross3d xt yt))
   (define b (vector-tabulate
              3
              (lambda (i) (- (vector-ref yt (modulo (+ i 1) 3))
@@ -49,8 +49,8 @@
   (/ (+ (dot mass a)
         (* (dot mass b) (vector-ref p 0))
         (* (dot mass c) (vector-ref  p 1)))
-     (cross2 (vector-map - (vector-ref nodes 1) (vector-ref nodes 0))
-             (vector-map - (vector-ref nodes 2) (vector-ref nodes 0)))))
+     (cross2d (vector-map - (vector-ref nodes 1) (vector-ref nodes 0))
+              (vector-map - (vector-ref nodes 2) (vector-ref nodes 0)))))
 
 (define (eval-at mesh p fel)
   (%eval-at-triangle
