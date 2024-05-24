@@ -20,7 +20,7 @@
    mesh2d-triangles
    mesh2d-triangles-for-each
    mesh2d-triangles-length
-   mesh2d-triangles-ref
+   mesh2d-trinix-ref
    )
   )
 
@@ -51,14 +51,14 @@
 (define (mesh2d-nodes-ref mesh i)
   (vview-cut (mesh2d-nodes mesh) (vector i)))
 
-(define (mesh2d-triangles-ref mesh i)
+(define (mesh2d-trinix-ref mesh i)
   (vview-cut (mesh2d-triangles mesh) (vector i)))
 
 (define (mesh2d-ith-triangle mesh t)
   (define (node i)
     (mesh2d-nodes-ref
      mesh
-     (vview-ref (mesh2d-triangles-ref mesh t) (vector i))))
+     (vview-ref (mesh2d-trinix-ref mesh t) (vector i))))
   (define (x_ i) (vview-ref (node i) #(0)))
   (define (y_ i) (vview-ref (node i) #(1)))
   (vector (x_ 0) (x_ 1) (x_ 2)
