@@ -14,9 +14,9 @@
  (vview->vector (make-vview #(a b c d) 1 #(3))))
 
 (test*
- "test-mesh2d-square"
+ "test-mesh2d-unit-square"
  121
- (mesh2d-nodes-length (mesh2d-square 11 11)))
+ (mesh2d-nodes-length (mesh2d-unit-square 11 11)))
 
 ;; / 1  2  0  0  0 \ / 5 \ = / 13 \
 ;; | 3  4  5  0  0 | | 4 |   | 46 |
@@ -38,14 +38,14 @@
 (test*
  "test-func->fel-3x3:x"
  #(0. 0.5 1. 0. 0.5 1. 0. 0.5 1.)
- (func->fel (mesh2d-square 3 3) (lambda (x y) x)))
+ (func->fel (mesh2d-unit-square 3 3) (lambda (x y) x)))
 
 (test*
  "test-func->fel-3x3:y"
  #(0. 0. 0. 0.5 0.5 0.5 1. 1. 1.)
- (func->fel (mesh2d-square 3 3) (lambda (x y) y)))
+ (func->fel (mesh2d-unit-square 3 3) (lambda (x y) y)))
 
-(let ((Th (mesh2d-square 5 5))
+(let ((Th (mesh2d-unit-square 5 5))
       (x (lambda (x y) x))
       (y (lambda (x y) y))
       (x^2+y^2 (lambda (x y) (+ (* x x) (* y y)))))
