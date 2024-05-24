@@ -14,39 +14,27 @@
 (define (make-coeff-matrix Th)
   (define N (mesh2d-nodes-length Th))
   (define dok (make-hash-table 'equal?))
-  (vector-for-each
-   (lambda (triangle)
-     (let* ((v (vector-map
-                (lambda (k)
-                  (vview->vector (mesh2d-nodes-ref Th k)))
-                triangle))   ; v_i = (x_i, y_i)  [i = 0, 1, 2]
-            (v01 (vector-map - (vector-ref v 1) (vector-ref v 0)))
-            (v02 (vector-map - (vector-ref v 2) (vector-ref v 0)))
-            (S (/ (cross2d v01 v02) 2))   ; v0, v1, v2 are counter clock-wise
-            (b (vector-tabulate
-                3
-                (lambda (i)
-                  (- (vector-ref (vector-ref v (modulo (+ i 1) 3)) 1)
-                     (vector-ref (vector-ref v (modulo (+ i 2) 3)) 1)))))
-            (c (vector-tabulate
-                3
-                (lambda (i)
-                  (- (vector-ref (vector-ref v (modulo (+ i 2) 3)) 0)
-                     (vector-ref (vector-ref v (modulo (+ i 1) 3)) 0))))))
-       (vector-for-each-with-index
-        (lambda (i vi)
-          (vector-for-each-with-index
-           (lambda (j vj)
-             (hash-table-update!/default
-              dok
-              (vector (vector-ref triangle i) (vector-ref triangle j))
-              (lambda (val)
-                (+ val
-                   (* (+ (* (vector-ref b i) (vector-ref b j))
-                         (* (vector-ref c i) (vector-ref c j)))
-                      (/ nu (* 4 S)))))
-              0))
-           v))
-        v)))
-   (vview-stratify (mesh2d-triangles Th)))
+  (mesh2d-trinix-for-each
+   (lambda (trinix)
+     (define trig (mesh2d-trinix->trig Th trinix))
+     (define (x_ i) (vector-ref trig i))
+     (define (y_ i) (vector-ref trig (+ i 3)))
+     (define b (vec3d-tabulate (lambda (i j k) (- (y_ j) (y_ k)))))
+     (define c (vec3d-tabulate (lambda (i j k) (- (x_ k) (x_ j)))))
+     (let loop ((i 0) (j 0))
+       (cond
+        ((= i 3) #f)
+        ((= j 3) (loop (+ i 1) 0))
+        (else
+         (hash-table-update!/default
+          dok
+          (vector (vector-ref trinix i) (vector-ref trinix j))
+          (lambda (val)
+            (+ val
+               (* (+ (* (vector-ref b i) (vector-ref b j))
+                     (* (vector-ref c i) (vector-ref c j)))
+                  (/ nu (* 4 (trig2d-area trig))))))
+          0)
+         (loop i (+ j 1))))))
+   Th)
   (make-matrix N N dok))
