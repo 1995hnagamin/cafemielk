@@ -20,6 +20,7 @@
    mesh2d-triangles
    mesh2d-triangles-for-each
    mesh2d-triangles-length
+   mesh2d-trinix-for-each
    mesh2d-trinix-ref
    mesh2d-trinix->trig
    )
@@ -63,19 +64,23 @@
 (define (mesh2d-trinix-ref mesh i)
   (vview-cut (mesh2d-triangles mesh) (vector i)))
 
+(define (mesh2d-trinix-for-each proc mesh)
+  (define N (mesh2d-triangles-length mesh))
+  (let loop ((t 0))
+    (cond
+     ((= t N) #f)
+     (else (proc (vview->vector (mesh2d-trinix-ref mesh t)))
+           (loop (+ t 1))))))
+
 (define (mesh2d-ith-triangle mesh t)
   (mesh2d-trinix->trig
    mesh
    (vview->vector (mesh2d-trinix-ref mesh t))))
 
 (define (mesh2d-triangles-for-each proc mesh)
-  (define N (mesh2d-triangles-length mesh))
-  (let loop ((t 0))
-    (cond
-     ((= t N) #f)
-     (else
-      (proc (mesh2d-ith-triangle mesh t))
-      (loop (+ t 1))))))
+  (mesh2d-trinix-for-each
+   (lambda (trinix) (proc (mesh2d-trinix->trig mesh trinix)))
+   mesh))
 
 ;; Geometric predicates
 
