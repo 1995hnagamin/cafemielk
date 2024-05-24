@@ -10,6 +10,7 @@
    cross2d
    cross3d
    dot
+   trig2d-prod
    vec3d-tabulate
    vector-unzip2
    )
@@ -43,6 +44,16 @@
 (define (vec3d-tabulate func)
   (vector-map (lambda (indices) (apply func indices))
               #((0 1 2) (1 2 0) (2 0 1))))
+
+(define (trig2d-prod trig u v)
+  (define (x_ i) (vector-ref trig i))
+  (define (y_ i) (vector-ref trig (+ i 3)))
+  (dot v
+       (vector-map
+        (lambda (w) (dot u w))
+        (vector (cross3d (vector-tabulate 3 x_) (vector-tabulate 3 y_))
+                (vec3d-tabulate (lambda (i j k) (- (y_ k) (y_ i))))
+                (vec3d-tabulate (lambda (i j k) (- (x_ k) (x_ j))))))))
 
 (define (vector-unzip2 vector-of-vectors)
   (define N (vector-length vector-of-vectors))
