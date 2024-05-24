@@ -10,6 +10,7 @@
    cross2
    cross3
    dot
+   vector-unzip2
    )
   )
 
@@ -38,3 +39,16 @@
 
 (define (dot u v)
   (vector-fold (lambda (acc ui vi) (+ acc (* ui vi))) 0 u v))
+
+(define (vector-unzip2 vector-of-vectors)
+  (define N (vector-length vector-of-vectors))
+  (define vec1 (make-vector N))
+  (define vec2 (make-vector N))
+  (let loop ((i 0))
+    (cond
+     ((= i N)
+      (values vec1 vec2))
+     (else
+      (vector-set! vec1 i (vector-ref (vector-ref vector-of-vectors i) 0))
+      (vector-set! vec2 i (vector-ref (vector-ref vector-of-vectors i) 1))
+      (loop (+ i 1))))))
