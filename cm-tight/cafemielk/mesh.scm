@@ -6,14 +6,19 @@
 (define-module cafemielk.mesh
   (use cafemielk.util)
   (use cafemielk.vview)
+  (use srfi-133)
+  (use srfi-210)
   (export
    <mesh2d>
    make-mesh2d
+   mesh2d-adherent?
    mesh2d-nodes
    mesh2d-nodes-length
    mesh2d-nodes-ref
    mesh2d-unit-square
+   mesh2d-ith-triangle
    mesh2d-triangles
+   mesh2d-triangles-length
    mesh2d-triangles-ref
    )
   )
@@ -39,11 +44,42 @@
 (define (mesh2d-nodes-length mesh)
   (vview-length (mesh2d-nodes mesh) 0))
 
+(define (mesh2d-triangles-length mesh)
+  (vview-length (mesh2d-triangles mesh) 0))
+
 (define (mesh2d-nodes-ref mesh i)
   (vview-cut (mesh2d-nodes mesh) (vector i)))
 
 (define (mesh2d-triangles-ref mesh i)
   (vview-cut (mesh2d-triangles mesh) (vector i)))
+
+(define (mesh2d-ith-triangle mesh t)
+  (define (node i)
+    (mesh2d-nodes-ref
+     mesh
+     (vview-ref (mesh2d-triangles-ref mesh t) (vector i))))
+  (define (x_ i) (vview-ref (node i) #(0)))
+  (define (y_ i) (vview-ref (node i) #(1)))
+  (vector (x_ 0) (x_ 1) (x_ 2)
+          (y_ 0) (y_ 1) (y_ 2)))
+
+;; Geometric predicates
+
+(define (mesh2d-adherent? p trig)
+  (define s (vector-ref p 0))
+  (define t (vector-ref p 1))
+  (define (x_ i) (vector-ref trig i))
+  (define (y_ i) (vector-ref trig (+ i 3)))
+  (define (dx_ i j) (- (x_ j) (x_ i)))
+  (define (dy_ i j) (- (y_ j) (y_ i)))
+  (every
+   (lambda (a) (not (negative? a)))
+   (list (- (* (dx_ 0 1) (- t (y_ 1))) (* (dy_ 0 1) (- s (x_ 1))))
+         (- (* (dx_ 1 2) (- t (y_ 2))) (* (dy_ 1 2) (- s (x_ 2))))
+         (- (* (dx_ 2 0) (- t (y_ 0))) (* (dy_ 2 0) (- s (x_ 0)))))))
+
+
+;; Mesh utility
 
 (define (mesh2d-unit-square nx ny)
   (define ns (%square-point-vec (vector-linspace 0. 1. nx)
