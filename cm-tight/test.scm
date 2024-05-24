@@ -54,6 +54,13 @@
    (vector-map x^2+y^2 (func->fel Th x) (func->fel Th y))
    (func->fel Th x^2+y^2)))
 
+(test*
+ "test-eval-at"
+ (inexact 1/16)
+ (let ((Th (mesh2d-unit-square 5 5)))
+   (eval-at Th #(1/12 1/6)
+            (func->fel Th (lambda (x y) (+ (* x x) (* y y)))))))
+
 ;; If you don't want `gosh' to exit with nonzero status even if
 ;; the test fails, pass #f to :exit-on-failure.
 (test-end :exit-on-failure #t)
