@@ -9,6 +9,6 @@ typedef union fdtrig2d {
   } cd;
 } fdtrig2d_t;
 
-double fdtrig2d_prod(fdtrig2d_t t, double cov[3], double vec[3]);
+double fdtrig2d_prod(fdtrig2d_t *t, double cov[3], double vec[3]);
 
 #endif /* TRIG2D_H */
