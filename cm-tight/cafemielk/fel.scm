@@ -5,6 +5,7 @@
 
 (define-module cafemielk.fel
   (use cafemielk.mesh)
+  (use cafemielk.util)
   (use cafemielk.vview)
   (export
    eval-at-triangle
