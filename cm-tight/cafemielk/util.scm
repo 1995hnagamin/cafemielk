@@ -60,12 +60,12 @@
   (vector-ref trig (+ i 3)))
 
 (define-inline (trig2d-area trig)
-  (define (x_ i) (vector-ref trig i))
-  (define (y_ i) (vector-ref trig (+ i 3)))
-  (define (dx_ i j) (- (x_ j) (x_ i)))
-  (define (dy_ i j) (- (y_ j) (y_ i)))
-  (* 1/2 (cross2d (vector (dx_ 0 1) (dy_ 0 1))
-                  (vector (dx_ 0 2) (dy_ 0 2)))))
+  (define-syntax dd
+    (syntax-rules ()
+      ((_ i j)
+       (vector (- (trig2d-xref trig j) (trig2d-xref trig i))
+               (- (trig2d-yref trig j) (trig2d-yref trig i))))))
+  (* 1/2 (cross2d (dd 0 1) (dd 0 2))))
 
 (define (trig2d-prod trig u v)
   (define (x_ i) (vector-ref trig i))
