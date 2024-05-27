@@ -15,8 +15,8 @@
 
 (test*
  "test-mesh2d-unit-square"
- 121
- (mesh2d-nodes-length (mesh2d-unit-square 11 11)))
+ 143
+ (mesh2d-nodes-length (mesh2d-unit-square 11 13)))
 
 ;; / 1  2  0  0  0 \ / 5 \ = / 13 \
 ;; | 3  4  5  0  0 | | 4 |   | 46 |
