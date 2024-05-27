@@ -17,10 +17,14 @@
   (mesh2d-trinix-for-each
    (lambda (trinix)
      (define trig (mesh2d-trinix->trig Th trinix))
-     (define (x_ i) (vector-ref trig i))
-     (define (y_ i) (vector-ref trig (+ i 3)))
-     (define b (vec3d-tabulate (lambda (i j k) (- (y_ j) (y_ k)))))
-     (define c (vec3d-tabulate (lambda (i j k) (- (x_ k) (x_ j)))))
+     (define b
+       (vec3d-tab
+        (i i+1 i+2)
+        (- (trig2d-yref trig i+1) (trig2d-yref trig i+2))))
+     (define c
+       (vec3d-tab
+        (i i+1 i+2)
+        (- (trig2d-xref trig i+2) (trig2d-xref trig i+1))))
      (let loop ((i 0) (j 0))
        (cond
         ((= i 3) #f)
