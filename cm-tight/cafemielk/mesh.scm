@@ -11,7 +11,6 @@
   (export
    <mesh2d>
    make-mesh2d
-   mesh2d-adherent?
    mesh2d-nodes
    mesh2d-nodes-length
    mesh2d-nodes-ref
@@ -23,6 +22,7 @@
    mesh2d-trinix-for-each
    mesh2d-trinix-ref
    mesh2d-trinix->trig
+   trig2d-adherent?
    )
   )
 
@@ -84,7 +84,7 @@
 
 ;; Geometric predicates
 
-(define-inline (mesh2d-adherent? p trig)
+(define-inline (trig2d-adherent? trig p)
   (every-replace-A3
    (i i+1 i+2)
    (not (negative?
