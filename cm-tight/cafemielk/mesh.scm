@@ -85,7 +85,7 @@
 ;; Geometric predicates
 
 (define-inline (mesh2d-adherent? p trig)
-  (and3d-tab
+  (every-replace-A3
    (i i+1 i+2)
    (not (negative?
          (- (* (- (trig2d-xref trig i+1) (trig2d-xref trig i))

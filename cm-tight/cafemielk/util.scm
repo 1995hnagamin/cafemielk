@@ -5,7 +5,6 @@
 (define-module cafemielk.util
   (use srfi.133)
   (export
-   and3d-tab
    linspace
    vector-linspace
    collect-replace
@@ -13,6 +12,7 @@
    cross2d
    cross3d
    dot
+   every-replace-A3
    trig2d-area
    trig2d-prod
    trig2d-xref
@@ -46,7 +46,7 @@
                        (0 1 2) (1 2 0) (2 0 1))
                       expr))))
 
-(define-syntax and3d-tab
+(define-syntax every-replace-A3
   (syntax-rules ()
     ((_ (i j k) expr)
      (collect-replace-A3 and (i j k) expr))))
