@@ -5,6 +5,7 @@
 (define-module cafemielk.util
   (use srfi.133)
   (export
+   and3d-tab
    linspace
    vector-linspace
    cross2d
@@ -20,6 +21,21 @@
   )
 
 (select-module cafemielk.util)
+
+(define-syntax *-tab
+  (syntax-rules ()
+    ((_ collect (i j k) expr)
+     (let-syntax
+         ((component (syntax-rules ()
+                       ((_ i j k) expr))))
+       (collect (component 0 1 2)
+                (component 1 2 0)
+                (component 2 0 1))))))
+
+(define-syntax and3d-tab
+  (syntax-rules ()
+    ((_ (i j k) expr)
+     (*-tab and (i j k) expr))))
 
 (define-syntax vec3d-tab
   (syntax-rules ()

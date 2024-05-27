@@ -85,15 +85,6 @@
 ;; Geometric predicates
 
 (define-inline (mesh2d-adherent? p trig)
-  (define-syntax and3d-tab
-    (syntax-rules ()
-      ((_ (i j k) expr)
-       (let-syntax
-           ((component (syntax-rules ()
-                         ((_ i j k) expr))))
-         (and (component 0 1 2)
-              (component 1 2 0)
-              (component 2 0 1))))))
   (and3d-tab
    (i i+1 i+2)
    (not (negative?
