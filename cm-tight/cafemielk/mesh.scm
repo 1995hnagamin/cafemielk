@@ -91,11 +91,20 @@
   (define (y_ i) (vector-ref trig (+ i 3)))
   (define (dx_ i j) (- (x_ j) (x_ i)))
   (define (dy_ i j) (- (y_ j) (y_ i)))
-  (every
-   (lambda (a) (not (negative? a)))
-   (list (- (* (dx_ 0 1) (- t (y_ 1))) (* (dy_ 0 1) (- s (x_ 1))))
-         (- (* (dx_ 1 2) (- t (y_ 2))) (* (dy_ 1 2) (- s (x_ 2))))
-         (- (* (dx_ 2 0) (- t (y_ 0))) (* (dy_ 2 0) (- s (x_ 0)))))))
+  (define-syntax and3d-tab
+    (syntax-rules ()
+      ((_ (i j k) expr)
+       (let-syntax
+           ((component (syntax-rules ()
+                         ((_ i j k) expr))))
+         (and (component 0 1 2)
+              (component 1 2 0)
+              (component 2 0 1))))))
+  (and3d-tab
+   (i i+1 i+2)
+   (not (negative?
+         (- (* (dx_ i i+1) (- t (y_ i+1)))
+            (* (dy_ i i+1) (- s (x_ i+1))))))))
 
 
 ;; Mesh utility
