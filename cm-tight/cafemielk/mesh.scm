@@ -85,12 +85,6 @@
 ;; Geometric predicates
 
 (define-inline (mesh2d-adherent? p trig)
-  (define s (vector-ref p 0))
-  (define t (vector-ref p 1))
-  (define (x_ i) (vector-ref trig i))
-  (define (y_ i) (vector-ref trig (+ i 3)))
-  (define (dx_ i j) (- (x_ j) (x_ i)))
-  (define (dy_ i j) (- (y_ j) (y_ i)))
   (define-syntax and3d-tab
     (syntax-rules ()
       ((_ (i j k) expr)
@@ -103,8 +97,10 @@
   (and3d-tab
    (i i+1 i+2)
    (not (negative?
-         (- (* (dx_ i i+1) (- t (y_ i+1)))
-            (* (dy_ i i+1) (- s (x_ i+1))))))))
+         (- (* (- (trig2d-xref trig i+1) (trig2d-xref trig i))
+               (- (vector-ref p 1)       (trig2d-yref trig i+1)))
+            (* (- (trig2d-yref trig i+1) (trig2d-yref trig i))
+               (- (vector-ref p 0)       (trig2d-xref trig i+1))))))))
 
 
 ;; Mesh utility
