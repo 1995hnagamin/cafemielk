@@ -25,6 +25,11 @@
 (select-module cafemielk.util)
 
 
+;; analogue of fold-map
+;;
+;; `(,collect ,@(map (lambda ,param-list expr)
+;;                   ,arg-list-list))
+;;
 (define-syntax collect-replace
   (syntax-rules ()
     ((_ collect ((param ...) (arg ...) ...) expr)
