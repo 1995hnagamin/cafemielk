@@ -37,11 +37,11 @@
   (define step (/ (- max min) (- size 1)))
   (vector-tabulate size (lambda (i) (+ min (* step i)))))
 
-(define (cross2d u v)
+(define-inline (cross2d u v)
   (- (* (vector-ref u 0) (vector-ref v 1))
      (* (vector-ref u 1) (vector-ref v 0))))
 
-(define (cross3d u v)
+(define-inline (cross3d u v)
   (define (u_ i) (vector-ref u i))
   (define (v_ i) (vector-ref v i))
   (vec3d-tab
@@ -51,7 +51,7 @@
 (define (dot u v)
   (vector-fold (lambda (acc ui vi) (+ acc (* ui vi))) 0 u v))
 
-(define (trig2d-area trig)
+(define-inline (trig2d-area trig)
   (define (x_ i) (vector-ref trig i))
   (define (y_ i) (vector-ref trig (+ i 3)))
   (define (dx_ i j) (- (x_ j) (x_ i)))
