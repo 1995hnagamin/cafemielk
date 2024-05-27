@@ -1,5 +1,5 @@
 (use cafemielk)
-(use cafemielk.linalg)
+(use gauche.time)
 
 (print "Loading playground file...")
 
