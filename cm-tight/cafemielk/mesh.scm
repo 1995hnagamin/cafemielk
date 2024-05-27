@@ -84,7 +84,7 @@
 
 ;; Geometric predicates
 
-(define (mesh2d-adherent? p trig)
+(define-inline (mesh2d-adherent? p trig)
   (define s (vector-ref p 0))
   (define t (vector-ref p 1))
   (define (x_ i) (vector-ref trig i))
