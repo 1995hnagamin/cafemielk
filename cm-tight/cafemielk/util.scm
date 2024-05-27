@@ -5,19 +5,19 @@
 (define-module cafemielk.util
   (use srfi.133)
   (export
-   linspace
-   vector-linspace
    collect-replace
    collect-replace-A3
    cross2d
    cross3d
    dot
    every-replace-A3
+   linspace
    trig2d-area
    trig2d-prod
    trig2d-xref
    trig2d-yref
    vec3d-tab
+   vector-linspace
    vector-unzip2
    )
   )
