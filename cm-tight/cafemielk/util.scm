@@ -12,13 +12,22 @@
    dot
    trig2d-area
    trig2d-prod
-   vec3d-tabulate
+   vec3d-tab
    vector-unzip2
    )
   )
 
 (select-module cafemielk.util)
 
+(define-syntax vec3d-tab
+  (syntax-rules ()
+    ((_ (i j k) expr)
+     (let-syntax
+         ((component (syntax-rules ()
+                       ((_ i j k) expr))))
+       (vector (component 0 1 2)
+               (component 1 2 0)
+               (component 2 0 1))))))
 
 (define (linspace min max size)
   (define step (/ (- max min) (- size 1)))
@@ -35,16 +44,12 @@
 (define (cross3d u v)
   (define (u_ i) (vector-ref u i))
   (define (v_ i) (vector-ref v i))
-  (vec3d-tabulate
-   (lambda (i j k)
-     (- (* (u_ j) (v_ k)) (* (u_ k) (v_ j))))))
+  (vec3d-tab
+   (i i+1 i+2)
+   (- (* (u_ i+1) (v_ i+2)) (* (u_ i+2) (v_ i+1)))))
 
 (define (dot u v)
   (vector-fold (lambda (acc ui vi) (+ acc (* ui vi))) 0 u v))
-
-(define (vec3d-tabulate func)
-  (vector-map (lambda (indices) (apply func indices))
-              #((0 1 2) (1 2 0) (2 0 1))))
 
 (define (trig2d-area trig)
   (define (x_ i) (vector-ref trig i))
@@ -61,8 +66,8 @@
        (vector-map
         (lambda (w) (dot u w))
         (vector (cross3d (vector-tabulate 3 x_) (vector-tabulate 3 y_))
-                (vec3d-tabulate (lambda (i j k) (- (y_ k) (y_ i))))
-                (vec3d-tabulate (lambda (i j k) (- (x_ k) (x_ j))))))))
+                (vec3d-tab (i j k) (- (y_ k) (y_ i)))
+                (vec3d-tab (i j k) (- (x_ k) (x_ j)))))))
 
 (define (vector-unzip2 vector-of-vectors)
   (define N (vector-length vector-of-vectors))
