@@ -11,7 +11,6 @@
   (export
    <mesh2d>
    make-mesh2d
-   mesh2d-adherent?
    mesh2d-nodes
    mesh2d-nodes-length
    mesh2d-nodes-ref
@@ -23,6 +22,7 @@
    mesh2d-trinix-for-each
    mesh2d-trinix-ref
    mesh2d-trinix->trig
+   trig2d-adherent?
    )
   )
 
@@ -84,18 +84,14 @@
 
 ;; Geometric predicates
 
-(define (mesh2d-adherent? p trig)
-  (define s (vector-ref p 0))
-  (define t (vector-ref p 1))
-  (define (x_ i) (vector-ref trig i))
-  (define (y_ i) (vector-ref trig (+ i 3)))
-  (define (dx_ i j) (- (x_ j) (x_ i)))
-  (define (dy_ i j) (- (y_ j) (y_ i)))
-  (every
-   (lambda (a) (not (negative? a)))
-   (list (- (* (dx_ 0 1) (- t (y_ 1))) (* (dy_ 0 1) (- s (x_ 1))))
-         (- (* (dx_ 1 2) (- t (y_ 2))) (* (dy_ 1 2) (- s (x_ 2))))
-         (- (* (dx_ 2 0) (- t (y_ 0))) (* (dy_ 2 0) (- s (x_ 0)))))))
+(define-inline (trig2d-adherent? trig p)
+  (every-replace-A3
+   (i i+1 i+2)
+   (not (negative?
+         (- (* (- (trig2d-xref trig i+1) (trig2d-xref trig i))
+               (- (vector-ref p 1)       (trig2d-yref trig i+1)))
+            (* (- (trig2d-yref trig i+1) (trig2d-yref trig i))
+               (- (vector-ref p 0)       (trig2d-xref trig i+1))))))))
 
 
 ;; Mesh utility

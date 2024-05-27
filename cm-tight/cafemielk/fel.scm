@@ -54,6 +54,6 @@
 
 (define (eval-at mesh p fel)
   (%eval-at-triangle
-   (find (lambda (i) (mesh2d-adherent? p (mesh2d-ith-triangle mesh i)))
+   (find (lambda (i) (trig2d-adherent? (mesh2d-ith-triangle mesh i) p))
          (iota (mesh2d-triangles-length mesh)))
    mesh p fel))
