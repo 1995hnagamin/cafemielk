@@ -13,6 +13,12 @@
  #(b c d)
  (vview->vector (make-vview #(a b c d) 1 #(3))))
 
+;; WolframAlpha: `triangle (3,653) (141,589) (592,793)`
+(test*
+ "test-trig2d-area"
+ 28508
+ (trig2d-area #(3 141 592 653 589 793)))
+
 (test*
  "test-mesh2d-unit-square"
  143
