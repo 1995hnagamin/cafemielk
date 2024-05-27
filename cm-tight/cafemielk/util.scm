@@ -8,6 +8,8 @@
    and3d-tab
    linspace
    vector-linspace
+   collect-replace
+   collect-replace-A3
    cross2d
    cross3d
    dot
@@ -22,30 +24,32 @@
 
 (select-module cafemielk.util)
 
-(define-syntax *-tab
+
+(define-syntax collect-replace
   (syntax-rules ()
-    ((_ collect (i j k) expr)
+    ((_ collect ((param ...) (arg ...) ...) expr)
      (let-syntax
          ((component (syntax-rules ()
-                       ((_ i j k) expr))))
-       (collect (component 0 1 2)
-                (component 1 2 0)
-                (component 2 0 1))))))
+                       ((_ param ...) expr))))
+       (collect (component arg ...) ...)))))
+
+(define-syntax collect-replace-A3
+  (syntax-rules ()
+    ((_ collect (i j k) expr)
+     (collect-replace collect
+                      ((i j k)
+                       (0 1 2) (1 2 0) (2 0 1))
+                      expr))))
 
 (define-syntax and3d-tab
   (syntax-rules ()
     ((_ (i j k) expr)
-     (*-tab and (i j k) expr))))
+     (collect-replace-A3 and (i j k) expr))))
 
 (define-syntax vec3d-tab
   (syntax-rules ()
     ((_ (i j k) expr)
-     (let-syntax
-         ((component (syntax-rules ()
-                       ((_ i j k) expr))))
-       (vector (component 0 1 2)
-               (component 1 2 0)
-               (component 2 0 1))))))
+     (collect-replace-A3 vector (i j k) expr))))
 
 (define (linspace min max size)
   (define step (/ (- max min) (- size 1)))
