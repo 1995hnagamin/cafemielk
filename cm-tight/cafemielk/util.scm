@@ -12,6 +12,8 @@
    dot
    trig2d-area
    trig2d-prod
+   trig2d-xref
+   trig2d-yref
    vec3d-tab
    vector-unzip2
    )
@@ -50,6 +52,12 @@
 
 (define (dot u v)
   (vector-fold (lambda (acc ui vi) (+ acc (* ui vi))) 0 u v))
+
+(define-inline (trig2d-xref trig i)
+  (vector-ref trig i))
+
+(define-inline (trig2d-yref trig i)
+  (vector-ref trig (+ i 3)))
 
 (define-inline (trig2d-area trig)
   (define (x_ i) (vector-ref trig i))
