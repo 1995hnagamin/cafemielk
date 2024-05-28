@@ -5,12 +5,12 @@
 (define-module cafemielk.util
   (use srfi.133)
   (export
-   collect-replace
-   collect-replace-A3
+   collect-substit
+   collect-substit-A3
    cross2d
    cross3d
    dot
-   every-replace-A3
+   every-substit-A3
    linspace
    trig2d-area
    trig2d-prod
@@ -30,7 +30,7 @@
 ;; `(,collect ,@(map (lambda ,param-list expr)
 ;;                   ,arg-list-list))
 ;;
-(define-syntax collect-replace
+(define-syntax collect-substit
   (syntax-rules ()
     ((_ collect ((param ...) (arg ...) ...) expr)
      (let-syntax
@@ -38,23 +38,23 @@
                        ((_ param ...) expr))))
        (collect (component arg ...) ...)))))
 
-(define-syntax collect-replace-A3
+(define-syntax collect-substit-A3
   (syntax-rules ()
     ((_ collect (i j k) expr)
-     (collect-replace collect
+     (collect-substit collect
                       ((i j k)
                        (0 1 2) (1 2 0) (2 0 1))
                       expr))))
 
-(define-syntax every-replace-A3
+(define-syntax every-substit-A3
   (syntax-rules ()
     ((_ (i j k) expr)
-     (collect-replace-A3 and (i j k) expr))))
+     (collect-substit-A3 and (i j k) expr))))
 
 (define-syntax vec3d-tab
   (syntax-rules ()
     ((_ (i j k) expr)
-     (collect-replace-A3 vector (i j k) expr))))
+     (collect-substit-A3 vector (i j k) expr))))
 
 (define (linspace min max size)
   (define step (/ (- max min) (- size 1)))

@@ -85,7 +85,7 @@
 ;; Geometric predicates
 
 (define-inline (trig2d-adherent? trig p)
-  (every-replace-A3
+  (every-substit-A3
    (i i+1 i+2)
    (not (negative?
          (- (* (- (trig2d-xref trig i+1) (trig2d-xref trig i))
