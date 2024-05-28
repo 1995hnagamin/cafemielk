@@ -4,6 +4,7 @@
 ;;;
 
 (define-module cafemielk.linalg
+  (use cafemielk.util)
   (use cafemielk.vview)
   (use gauche.sequence)
   (export
@@ -11,6 +12,7 @@
    <coo>
    <csr>
    <rmaj>
+   cg-solve
    coo-cols
    coo-rows
    coo-vals
@@ -238,3 +240,45 @@
 
 (define-method mv (nr nc (A <rmaj>) v)
   (rmaj-mv nr nc A v))
+
+;;;
+;;; Solvers
+;;;
+
+;; Conjugate gradient method
+;; (Saad 2003, 199-200)
+(define (cg-solve A b :key eps (init-guess #f) (max-iter +inf.0) (debug #f))
+  (define threshold^2 (expt (* eps (sqrt (dot b b))) 2))
+  (define x (or init-guess
+                (make-vector (vector-length b) 0.)))
+  (define r (vector-map - b (mv A x)))
+  (define p (vector-copy r))
+  (define Ap (mv A p))
+  (let loop ((iter 0)
+             (r^2 (dot r r)))
+    (cond
+     ((>= iter max-iter)
+      (if debug (print "max-iter"))
+      (values x #f))
+     ((< r^2 threshold^2)
+      (if debug (print "converged"))
+      (values x #t))
+     (else
+      (let ((alpha (/ r^2 (dot p Ap))))
+        (vector-addcv! x alpha p)
+        (vector-addcv! r (- alpha) Ap)
+        (let* ((r~^2 (dot r r))
+               (beta (/ r~^2 r^2)))
+          (vector-scale-add! p beta r)
+          (mv-set! Ap A p)
+          (loop (+ iter 1) r~^2)))))))
+
+
+;;;
+;;; References
+;;;
+;;; Saad, Yousef. 2003.
+;;;   Iterative Methods for Sparse Linear Systems. 2nd ed.
+;;;   Society for Industrial and Applied Mathematics.
+;;;   doi: 10.1137/1.9780898718003
+;;;
