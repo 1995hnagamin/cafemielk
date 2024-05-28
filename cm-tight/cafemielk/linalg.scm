@@ -18,12 +18,14 @@
    coom->csrm
    csr-addmv!
    csr-mv
+   csr-ref
    dokm->coom
    make-coo
    make-csr
    make-matrix
    make-rmaj
    matrix-data
+   matrix-ref
    mv
    ncols
    nrows
@@ -50,6 +52,9 @@
 (define-method mv ((M <matrix>) v)
   (mv (nrows M) (ncols M) (matrix-data M) v))
 
+(define-method matrix-ref ((M <matrix>) i j)
+  (csr-ref (matrix-data M) i j))
+
 ;; CSR (compressed sparse row)
 
 (define-class <csr> ()
@@ -60,6 +65,15 @@
 (define (make-csr vals rowptr colind)
   (make <csr>
     :vals vals :rowptr rowptr :colind colind))
+
+(define (csr-rowptr-ref A k)
+  (vector-ref (slot-ref A 'rowptr) k))
+
+(define (csr-colind-ref A k)
+  (vector-ref (slot-ref A 'colind) k))
+
+(define (csr-value-ref A k)
+  (vector-ref (slot-ref A 'vals) k))
 
 (define (csr-addmv! nr nc A x y)
   ;; y += A*x
@@ -80,6 +94,20 @@
 
 (define-method mv (nr nc (A <csr>) v)
   (csr-mv nr nc A v))
+
+(define (csr-ref A i j)
+  (let ((start (csr-rowptr-ref A i))
+        (end (csr-rowptr-ref A (+ i 1))))
+    (let loop ((t start))
+      (cond
+       ((= t end) 0)
+       ((= (csr-colind-ref A t) j)
+        (csr-value-ref A t))
+       (else
+        (loop (+ t 1)))))))
+
+(define-method matrix-ref ((A <csr>) i j)
+  (csr-ref A i j))
 
 ;; COO (coordinate format)
 
