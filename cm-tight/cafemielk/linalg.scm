@@ -36,6 +36,39 @@
 
 (select-module cafemielk.linalg)
 
+;;;
+;;; Vector operations
+;;;
+
+(define-inline (vector-scale! y c)
+  ;; y *= c
+  (define N (vector-length y))
+  (do ((i 0 (+ i 1)))
+      ((= i N) y)
+    (vector-set! y i (* c (vector-ref y i)))))
+
+(define-inline (vector-addv! y x)
+  (define N (vector-length y))
+  (do ((i 0 (+ i 1)))
+      ((= i N) y)
+    (vector-set! y i
+                 (+ (vector-ref y i)
+                    (vector-ref x i)))))
+
+(define-inline (vector-scale-add! y c x)
+  ;; y := c * y + x
+  (vector-scale! y c)
+  (vector-addv! y x))
+
+(define-inline (vector-addcv! y c x)
+  ;; y += c * x
+  (define N (vector-length y))
+  (do ((i 0 (+ i 1)))
+      ((= i N) y)
+    (vector-set! y i
+                 (+ (vector-ref y i)
+                    (* c (vector-ref x i))))))
+
 (define-class <matrix> ()
   ((nrows :init-keyword :nrows)
    (ncols :init-keyword :ncols)
