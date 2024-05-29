@@ -244,21 +244,10 @@
     (make-coo vals rows cols)))
 
 (define (dokm->coom dokm)
-  (define dok (matrix-data dokm))
-  (define nnz (hash-table-size dok))
-  (let ((vals (make-vector nnz))
-        (rows (make-vector nnz))
-        (cols (make-vector nnz)))
-    (for-each-with-index
-     (lambda (i kv)
-       (vector-set! vals i (cdr kv))
-       (vector-set! rows i (vector-ref (car kv) 0))
-       (vector-set! cols i (vector-ref (car kv) 1)))
-     (sort (hash-table->alist dok)))
-    (make-matrix
-     (nrows dokm)
-     (ncols dokm)
-     (make-coo vals rows cols))))
+  (make-matrix
+   (nrows dokm)
+   (ncols dokm)
+   (dok->coo (matrix-data dokm))))
 
 ;; row-major dense matrix
 
