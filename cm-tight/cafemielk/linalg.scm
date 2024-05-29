@@ -228,6 +228,21 @@
 
 ;; DOK (dictionary of keys)
 
+(define (dok->coo dok)
+  (let* ((nnz (hash-table-size dok))
+         (vals (make-vector nnz))
+         (rows (make-vector nnz))
+         (cols (make-vector nnz)))
+    (dict-fold dok
+               (lambda (ij v t)
+                 (vector-set! rows t (vector-ref ij 0))
+                 (vector-set! cols t (vector-ref ij 1))
+                 (vector-set! vals t v)
+                 (+ t 1))
+               0)
+    (ucoo-sort! vals rows cols)
+    (make-coo vals rows cols)))
+
 (define (dokm->coom dokm)
   (define dok (matrix-data dokm))
   (define nnz (hash-table-size dok))
