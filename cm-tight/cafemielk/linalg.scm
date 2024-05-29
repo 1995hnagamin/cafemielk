@@ -31,6 +31,7 @@
    mv
    ncols
    nrows
+   pcg-solve
    rmaj-addmv!
    rmaj-mv
    )
@@ -272,6 +273,39 @@
           (vector-scale-add! p beta r)
           (mv-set! Ap A p)
           (loop (+ iter 1) r~^2)))))))
+
+;; Preconditioned conjugate gradient method
+;; (Saad 2003, 277)
+(define (pcg-solve A b
+                   :key precond! eps
+                   (init-guess #f) (max-iter +inf.0) (debug #f))
+  (define threshold^2 (expt (* eps (sqrt (dot b b))) 2))
+  (define x (or init-guess
+                (make-vector (vector-length b) 0.)))
+  (define r (vector-map - b (mv A x)))
+  (define z (precond! (make-vector (vector-length r)) r))
+  (define p (vector-copy z))
+  (define Ap (mv A p))
+  (let loop ((iter 0)
+             (r^2 (dot r r))
+             (r.z (dot r z)))
+    (cond
+     ((>= iter max-iter)
+      (if debug (print "max-iter"))
+      (values x #f))
+     ((< r^2 threshold^2)
+      (if debug (print "converged"))
+      (values x #t))
+     (else
+      (let ((alpha (/ r.z (dot p Ap))))
+        (vector-addcv! x alpha p)
+        (vector-addcv! r (- alpha) Ap)
+        (precond! z r)
+        (let* ((r~.z~ (dot r z))
+               (beta (/ r~.z~ r.z)))
+          (vector-scale-add! p beta z)
+          (mv-set! Ap A p)
+          (loop (+ iter 1) (dot r r) r~.z~)))))))
 
 
 ;;;
