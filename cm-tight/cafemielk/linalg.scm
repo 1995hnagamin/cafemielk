@@ -85,6 +85,9 @@
 (define-method mv ((M <matrix>) v)
   (mv (nrows M) (ncols M) (matrix-data M) v))
 
+(define-method mv-set! (y (M <matrix>) v)
+  (mv-set! y (nrows M) (ncols M) (matrix-data M) v))
+
 (define-method matrix-ref ((M <matrix>) i j)
   (csr-ref (matrix-data M) i j))
 
@@ -120,6 +123,13 @@
           (* (vector-ref (slot-ref A 'vals) j)
              (vector-ref x (vector-ref (slot-ref A 'colind) j))))))))
 
+(define (csr-mv-set! y nr nc A x)
+  (do ((i 0 (+ i 1)))
+      ((= i nr) #f)
+    (vector-set! y i 0))
+  (csr-addmv! nr nc A x y)
+  y)
+
 (define (csr-mv nr nc A x)
   (define y (make-vector nr 0))
   (csr-addmv! nr nc A x y)
@@ -127,6 +137,9 @@
 
 (define-method mv (nr nc (A <csr>) v)
   (csr-mv nr nc A v))
+
+(define-method mv-set! (y nr nc (A <csr>) v)
+  (csr-mv-set! y nr nc A v))
 
 (define (csr-ref A i j)
   (let ((start (csr-rowptr-ref A i))
