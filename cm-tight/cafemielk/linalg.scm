@@ -28,10 +28,10 @@
    make-matrix
    make-rmaj
    matrix-data
+   matrix-ncols
+   matrix-nrows
    matrix-ref
    mv
-   ncols
-   nrows
    pcg-solve
    rmaj-addmv!
    rmaj-mv
@@ -86,15 +86,23 @@
   (make <matrix>
     :nrows nr :ncols nc :data data))
 
-(define (nrows matrix) (slot-ref matrix 'nrows))
-(define (ncols matrix) (slot-ref matrix 'ncols))
-(define (matrix-data matrix) (slot-ref matrix 'data))
+(define (matrix-nrows matrix)
+  (slot-ref matrix 'nrows))
+
+(define (matrix-ncols matrix)
+  (slot-ref matrix 'ncols))
+
+(define (matrix-data matrix)
+  (slot-ref matrix 'data))
 
 (define-method mv ((M <matrix>) v)
-  (mv (nrows M) (ncols M) (matrix-data M) v))
+  (mv (matrix-nrows M) (matrix-ncols M)
+      (matrix-data M) v))
 
 (define-method mv-set! (y (M <matrix>) v)
-  (mv-set! y (nrows M) (ncols M) (matrix-data M) v))
+  (mv-set! y
+           (matrix-nrows M) (matrix-ncols M)
+           (matrix-data M) v))
 
 (define-method matrix-ref ((M <matrix>) i j)
   (csr-ref (matrix-data M) i j))
@@ -203,9 +211,9 @@
 
 (define (coom->csrm coom)
   (make-matrix
-   (nrows coom)
-   (ncols coom)
-   (coo->csr (nrows coom) (matrix-data coom))))
+   (matrix-nrows coom)
+   (matrix-ncols coom)
+   (coo->csr (matrix-nrows coom) (matrix-data coom))))
 
 ;;;
 ;;; DOK (dictionary of keys)
@@ -224,8 +232,8 @@
        (vector-set! cols i (vector-ref (car kv) 1)))
      (sort (hash-table->alist dok)))
     (make-matrix
-     (nrows dokm)
-     (ncols dokm)
+     (matrix-nrows dokm)
+     (matrix-ncols dokm)
      (make-coo vals rows cols))))
 
 ;;;
@@ -322,7 +330,7 @@
 
 ;; Diganoal scaling
 (define (make-diag-precond A)
-  (let* ((N (nrows A))
+  (let* ((N (matrix-nrows A))
          (diags (vector-tabulate
                  N
                  (lambda (i) (matrix-ref A i i)))))
