@@ -17,17 +17,17 @@
    coo-rows
    coo-vals
    coo->csr
-   coom->csrm
    csr-addmv!
    csr-mv
    csr-ref
-   dokm->coom
    make-coo
    make-csr
    make-diag-precond
    make-matrix
    make-rmaj
+   matrix-coo->csr
    matrix-data
+   matrix-dok->coo
    matrix-ncols
    matrix-nrows
    matrix-ref
@@ -209,7 +209,7 @@
        (loop (+ i 1) r))))
    (vector-copy (coo-cols coo))))
 
-(define (coom->csrm coom)
+(define (matrix-coo->csr coom)
   (make-matrix
    (matrix-nrows coom)
    (matrix-ncols coom)
@@ -219,7 +219,7 @@
 ;;; DOK (dictionary of keys)
 ;;;
 
-(define (dokm->coom dokm)
+(define (matrix-dok->coo dokm)
   (define dok (matrix-data dokm))
   (define nnz (hash-table-size dok))
   (let ((vals (make-vector nnz))
