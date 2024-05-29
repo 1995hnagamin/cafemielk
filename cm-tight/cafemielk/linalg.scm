@@ -24,6 +24,7 @@
    dokm->coom
    make-coo
    make-csr
+   make-diag-precond
    make-matrix
    make-rmaj
    matrix-data
@@ -306,6 +307,20 @@
           (vector-scale-add! p beta z)
           (mv-set! Ap A p)
           (loop (+ iter 1) (dot r r) r~.z~)))))))
+
+(define (make-diag-precond A)
+  (let* ((N (nrows A))
+         (diags (vector-tabulate
+                 N
+                 (lambda (i) (matrix-ref A i i)))))
+    (lambda (dst src)
+      (let loop ((i 0))
+        (cond
+         ((= i N) dst)
+         (else
+          (vector-set! dst i (/ (vector-ref src i)
+                                (vector-ref diags i)))
+          (loop (+ i 1))))))))
 
 
 ;;;
