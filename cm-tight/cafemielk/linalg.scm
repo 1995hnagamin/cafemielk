@@ -73,6 +73,10 @@
                  (+ (vector-ref y i)
                     (* c (vector-ref x i))))))
 
+;;;
+;;; <matrix> -- General matrix
+;;;
+
 (define-class <matrix> ()
   ((nrows :init-keyword :nrows)
    (ncols :init-keyword :ncols)
@@ -95,7 +99,9 @@
 (define-method matrix-ref ((M <matrix>) i j)
   (csr-ref (matrix-data M) i j))
 
-;; CSR (compressed sparse row)
+;;;
+;;; CSR (compressed sparse row)
+;;;
 
 (define-class <csr> ()
   ((vals :init-keyword :vals)
@@ -159,7 +165,9 @@
 (define-method matrix-ref ((A <csr>) i j)
   (csr-ref A i j))
 
-;; COO (coordinate format)
+;;;
+;;; COO (coordinate format)
+;;;
 
 (define-class <coo> ()
   ((vals :init-keyword :vals)
@@ -199,7 +207,9 @@
    (ncols coom)
    (coo->csr (nrows coom) (matrix-data coom))))
 
-;; DOK (dictionary of keys)
+;;;
+;;; DOK (dictionary of keys)
+;;;
 
 (define (dokm->coom dokm)
   (define dok (matrix-data dokm))
@@ -218,7 +228,9 @@
      (ncols dokm)
      (make-coo vals rows cols))))
 
-;; row-major dense matrix
+;;;
+;;; Row-major dense matrix
+;;;
 
 (define-class <rmaj> () ((vals :init-keyword :vals)))
 
@@ -308,6 +320,7 @@
           (mv-set! Ap A p)
           (loop (+ iter 1) (dot r r) r~.z~)))))))
 
+;; Diganoal scaling
 (define (make-diag-precond A)
   (let* ((N (nrows A))
          (diags (vector-tabulate
