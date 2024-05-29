@@ -6,7 +6,9 @@
 (define-module cafemielk.linalg
   (use cafemielk.util)
   (use cafemielk.vview)
+  (use gauche.dictionary)
   (use gauche.sequence)
+  (use scheme.vector)
   (export
    <csr>
    <coo>
@@ -35,6 +37,7 @@
    pcg-solve
    rmaj-addmv!
    rmaj-mv
+   ucoo-sort!
    )
   )
 
@@ -198,6 +201,30 @@
    (nrows coom)
    (ncols coom)
    (coo->csr (nrows coom) (matrix-data coom))))
+
+;; Sort unsorted COO data.
+(define (ucoo-sort! vals rows cols)
+  (define N (vector-length vals))
+  (let run ((gap N))
+    (let loop ((i 0) (i+gap gap) (swapped #f))
+      (cond
+       ((= i+gap N)
+        (if (or (> gap 1) swapped)
+            (run (cond
+                  ((= gap 1) 1)
+                  ((< 11 gap 15) 11)
+                  (else (floor->exact (/ gap 1.3)))))
+            ;; return otherwise
+            ))
+       ((or (> (vector-ref rows i) (vector-ref rows i+gap))
+            (and (= (vector-ref rows i) (vector-ref rows i+gap))
+                 (> (vector-ref cols i) (vector-ref cols i+gap))))
+        (vector-swap! vals i i+gap)
+        (vector-swap! rows i i+gap)
+        (vector-swap! cols i i+gap)
+        (loop (+ i 1) (+ i+gap 1) #t))
+       (else
+        (loop (+ i 1) (+ i+gap 1) swapped))))))
 
 ;; DOK (dictionary of keys)
 
