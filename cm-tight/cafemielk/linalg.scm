@@ -4,6 +4,7 @@
 ;;;
 
 (define-module cafemielk.linalg
+  (use cafemielk.util)
   (use cafemielk.vview)
   (use gauche.sequence)
   (export
@@ -11,6 +12,7 @@
    <coo>
    <csr>
    <rmaj>
+   cg-solve
    coo-cols
    coo-rows
    coo-vals
@@ -18,21 +20,58 @@
    coom->csrm
    csr-addmv!
    csr-mv
+   csr-ref
    dokm->coom
    make-coo
    make-csr
+   make-diag-precond
    make-matrix
    make-rmaj
    matrix-data
+   matrix-ref
    mv
    ncols
    nrows
+   pcg-solve
    rmaj-addmv!
    rmaj-mv
    )
   )
 
 (select-module cafemielk.linalg)
+
+;;;
+;;; Vector operations
+;;;
+
+(define-inline (vector-scale! y c)
+  ;; y *= c
+  (define N (vector-length y))
+  (do ((i 0 (+ i 1)))
+      ((= i N) y)
+    (vector-set! y i (* c (vector-ref y i)))))
+
+(define-inline (vector-addv! y x)
+  (define N (vector-length y))
+  (do ((i 0 (+ i 1)))
+      ((= i N) y)
+    (vector-set! y i
+                 (+ (vector-ref y i)
+                    (vector-ref x i)))))
+
+(define-inline (vector-scale-add! y c x)
+  ;; y := c * y + x
+  (vector-scale! y c)
+  (vector-addv! y x))
+
+(define-inline (vector-addcv! y c x)
+  ;; y += c * x
+  (define N (vector-length y))
+  (do ((i 0 (+ i 1)))
+      ((= i N) y)
+    (vector-set! y i
+                 (+ (vector-ref y i)
+                    (* c (vector-ref x i))))))
 
 (define-class <matrix> ()
   ((nrows :init-keyword :nrows)
@@ -50,6 +89,12 @@
 (define-method mv ((M <matrix>) v)
   (mv (nrows M) (ncols M) (matrix-data M) v))
 
+(define-method mv-set! (y (M <matrix>) v)
+  (mv-set! y (nrows M) (ncols M) (matrix-data M) v))
+
+(define-method matrix-ref ((M <matrix>) i j)
+  (csr-ref (matrix-data M) i j))
+
 ;; CSR (compressed sparse row)
 
 (define-class <csr> ()
@@ -60,6 +105,15 @@
 (define (make-csr vals rowptr colind)
   (make <csr>
     :vals vals :rowptr rowptr :colind colind))
+
+(define (csr-rowptr-ref A k)
+  (vector-ref (slot-ref A 'rowptr) k))
+
+(define (csr-colind-ref A k)
+  (vector-ref (slot-ref A 'colind) k))
+
+(define (csr-value-ref A k)
+  (vector-ref (slot-ref A 'vals) k))
 
 (define (csr-addmv! nr nc A x y)
   ;; y += A*x
@@ -73,6 +127,13 @@
           (* (vector-ref (slot-ref A 'vals) j)
              (vector-ref x (vector-ref (slot-ref A 'colind) j))))))))
 
+(define (csr-mv-set! y nr nc A x)
+  (do ((i 0 (+ i 1)))
+      ((= i nr) #f)
+    (vector-set! y i 0))
+  (csr-addmv! nr nc A x y)
+  y)
+
 (define (csr-mv nr nc A x)
   (define y (make-vector nr 0))
   (csr-addmv! nr nc A x y)
@@ -80,6 +141,23 @@
 
 (define-method mv (nr nc (A <csr>) v)
   (csr-mv nr nc A v))
+
+(define-method mv-set! (y nr nc (A <csr>) v)
+  (csr-mv-set! y nr nc A v))
+
+(define (csr-ref A i j)
+  (let ((start (csr-rowptr-ref A i))
+        (end (csr-rowptr-ref A (+ i 1))))
+    (let loop ((t start))
+      (cond
+       ((= t end) 0)
+       ((= (csr-colind-ref A t) j)
+        (csr-value-ref A t))
+       (else
+        (loop (+ t 1)))))))
+
+(define-method matrix-ref ((A <csr>) i j)
+  (csr-ref A i j))
 
 ;; COO (coordinate format)
 
@@ -164,3 +242,92 @@
 
 (define-method mv (nr nc (A <rmaj>) v)
   (rmaj-mv nr nc A v))
+
+;;;
+;;; Solvers
+;;;
+
+;; Conjugate gradient method
+;; (Saad 2003, 199-200)
+(define (cg-solve A b :key eps (init-guess #f) (max-iter +inf.0) (debug #f))
+  (define threshold^2 (expt (* eps (sqrt (dot b b))) 2))
+  (define x (or init-guess
+                (make-vector (vector-length b) 0.)))
+  (define r (vector-map - b (mv A x)))
+  (define p (vector-copy r))
+  (define Ap (mv A p))
+  (let loop ((iter 0)
+             (r^2 (dot r r)))
+    (cond
+     ((>= iter max-iter)
+      (if debug (print "max-iter"))
+      (values x #f))
+     ((< r^2 threshold^2)
+      (if debug (print "converged"))
+      (values x #t))
+     (else
+      (let ((alpha (/ r^2 (dot p Ap))))
+        (vector-addcv! x alpha p)
+        (vector-addcv! r (- alpha) Ap)
+        (let* ((r~^2 (dot r r))
+               (beta (/ r~^2 r^2)))
+          (vector-scale-add! p beta r)
+          (mv-set! Ap A p)
+          (loop (+ iter 1) r~^2)))))))
+
+;; Preconditioned conjugate gradient method
+;; (Saad 2003, 277)
+(define (pcg-solve A b
+                   :key precond! eps
+                   (init-guess #f) (max-iter +inf.0) (debug #f))
+  (define threshold^2 (expt (* eps (sqrt (dot b b))) 2))
+  (define x (or init-guess
+                (make-vector (vector-length b) 0.)))
+  (define r (vector-map - b (mv A x)))
+  (define z (precond! (make-vector (vector-length r)) r))
+  (define p (vector-copy z))
+  (define Ap (mv A p))
+  (let loop ((iter 0)
+             (r^2 (dot r r))
+             (r.z (dot r z)))
+    (cond
+     ((>= iter max-iter)
+      (if debug (print "max-iter"))
+      (values x #f))
+     ((< r^2 threshold^2)
+      (if debug (print "converged"))
+      (values x #t))
+     (else
+      (let ((alpha (/ r.z (dot p Ap))))
+        (vector-addcv! x alpha p)
+        (vector-addcv! r (- alpha) Ap)
+        (precond! z r)
+        (let* ((r~.z~ (dot r z))
+               (beta (/ r~.z~ r.z)))
+          (vector-scale-add! p beta z)
+          (mv-set! Ap A p)
+          (loop (+ iter 1) (dot r r) r~.z~)))))))
+
+(define (make-diag-precond A)
+  (let* ((N (nrows A))
+         (diags (vector-tabulate
+                 N
+                 (lambda (i) (matrix-ref A i i)))))
+    (lambda (dst src)
+      (let loop ((i 0))
+        (cond
+         ((= i N) dst)
+         (else
+          (vector-set! dst i (/ (vector-ref src i)
+                                (vector-ref diags i)))
+          (loop (+ i 1))))))))
+
+
+;;;
+;;; References
+;;;
+;;; Saad, Yousef. 2003.
+;;;   Iterative Methods for Sparse Linear Systems. 2nd ed.
+;;;   Society for Industrial and Applied Mathematics.
+;;;   doi: 10.1137/1.9780898718003
+;;;

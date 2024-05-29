@@ -3,6 +3,7 @@
 ;;;
 
 (use gauche.test)
+(use srfi-133)
 
 (test-start "cafemielk")
 (use cafemielk)
@@ -46,6 +47,29 @@
             #(0 1 0 1 2 1 2 3 2 3 4 3 4))))
        (x #(5 4 3 2 1)))
    (mv A x)))
+
+(let ((A (make-matrix
+           5 5
+           (make-csr
+            #(1 2 2 4 5 5 7 8 8 10 11 11 13)
+            #(0 2 5 8 11 13)
+            #(0 1 0 1 2 1 2 3 2 3 4 3 4))))
+      (answer #(5 4 3 2 1))
+      (b #(13 41 57 55 35))
+      (check (lambda (expected result-of-thunk)
+               (vector-every
+                (lambda (x) (< (abs x) 1e-10))
+                (vector-map - expected result-of-thunk)))))
+  (test*
+   "test-cg-solve"
+   answer
+   (cg-solve A b :eps 1e-13 :max-iter 10)
+   check)
+  (test*
+   "test-pcg-solve (diagonal scaling)"
+   answer
+   (pcg-solve A b :eps 1e-13 :max-iter 10 :precond! (make-diag-precond A))
+   check))
 
 (test*
  "test-func->fel-3x3:x"
