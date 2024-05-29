@@ -44,7 +44,7 @@
 ;;; Vector operations
 ;;;
 
-(define-inline (vector-scale! y c)
+(define-inline (vector-rescale! y c)
   ;; y *= c
   (define N (vector-length y))
   (do ((i 0 (+ i 1)))
@@ -59,9 +59,9 @@
                  (+ (vector-ref y i)
                     (vector-ref x i)))))
 
-(define-inline (vector-scale-add! y c x)
+(define-inline (vector-rescale-addv! y c x)
   ;; y := c * y + x
-  (vector-scale! y c)
+  (vector-rescale! y c)
   (vector-addv! y x))
 
 (define-inline (vector-addcv! y c x)
@@ -283,7 +283,7 @@
         (vector-addcv! r (- alpha) Ap)
         (let* ((r~^2 (dot r r))
                (beta (/ r~^2 r^2)))
-          (vector-scale-add! p beta r)
+          (vector-rescale-addv! p beta r)
           (mv-set! Ap A p)
           (loop (+ iter 1) r~^2)))))))
 
@@ -316,7 +316,7 @@
         (precond! z r)
         (let* ((r~.z~ (dot r z))
                (beta (/ r~.z~ r.z)))
-          (vector-scale-add! p beta z)
+          (vector-rescale-addv! p beta z)
           (mv-set! Ap A p)
           (loop (+ iter 1) (dot r r) r~.z~)))))))
 
