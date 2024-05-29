@@ -1,5 +1,6 @@
 (use cafemielk)
 (use gauche.sequence)
+(use gauche.time)
 
 ;; \int_\Omega \nu (\grad w)\cdot(\grad A)dS = \int_\Omega w J_0 dS
 
