@@ -6,7 +6,9 @@
 (define-module cafemielk.linalg
   (use cafemielk.util)
   (use cafemielk.vview)
+  (use gauche.dictionary)
   (use gauche.sequence)
+  (use scheme.vector)
   (export
    <csr>
    <coo>
@@ -35,6 +37,7 @@
    pcg-solve
    rmaj-addmv!
    rmaj-mv
+   ucoo-sort!
    )
   )
 
@@ -199,24 +202,52 @@
    (ncols coom)
    (coo->csr (nrows coom) (matrix-data coom))))
 
+;; Sort unsorted COO data.
+(define (ucoo-sort! vals rows cols)
+  (define N (vector-length vals))
+  (let run ((gap N))
+    (let loop ((i 0) (i+gap gap) (swapped #f))
+      (cond
+       ((= i+gap N)
+        (if (or (> gap 1) swapped)
+            (run (cond
+                  ((= gap 1) 1)
+                  ((< 11 gap 15) 11)
+                  (else (floor->exact (/ gap 1.3)))))
+            ;; return otherwise
+            ))
+       ((or (> (vector-ref rows i) (vector-ref rows i+gap))
+            (and (= (vector-ref rows i) (vector-ref rows i+gap))
+                 (> (vector-ref cols i) (vector-ref cols i+gap))))
+        (vector-swap! vals i i+gap)
+        (vector-swap! rows i i+gap)
+        (vector-swap! cols i i+gap)
+        (loop (+ i 1) (+ i+gap 1) #t))
+       (else
+        (loop (+ i 1) (+ i+gap 1) swapped))))))
+
 ;; DOK (dictionary of keys)
 
+(define (dok->coo dok)
+  (let* ((nnz (hash-table-size dok))
+         (vals (make-vector nnz))
+         (rows (make-vector nnz))
+         (cols (make-vector nnz)))
+    (dict-fold dok
+               (lambda (ij v t)
+                 (vector-set! rows t (vector-ref ij 0))
+                 (vector-set! cols t (vector-ref ij 1))
+                 (vector-set! vals t v)
+                 (+ t 1))
+               0)
+    (ucoo-sort! vals rows cols)
+    (make-coo vals rows cols)))
+
 (define (dokm->coom dokm)
-  (define dok (matrix-data dokm))
-  (define nnz (hash-table-size dok))
-  (let ((vals (make-vector nnz))
-        (rows (make-vector nnz))
-        (cols (make-vector nnz)))
-    (for-each-with-index
-     (lambda (i kv)
-       (vector-set! vals i (cdr kv))
-       (vector-set! rows i (vector-ref (car kv) 0))
-       (vector-set! cols i (vector-ref (car kv) 1)))
-     (sort (hash-table->alist dok)))
-    (make-matrix
-     (nrows dokm)
-     (ncols dokm)
-     (make-coo vals rows cols))))
+  (make-matrix
+   (nrows dokm)
+   (ncols dokm)
+   (dok->coo (matrix-data dokm))))
 
 ;; row-major dense matrix
 
