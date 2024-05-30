@@ -19,21 +19,21 @@
    coo-rows
    coo-vals
    coo->csr
-   coom->csrm
    csr-addmv!
    csr-mv
    csr-ref
-   dokm->coom
    make-coo
    make-csr
    make-diag-precond
    make-matrix
    make-rmaj
+   matrix-coo->csr
    matrix-data
+   matrix-dok->coo
+   matrix-ncols
+   matrix-nrows
    matrix-ref
    mv
-   ncols
-   nrows
    pcg-solve
    rmaj-addmv!
    rmaj-mv
@@ -47,7 +47,7 @@
 ;;; Vector operations
 ;;;
 
-(define-inline (vector-scale! y c)
+(define-inline (vector-rescale! y c)
   ;; y *= c
   (define N (vector-length y))
   (do ((i 0 (+ i 1)))
@@ -62,9 +62,9 @@
                  (+ (vector-ref y i)
                     (vector-ref x i)))))
 
-(define-inline (vector-scale-add! y c x)
+(define-inline (vector-rescale-addv! y c x)
   ;; y := c * y + x
-  (vector-scale! y c)
+  (vector-rescale! y c)
   (vector-addv! y x))
 
 (define-inline (vector-addcv! y c x)
@@ -76,6 +76,10 @@
                  (+ (vector-ref y i)
                     (* c (vector-ref x i))))))
 
+;;;
+;;; <matrix> -- General matrix
+;;;
+
 (define-class <matrix> ()
   ((nrows :init-keyword :nrows)
    (ncols :init-keyword :ncols)
@@ -85,20 +89,30 @@
   (make <matrix>
     :nrows nr :ncols nc :data data))
 
-(define (nrows matrix) (slot-ref matrix 'nrows))
-(define (ncols matrix) (slot-ref matrix 'ncols))
-(define (matrix-data matrix) (slot-ref matrix 'data))
+(define (matrix-nrows matrix)
+  (slot-ref matrix 'nrows))
+
+(define (matrix-ncols matrix)
+  (slot-ref matrix 'ncols))
+
+(define (matrix-data matrix)
+  (slot-ref matrix 'data))
 
 (define-method mv ((M <matrix>) v)
-  (mv (nrows M) (ncols M) (matrix-data M) v))
+  (mv (matrix-nrows M) (matrix-ncols M)
+      (matrix-data M) v))
 
 (define-method mv-set! (y (M <matrix>) v)
-  (mv-set! y (nrows M) (ncols M) (matrix-data M) v))
+  (mv-set! y
+           (matrix-nrows M) (matrix-ncols M)
+           (matrix-data M) v))
 
 (define-method matrix-ref ((M <matrix>) i j)
   (csr-ref (matrix-data M) i j))
 
-;; CSR (compressed sparse row)
+;;;
+;;; CSR (compressed sparse row)
+;;;
 
 (define-class <csr> ()
   ((vals :init-keyword :vals)
@@ -118,7 +132,7 @@
 (define (csr-value-ref A k)
   (vector-ref (slot-ref A 'vals) k))
 
-(define (csr-addmv! nr nc A x y)
+(define (csr-addmv! y nr nc A x)
   ;; y += A*x
   (do ((i 0 (+ i 1)))
       ((= i nr) #f)
@@ -134,12 +148,12 @@
   (do ((i 0 (+ i 1)))
       ((= i nr) #f)
     (vector-set! y i 0))
-  (csr-addmv! nr nc A x y)
+  (csr-addmv! y nr nc A x)
   y)
 
 (define (csr-mv nr nc A x)
   (define y (make-vector nr 0))
-  (csr-addmv! nr nc A x y)
+  (csr-addmv! y nr nc A x)
   y)
 
 (define-method mv (nr nc (A <csr>) v)
@@ -162,7 +176,9 @@
 (define-method matrix-ref ((A <csr>) i j)
   (csr-ref A i j))
 
-;; COO (coordinate format)
+;;;
+;;; COO (coordinate format)
+;;;
 
 (define-class <coo> ()
   ((vals :init-keyword :vals)
@@ -196,11 +212,11 @@
        (loop (+ i 1) r))))
    (vector-copy (coo-cols coo))))
 
-(define (coom->csrm coom)
+(define (matrix-coo->csr coom)
   (make-matrix
-   (nrows coom)
-   (ncols coom)
-   (coo->csr (nrows coom) (matrix-data coom))))
+   (matrix-nrows coom)
+   (matrix-ncols coom)
+   (coo->csr (matrix-nrows coom) (matrix-data coom))))
 
 ;; Sort unsorted COO data.
 (define (ucoo-sort! vals rows cols)
@@ -226,7 +242,9 @@
        (else
         (loop (+ i 1) (+ i+gap 1) swapped))))))
 
-;; DOK (dictionary of keys)
+;;;
+;;; DOK (dictionary of keys)
+;;;
 
 (define (dok->coo dok)
   (let* ((nnz (hash-table-size dok))
@@ -243,13 +261,15 @@
     (ucoo-sort! vals rows cols)
     (make-coo vals rows cols)))
 
-(define (dokm->coom dokm)
+(define (matrix-dok->coo dokm)
   (make-matrix
-   (nrows dokm)
-   (ncols dokm)
+   (matrix-nrows dokm)
+   (matrix-ncols dokm)
    (dok->coo (matrix-data dokm))))
 
-;; row-major dense matrix
+;;;
+;;; Row-major dense matrix
+;;;
 
 (define-class <rmaj> () ((vals :init-keyword :vals)))
 
@@ -302,7 +322,7 @@
         (vector-addcv! r (- alpha) Ap)
         (let* ((r~^2 (dot r r))
                (beta (/ r~^2 r^2)))
-          (vector-scale-add! p beta r)
+          (vector-rescale-addv! p beta r)
           (mv-set! Ap A p)
           (loop (+ iter 1) r~^2)))))))
 
@@ -335,12 +355,13 @@
         (precond! z r)
         (let* ((r~.z~ (dot r z))
                (beta (/ r~.z~ r.z)))
-          (vector-scale-add! p beta z)
+          (vector-rescale-addv! p beta z)
           (mv-set! Ap A p)
           (loop (+ iter 1) (dot r r) r~.z~)))))))
 
+;; Diganoal scaling
 (define (make-diag-precond A)
-  (let* ((N (nrows A))
+  (let* ((N (matrix-nrows A))
          (diags (vector-tabulate
                  N
                  (lambda (i) (matrix-ref A i i)))))
