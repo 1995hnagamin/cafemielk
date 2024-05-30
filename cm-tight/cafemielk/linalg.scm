@@ -129,7 +129,7 @@
 (define (csr-value-ref A k)
   (vector-ref (slot-ref A 'vals) k))
 
-(define (csr-addmv! nr nc A x y)
+(define (csr-addmv! y nr nc A x)
   ;; y += A*x
   (do ((i 0 (+ i 1)))
       ((= i nr) #f)
@@ -145,12 +145,12 @@
   (do ((i 0 (+ i 1)))
       ((= i nr) #f)
     (vector-set! y i 0))
-  (csr-addmv! nr nc A x y)
+  (csr-addmv! y nr nc A x)
   y)
 
 (define (csr-mv nr nc A x)
   (define y (make-vector nr 0))
-  (csr-addmv! nr nc A x y)
+  (csr-addmv! y nr nc A x)
   y)
 
 (define-method mv (nr nc (A <csr>) v)
