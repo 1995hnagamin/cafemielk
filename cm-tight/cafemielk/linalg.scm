@@ -109,7 +109,7 @@
            (matrix-data M) v))
 
 (define-method matrix-ref ((M <matrix>) i j)
-  (csr-ref (matrix-data M) i j))
+  (matrix-ref (matrix-data M) i j))
 
 ;;;
 ;;; CSR (compressed sparse row)
