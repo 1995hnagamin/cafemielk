@@ -12,6 +12,7 @@
    <mesh2d>
    make-mesh2d
    mesh2d-nodes
+   mesh2d-nodes-for-each-with-index
    mesh2d-nodes-length
    mesh2d-nodes-ref
    mesh2d-unit-square
@@ -52,6 +53,16 @@
 
 (define (mesh2d-nodes-ref mesh i)
   (vview-cut (mesh2d-nodes mesh) (vector i)))
+
+(define (mesh2d-nodes-for-each-with-index proc mesh)
+  (define N (mesh2d-nodes-length mesh))
+  (define nodes (mesh2d-nodes mesh))
+  (let loop ((i 0))
+    (cond
+     ((= i N) #f)
+     (else
+      (proc i (vview-ref nodes (vector i 0)) (vview-ref nodes (vector i 1)))
+      (loop (+ i 1))))))
 
 (define (mesh2d-trinix->trig mesh trinix)
   (define (node i)
