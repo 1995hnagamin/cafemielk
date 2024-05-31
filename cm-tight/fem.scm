@@ -4,11 +4,9 @@
 
 ;; \int_\Omega \nu (\grad w)\cdot(\grad A)dS = \int_\Omega w J_0 dS
 
-(define Th (mesh2d-unit-square 10 10))
-
-(define (f x y) (+ (* x x) (* y y)))
-
-(define fel (func->fel Th f))
+(define num-divs 20)
+(define Th (mesh2d-unit-square (+ num-divs 1)
+                               (+ num-divs 1)))
 
 (define nu 1)
 
@@ -94,3 +92,48 @@
       (else)))
    Th)
   (values (matrix-coo->csr (matrix-dok->coo K)) b))
+
+(define (main)
+  (define-values (K b) (make-equation Th))
+  (define A (cg-solve K b :eps 1e-13 :max-iter 100 :debug #t))
+  (call-with-output-file "output.vtk"
+    (lambda (port)
+      (display "# vtk DataFile Version 2.0\n" port)
+      (display "sample\n" port)
+      (display "ASCII\n" port)
+      (display "DATASET UNSTRUCTURED_GRID\n" port)
+      ;; Mesh
+      (display (format #f "POINTS ~s float\n" (mesh2d-nodes-length Th))
+               port)
+      (mesh2d-nodes-for-each-with-index
+       (lambda (k x y)
+         (display (format #f "~s ~s 0\n" x y)
+                  port))
+       Th)
+      (display (format #f "CELLS ~s ~s\n"
+                       (mesh2d-triangles-length Th)
+                       (* 4 (mesh2d-triangles-length Th)))
+               port)
+      (mesh2d-trinix-for-each
+       (lambda (trinix)
+         (display (format #f "3 ~s ~s ~s\n"
+                          (vector-ref trinix 0)
+                          (vector-ref trinix 1)
+                          (vector-ref trinix 2))
+                  port))
+       Th)
+      (display (format #f "CELL_TYPES ~s\n" (mesh2d-triangles-length Th))
+               port)
+      (mesh2d-trinix-for-each
+       (lambda (trinix)
+         (display "5\n" port))
+       Th)
+      ;; Data
+      (display (format #f "POINT_DATA ~s\n" (mesh2d-nodes-length Th))
+               port)
+      (display "SCALARS a float\n" port)
+      (display "LOOKUP_TABLE default\n" port)
+      (vector-for-each
+       (lambda (v)
+         (display (format #f "~s\n" v) port))
+       A))))
