@@ -25,6 +25,7 @@
    make-coo
    make-csr
    make-diag-precond
+   make-dok
    make-matrix
    make-rmaj
    matrix-coo->csr
@@ -246,12 +247,17 @@
 ;;; DOK (dictionary of keys)
 ;;;
 
+(define-class <dok> () ((vals :init-keyword :vals)))
+
+(define (make-dok dict)
+  (make <dok> :vals dict))
+
 (define (dok->coo dok)
-  (let* ((nnz (hash-table-size dok))
+  (let* ((nnz (hash-table-size (slot-ref dok 'vals)))
          (vals (make-vector nnz))
          (rows (make-vector nnz))
          (cols (make-vector nnz)))
-    (dict-fold dok
+    (dict-fold (slot-ref dok 'vals)
                (lambda (ij v t)
                  (vector-set! rows t (vector-ref ij 0))
                  (vector-set! cols t (vector-ref ij 1))
@@ -266,6 +272,9 @@
    (matrix-nrows dokm)
    (matrix-ncols dokm)
    (dok->coo (matrix-data dokm))))
+
+(define-method matrix-ref ((A <dok>) i j)
+  (hash-table-get (slot-ref A 'vals) (vector i j) 0.))
 
 ;;;
 ;;; Row-major dense matrix
