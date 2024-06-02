@@ -19,6 +19,7 @@
    coo-rows
    coo-vals
    coo->csr
+   create-rvd
    csr-addmv!
    csr-mv
    csr-ref
@@ -26,11 +27,13 @@
    make-csr
    make-diag-precond
    make-dok
+   make-rvd
    make-matrix
    make-rmaj
    matrix-coo->csr
    matrix-data
    matrix-dok->coo
+   matrix-rvd->csr
    matrix-ncols
    matrix-nrows
    matrix-ref
@@ -38,6 +41,11 @@
    pcg-solve
    rmaj-addmv!
    rmaj-mv
+   rvd-delete!
+   rvd-ref
+   rvd-set!
+   rvddata-ref
+   rvddata-set!
    ucoo-sort!
    )
   )
@@ -275,6 +283,107 @@
 
 (define-method matrix-ref ((A <dok>) i j)
   (hash-table-get (slot-ref A 'vals) (vector i j) 0.))
+
+
+;;;
+;;; Row-oriented vector of dictionaries
+;;;
+
+(define-class <rvd> ()
+  ((rows :init-keyword :rows)))
+
+(define-inline (make-rvd rvd)
+  (make <rvd> :rows rvd))
+
+(define-inline (create-rvd nr)
+  (vector-tabulate nr (lambda (_) (make-hash-table 'eqv?))))
+
+(define-method matrix-ref ((A <rvd>) i j)
+  (rvddata-ref (slot-ref A 'rows) i j))
+
+(define-inline (rvddata-ref rvd i j)
+  (hash-table-ref/default (vector-ref rvd i) j 0))
+
+(define-inline (rvddata-delete! rvd i j)
+  (hash-table-delete! (vector-ref rvd i) j))
+
+(define-inline (rvddata-set! rvd i j val)
+  (hash-table-set! (vector-ref rvd i) j val))
+
+(define-inline (rvd-ref A i j)
+  (rvddata-ref (slot-ref A 'rows) i j))
+
+(define-inline (rvd-delete! A i j)
+  (rvddata-delete! (slot-ref A 'rows) i j))
+
+(define-inline (rvd-set! A i j val)
+  (rvddata-set! (slot-ref A 'rows) i j val))
+
+(define (rvd-sort! keys vals)
+  (define N (vector-length keys))
+  (let run ((gap N))
+    (let loop ((i 0) (i+gap gap) (swapped #f))
+      (cond
+       ((= i+gap N)
+        (if (or (> gap 1) swapped)
+            (run (cond
+                  ((= gap 1) 1)
+                  ((< 11 gap 15) 11)
+                  (else (floor->exact (/ gap 1.3)))))
+            ;; return otherwise
+            ))
+       ((> (vector-ref keys i) (vector-ref keys i+gap))
+        (vector-swap! keys i i+gap)
+        (vector-swap! vals i i+gap)
+        (loop (+ i 1) (+ i+gap 1) #t))
+       (else
+        (loop (+ i 1) (+ i+gap 1) swapped))))))
+
+(define (rvd-row-kv rvd i)
+  (define ht (vector-ref rvd i))
+  (define N (hash-table-size ht))
+  (define keys (make-vector N))
+  (define vals (make-vector N))
+  (hash-table-fold
+   (vector-ref rvd i)
+   (lambda (k v t)
+     (vector-set! keys t k)
+     (vector-set! vals t v)
+     (+ t 1))
+   0)
+  (rvd-sort! keys vals)
+  (values keys vals))
+
+(define (rvd-size rvd)
+  (fold (lambda (ht acc) (+ (hash-table-size ht) acc))
+        0 rvd))
+
+(define (rvd->csr rvd)
+  (define nr (vector-length rvd))
+  (define size (rvd-size rvd))
+  (define vals (make-vector size))
+  (define rowptr (make-vector (+ nr 1)))
+  (define colind (make-vector size))
+  (let loop ((i 0) (gt 0))
+    (cond
+     ((= i nr)
+      (vector-set! rowptr nr gt)
+      (make-csr vals rowptr colind))
+     (else
+      (vector-set! rowptr i gt)
+      (let-values (((Ni) (hash-table-size (vector-ref rvd i)))
+                   ((ks vs) (rvd-row-kv rvd i)))
+        (do ((j 0 (+ j 1))
+             (t gt (+ t 1)))
+            ((= j Ni) (loop (+ i 1) t))
+          (vector-set! vals t (vector-ref vs j))
+          (vector-set! colind t (vector-ref ks j))))))))
+
+(define (matrix-rvd->csr M)
+  (make-matrix
+   (matrix-nrows M)
+   (matrix-ncols M)
+   (rvd->csr (slot-ref (matrix-data M) 'rows))))
 
 ;;;
 ;;; Row-major dense matrix
