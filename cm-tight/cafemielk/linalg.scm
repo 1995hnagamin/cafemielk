@@ -398,7 +398,7 @@
   ;; y += A*x
   (do ((i 0 (+ i 1))) ((= i nr) #f)
     (do ((j 0 (+ j 1))) ((= j nc) #f)
-      (let ((ij (+ (* i nr) j)))
+      (let1 ij (+ (* i nr) j)
         (vector-set!
          y i
          (+ (vector-ref y i)
@@ -467,7 +467,7 @@
       (if debug (print "converged"))
       (values x #t))
      (else
-      (let ((alpha (/ r.z (dot p Ap))))
+      (let1 alpha (/ r.z (dot p Ap))
         (vector-addcv! x alpha p)
         (vector-addcv! r (- alpha) Ap)
         (precond! z r)

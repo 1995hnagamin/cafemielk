@@ -49,11 +49,11 @@
   (define rhs (make-vector N 0.))
   (mesh2d-trinix-for-each
    (lambda (trinix)
-     (let ((JS (*. j0 (trig2d-area (mesh2d-trinix->trig Th trinix)) 1/3)))
+     (let1 JS/3 (*. j0 (trig2d-area (mesh2d-trinix->trig Th trinix)) 1/3)
        (do ((i 0 (+ i 1)))
            ((= i 3))
-         (let ((vi (vector-ref trinix i)))
-           (vector-set! rhs vi (+. (vector-ref rhs vi) JS))))))
+         (let1 vi (vector-ref trinix i)
+           (vector-set! rhs vi (+. (vector-ref rhs vi) JS/3))))))
    Th)
   rhs)
 
