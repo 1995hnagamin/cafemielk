@@ -90,11 +90,10 @@
    Th)
   (values (matrix-rvd->csr K) b))
 
-(define (main)
-  (define-values (K b) (make-equation Th))
-  (define A (cg-solve K b :eps 1e-13 :max-iter 100 :debug #t))
-  (call-with-output-file "output.vtk"
-    (lambda (port)
-      (legacyvtk-print-header port)
-      (legacyvtk-print-unstruct-grid Th port)
-      (legacyvtk-print-point-scalar Th A "A" port))))
+(define-values (K b) (make-equation Th))
+(define A (cg-solve K b :eps 1e-13 :max-iter 100 :debug #t))
+(call-with-output-file "output.vtk"
+  (lambda (port)
+    (legacyvtk-print-header port)
+    (legacyvtk-print-unstruct-grid Th port)
+    (legacyvtk-print-point-scalar Th A "A" port)))
