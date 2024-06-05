@@ -15,7 +15,7 @@
 
 (define (make-coeff-matrix Th)
   (define N (mesh2d-nodes-length Th))
-  (define dok (make-hash-table 'equal?))
+  (define rvd (make-empty-rvd N))
   (mesh2d-trinix-for-each
    (lambda (trinix)
      (define trig (mesh2d-trinix->trig Th trinix))
@@ -32,18 +32,17 @@
         ((= i 3) #f)
         ((= j 3) (loop (+ i 1) 0))
         (else
-         (hash-table-update!/default
-          dok
-          (vector (vector-ref trinix i) (vector-ref trinix j))
-          (lambda (val)
-            (+. val
+         (let ((vi (vector-ref trinix i))
+               (vj (vector-ref trinix j)))
+           (rvd*-set!
+            rvd vi vj
+            (+. (rvd*-ref rvd vi vj)
                 (*. (+. (*. (vector-ref b i) (vector-ref b j))
                         (*. (vector-ref c i) (vector-ref c j)))
-                    (/. nu (*. 4 (trig2d-area trig))))))
-          0)
+                    (/. nu (*. 4 (trig2d-area trig)))))))
          (loop i (+ j 1))))))
    Th)
-  (make-matrix N N (make-dok dok)))
+  (make-matrix N N (make-rvd rvd)))
 
 (define (make-rhs-vector Th)
   (define N (mesh2d-nodes-length Th))
@@ -73,11 +72,9 @@
           ((= j numnodes) #f)
           ((= j k) (loop (+ j 1)))
           (else
-           (hash-table-delete! (slot-ref (matrix-data K) 'vals)
-                               (vector k j))
+           (rvd-delete! (matrix-data K) k j)
            (loop (+ j 1)))))
-       (hash-table-set! (slot-ref (matrix-data K) 'vals)
-                        (vector k k) 1.)
+       (rvd-set! (matrix-data K) k k 1.)
        (vector-set! b k A0)
        (let loop ((i 0))
          (cond
@@ -88,11 +85,10 @@
             b i
             (- (vector-ref b i)
                (*. (matrix-ref K i k) A0)))
-           (hash-table-delete! (slot-ref (matrix-data K) 'vals)
-                               (vector i k))))))
+           (rvd-delete! (matrix-data K) i k)))))
       (else)))
    Th)
-  (values (matrix-coo->csr (matrix-dok->coo K)) b))
+  (values (matrix-rvd->csr K) b))
 
 (define (main)
   (define-values (K b) (make-equation Th))
