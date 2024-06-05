@@ -15,7 +15,7 @@
 
 (define (make-coeff-matrix Th)
   (define N (mesh2d-nodes-length Th))
-  (define rvd (make-empty-rvd N))
+  (define rvd (make-empty-rvd* N))
   (mesh2d-trinix-for-each
    (lambda (trinix)
      (define trig (mesh2d-trinix->trig Th trinix))
