@@ -15,7 +15,7 @@
 
 (define (make-coeff-matrix Th)
   (define N (mesh2d-nodes-length Th))
-  (define rvd (create-rvd N))
+  (define rvd (make-empty-rvd N))
   (mesh2d-trinix-for-each
    (lambda (trinix)
      (define trig (mesh2d-trinix->trig Th trinix))
@@ -34,9 +34,9 @@
         (else
          (let ((vi (vector-ref trinix i))
                (vj (vector-ref trinix j)))
-           (rvddata-set!
+           (rvd*-set!
             rvd vi vj
-            (+. (rvddata-ref rvd vi vj)
+            (+. (rvd*-ref rvd vi vj)
                 (*. (+. (*. (vector-ref b i) (vector-ref b j))
                         (*. (vector-ref c i) (vector-ref c j)))
                     (/. nu (*. 4 (trig2d-area trig)))))))

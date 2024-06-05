@@ -19,7 +19,6 @@
    coo-rows
    coo-vals
    coo->csr
-   create-rvd
    csr-addmv!
    csr-mv
    csr-ref
@@ -27,9 +26,10 @@
    make-csr
    make-diag-precond
    make-dok
-   make-rvd
+   make-empty-rvd*
    make-matrix
    make-rmaj
+   make-rvd
    matrix-coo->csr
    matrix-data
    matrix-dok->coo
@@ -41,11 +41,11 @@
    pcg-solve
    rmaj-addmv!
    rmaj-mv
+   rvd*-ref
+   rvd*-set!
    rvd-delete!
    rvd-ref
    rvd-set!
-   rvddata-ref
-   rvddata-set!
    ucoo-sort!
    )
   )
@@ -295,31 +295,31 @@
 (define-inline (make-rvd rvd)
   (make <rvd> :rows rvd))
 
-(define-inline (create-rvd nr)
+(define-inline (make-empty-rvd* nr)
   (vector-tabulate nr (lambda (_) (make-hash-table 'eqv?))))
 
 (define-method matrix-ref ((A <rvd>) i j)
-  (rvddata-ref (slot-ref A 'rows) i j))
+  (rvd*-ref (slot-ref A 'rows) i j))
 
-(define-inline (rvddata-ref rvd i j)
-  (hash-table-ref/default (vector-ref rvd i) j 0))
+(define-inline (rvd*-ref vec i j)
+  (hash-table-ref/default (vector-ref vec i) j 0))
 
-(define-inline (rvddata-delete! rvd i j)
-  (hash-table-delete! (vector-ref rvd i) j))
+(define-inline (rvd*-delete! vec i j)
+  (hash-table-delete! (vector-ref vec i) j))
 
-(define-inline (rvddata-set! rvd i j val)
-  (hash-table-set! (vector-ref rvd i) j val))
+(define-inline (rvd*-set! vec i j val)
+  (hash-table-set! (vector-ref vec i) j val))
 
 (define-inline (rvd-ref A i j)
-  (rvddata-ref (slot-ref A 'rows) i j))
+  (rvd*-ref (slot-ref A 'rows) i j))
 
 (define-inline (rvd-delete! A i j)
-  (rvddata-delete! (slot-ref A 'rows) i j))
+  (rvd*-delete! (slot-ref A 'rows) i j))
 
 (define-inline (rvd-set! A i j val)
-  (rvddata-set! (slot-ref A 'rows) i j val))
+  (rvd*-set! (slot-ref A 'rows) i j val))
 
-(define (rvd-sort! keys vals)
+(define (%rvd-sort! keys vals)
   (define N (vector-length keys))
   (let run ((gap N))
     (let loop ((i 0) (i+gap gap) (swapped #f))
@@ -339,7 +339,7 @@
        (else
         (loop (+ i 1) (+ i+gap 1) swapped))))))
 
-(define (rvd-row-kv rvd i)
+(define (%rvd-row-kv rvd i)
   (define ht (vector-ref rvd i))
   (define N (hash-table-size ht))
   (define keys (make-vector N))
@@ -351,7 +351,7 @@
      (vector-set! vals t v)
      (+ t 1))
    0)
-  (rvd-sort! keys vals)
+  (%rvd-sort! keys vals)
   (values keys vals))
 
 (define (rvd-size rvd)
@@ -372,7 +372,7 @@
      (else
       (vector-set! rowptr i gt)
       (let-values (((Ni) (hash-table-size (vector-ref rvd i)))
-                   ((ks vs) (rvd-row-kv rvd i)))
+                   ((ks vs) (%rvd-row-kv rvd i)))
         (do ((j 0 (+ j 1))
              (t gt (+ t 1)))
             ((= j Ni) (loop (+ i 1) t))
