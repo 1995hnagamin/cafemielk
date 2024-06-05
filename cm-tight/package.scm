@@ -30,12 +30,13 @@
   ;; List name and contact info of authors.
   ;; e.g. ("Eva Lu Ator <eval@example.com>"
   ;;       "Alyssa P. Hacker <lisper@example.com>")
-  :authors ("Nagamine, Hideaki <nagamine.hideaki.88x@kyoto-u.jp>")
+  :authors ("Nagamine, Hideaki <nagamine.hideaki.88x@kyoto-u.jp>"
+            "Shiro Kawai <shiro@acm.org>")
 
   ;; List name and contact info of package maintainers, if they differ
   ;; from authors.
   ;; e.g. ("Cy D. Fect <c@example.com>")
-  :maintainers ()
+  :maintainers ("Nagamine, Hideaki <nagamine.hideaki.88x@kyoto-u.jp>")
 
   ;; List licenses
   ;; e.g. ("BSD")
