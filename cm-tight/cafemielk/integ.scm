@@ -1,5 +1,6 @@
 (define-module cafemielk.integ
   (use cafemielk.util)
+  (use srfi.133)
   (export
    int2d
    int2d-smesh
@@ -11,46 +12,41 @@
 
 (select-module cafemielk.integ)
 
-(define (quadrature2d weights xs ys f)
-  (fold (lambda (w x y acc)
-          (+ acc (* w (f x y))))
-        0
-        weights
-        xs
-        ys))
+(define-inline (quadrature2d weights xs ys f)
+  (vector-fold (lambda (acc w x y)
+                 (+ acc (* w (f x y))))
+               0 weights xs ys))
 
-(define (int2d f)
-  (define r (/ (sqrt 3)))
+(define-inline (int2d f)
+  (define t (/ (sqrt 3)))
   (quadrature2d
-   '(1 1 1 1)
-   (list (- r) (- r) r r)
-   (list (- r)    r  r (- r))
+   #(1 1 1 1)
+   (vector (- t) (- t)    t     t)
+   (vector (- t)    t     t  (- t))
    f))
 
-(define (Ns xi eta)
+(define-inline (Ns xi eta)
   (vector
    (* 1/4 (- 1 xi) (- 1 eta))
    (* 1/4 (+ 1 xi) (- 1 eta))
    (* 1/4 (+ 1 xi) (+ 1 eta))
    (* 1/4 (- 1 xi) (+ 1 eta))))
 
-(define (d/dxi xi eta)
+(define-inline (d/dxi xi eta)
   (vector
    (* -1/4 (- 1 eta))
    (* +1/4 (- 1 eta))
    (* +1/4 (+ 1 eta))
-   (* -1/4 (+ 1 eta))
-   ))
+   (* -1/4 (+ 1 eta))))
 
-(define (d/deta xi eta)
+(define-inline (d/deta xi eta)
   (vector
    (* -1/4 (- 1 xi))
    (* -1/4 (+ 1 xi))
    (* +1/4 (+ 1 xi))
-   (* +1/4 (- 1 xi))
-   ))
+   (* +1/4 (- 1 xi))))
 
-(define (detJ qlat2d xi eta)
+(define-inline (detJ qlat2d xi eta)
   (define xs
     (vector-tabulate 4 (lambda (i) (vector-ref qlat2d i))))
   (define ys
