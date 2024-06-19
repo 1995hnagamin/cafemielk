@@ -48,8 +48,7 @@
    (* -1/4 (+ 1 xi))
    (* +1/4 (+ 1 xi))
    (* +1/4 (- 1 xi))
-   )
-  )
+   ))
 
 (define (detJ qlat2d xi eta)
   (define xs
@@ -63,9 +62,9 @@
 
 (define (int2d-smesh f qlat2d)
   (define xs
-    (vector-tabulate 4 (lambda (i) (vector-ref qlat2d (* 2 i)))))
+    (vector-tabulate 4 (lambda (i) (vector-ref qlat2d i))))
   (define ys
-    (vector-tabulate 4 (lambda (i) (vector-ref qlat2d (+ (* 2 i) 1)))))
+    (vector-tabulate 4 (lambda (i) (vector-ref qlat2d (+ i 4)))))
   (define (x xi eta)
     (dot xs (Ns xi eta)))
   (define (y xi eta)
