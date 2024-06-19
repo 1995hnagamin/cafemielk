@@ -53,9 +53,9 @@
 
 (define (detJ qlat2d xi eta)
   (define xs
-    (vector-tabulate 4 (lambda (i) (vector-ref qlat2d (* 2 i)))))
+    (vector-tabulate 4 (lambda (i) (vector-ref qlat2d i))))
   (define ys
-    (vector-tabulate 4 (lambda (i) (vector-ref qlat2d (+ (* 2 i) 1)))))
+    (vector-tabulate 4 (lambda (i) (vector-ref qlat2d (+ i 4)))))
   (- (* (dot xs (d/dxi  xi eta))
         (dot ys (d/deta xi eta)))
      (* (dot xs (d/deta xi eta))
