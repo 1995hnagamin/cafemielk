@@ -23,7 +23,6 @@
    mesh2d-vise->trig
    mesh2d-vises
    mesh2d-vises-length
-   trig2d-adherent?
    )
   )
 
@@ -92,17 +91,6 @@
   (mesh2d-vise-for-each
    (lambda (vise) (proc (mesh2d-vise->trig mesh vise)))
    mesh))
-
-;; Geometric predicates
-
-(define-inline (trig2d-adherent? trig p)
-  (every-substit-A3
-   (i i+1 i+2)
-   (not (negative?
-         (- (* (- (trig2d-xref trig i+1) (trig2d-xref trig i))
-               (- (vector-ref p 1)       (trig2d-yref trig i+1)))
-            (* (- (trig2d-yref trig i+1) (trig2d-yref trig i))
-               (- (vector-ref p 0)       (trig2d-xref trig i+1))))))))
 
 
 ;; Mesh utility

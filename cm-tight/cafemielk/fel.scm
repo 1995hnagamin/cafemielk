@@ -4,6 +4,7 @@
 ;;;
 
 (define-module cafemielk.fel
+  (use cafemielk.geom.trig2d)
   (use cafemielk.mesh)
   (use cafemielk.util)
   (use cafemielk.vview)
