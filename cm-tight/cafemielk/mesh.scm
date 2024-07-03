@@ -11,8 +11,8 @@
   (export
    <mesh2d>
    make-mesh2d
-   mesh2d-trigs-elt
    mesh2d-trigs-for-each
+   mesh2d-trigs-retrieve
    mesh2d-unit-square
    mesh2d-vertices
    mesh2d-vertices-for-each-with-index
@@ -82,7 +82,8 @@
      (else (proc (vview->vector (mesh2d-vise-ref mesh t)))
            (loop (+ t 1))))))
 
-(define (mesh2d-trigs-elt mesh t)
+;; Retrieve (unlocatable ref) tth triangle of mesh
+(define (mesh2d-trigs-retrieve mesh t)
   (mesh2d-vise->trig
    mesh
    (vview->vector (mesh2d-vise-ref mesh t))))
