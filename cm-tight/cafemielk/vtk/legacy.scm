@@ -34,19 +34,19 @@
   (define N (mesh2d-triangles-length mesh))
   (format port "CELLS ~s ~s\n"
           N (* 4 N))
-  (mesh2d-trinix-for-each
-   (lambda (trinix)
+  (mesh2d-vise-for-each
+   (lambda (vise)
      (format port "3 ~s ~s ~s\n"
-             (vector-ref trinix 0)
-             (vector-ref trinix 1)
-             (vector-ref trinix 2)))
+             (vector-ref vise 0)
+             (vector-ref vise 1)
+             (vector-ref vise 2)))
    mesh))
 
 (define (legacyvtk-print-cell-types mesh port)
   (format port "CELL_TYPES ~s\n"
           (mesh2d-triangles-length mesh))
-  (mesh2d-trinix-for-each
-   (lambda (trinix)
+  (mesh2d-vise-for-each
+   (lambda (vise)
      (display "5\n" port))
    mesh))
 

@@ -29,7 +29,7 @@
   (define nodes
     (vector-map
      (lambda (i) (vview->vector (mesh2d-nodes-ref mesh i)))
-     (vview->vector (mesh2d-trinix-ref mesh t))))
+     (vview->vector (mesh2d-vise-ref mesh t))))
   (define xt
     (vector-tabulate 3 (lambda (i) (vector-ref (vector-ref nodes i) 0))))
   (define yt
@@ -45,7 +45,7 @@
                             (vector-ref xt (modulo (+ i 1) 3))))))
   (define mass (vector-map
                 (lambda (i) (vector-ref fel i))
-                (vview->vector (mesh2d-trinix-ref mesh t))))
+                (vview->vector (mesh2d-vise-ref mesh t))))
   (/ (+ (dot mass a)
         (* (dot mass b) (vector-ref p 0))
         (* (dot mass c) (vector-ref  p 1)))

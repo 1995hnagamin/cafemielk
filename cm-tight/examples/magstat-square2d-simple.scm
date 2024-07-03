@@ -16,9 +16,9 @@
 (define (make-coeff-matrix Th)
   (define N (mesh2d-nodes-length Th))
   (define rvd (make-empty-rvd* N))
-  (mesh2d-trinix-for-each
-   (lambda (trinix)
-     (define trig (mesh2d-trinix->trig Th trinix))
+  (mesh2d-vise-for-each
+   (lambda (vise)
+     (define trig (mesh2d-vise->trig Th vise))
      (define b
        (vec3d-tab
         (i i+1 i+2)
@@ -32,8 +32,8 @@
         ((= i 3) #f)
         ((= j 3) (loop (+ i 1) 0))
         (else
-         (let ((vi (vector-ref trinix i))
-               (vj (vector-ref trinix j)))
+         (let ((vi (vector-ref vise i))
+               (vj (vector-ref vise j)))
            (rvd*-set!
             rvd vi vj
             (+. (rvd*-ref rvd vi vj)
@@ -47,12 +47,12 @@
 (define (make-rhs-vector Th)
   (define N (mesh2d-nodes-length Th))
   (define rhs (make-vector N 0.))
-  (mesh2d-trinix-for-each
-   (lambda (trinix)
-     (let1 JS/3 (*. j0 (trig2d-area (mesh2d-trinix->trig Th trinix)) 1/3)
+  (mesh2d-vise-for-each
+   (lambda (vise)
+     (let1 JS/3 (*. j0 (trig2d-area (mesh2d-vise->trig Th vise)) 1/3)
        (do ((i 0 (+ i 1)))
            ((= i 3))
-         (let1 vi (vector-ref trinix i)
+         (let1 vi (vector-ref vise i)
            (vector-set! rhs vi (+. (vector-ref rhs vi) JS/3))))))
    Th)
   rhs)

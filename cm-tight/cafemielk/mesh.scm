@@ -20,9 +20,9 @@
    mesh2d-triangles
    mesh2d-triangles-for-each
    mesh2d-triangles-length
-   mesh2d-trinix-for-each
-   mesh2d-trinix-ref
-   mesh2d-trinix->trig
+   mesh2d-vise-for-each
+   mesh2d-vise-ref
+   mesh2d-vise->trig
    trig2d-adherent?
    )
   )
@@ -64,33 +64,33 @@
       (proc i (vview-ref nodes (vector i 0)) (vview-ref nodes (vector i 1)))
       (loop (+ i 1))))))
 
-(define (mesh2d-trinix->trig mesh trinix)
+(define (mesh2d-vise->trig mesh vise)
   (define (node i)
-    (vview->vector (mesh2d-nodes-ref mesh (vector-ref trinix i))))
+    (vview->vector (mesh2d-nodes-ref mesh (vector-ref vise i))))
   (define (x_ i) (vector-ref (node i) 0))
   (define (y_ i) (vector-ref (node i) 1))
   (vector (x_ 0) (x_ 1) (x_ 2)
           (y_ 0) (y_ 1) (y_ 2)))
 
-(define (mesh2d-trinix-ref mesh i)
+(define (mesh2d-vise-ref mesh i)
   (vview-cut (mesh2d-triangles mesh) (vector i)))
 
-(define (mesh2d-trinix-for-each proc mesh)
+(define (mesh2d-vise-for-each proc mesh)
   (define N (mesh2d-triangles-length mesh))
   (let loop ((t 0))
     (cond
      ((= t N) #f)
-     (else (proc (vview->vector (mesh2d-trinix-ref mesh t)))
+     (else (proc (vview->vector (mesh2d-vise-ref mesh t)))
            (loop (+ t 1))))))
 
 (define (mesh2d-ith-triangle mesh t)
-  (mesh2d-trinix->trig
+  (mesh2d-vise->trig
    mesh
-   (vview->vector (mesh2d-trinix-ref mesh t))))
+   (vview->vector (mesh2d-vise-ref mesh t))))
 
 (define (mesh2d-triangles-for-each proc mesh)
-  (mesh2d-trinix-for-each
-   (lambda (trinix) (proc (mesh2d-trinix->trig mesh trinix)))
+  (mesh2d-vise-for-each
+   (lambda (vise) (proc (mesh2d-vise->trig mesh vise)))
    mesh))
 
 ;; Geometric predicates
