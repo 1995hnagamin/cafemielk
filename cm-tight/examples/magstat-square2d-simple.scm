@@ -14,7 +14,7 @@
 (define j0 1)
 
 (define (make-coeff-matrix Th)
-  (define N (mesh2d-nodes-length Th))
+  (define N (mesh2d-vertices-length Th))
   (define rvd (make-empty-rvd* N))
   (mesh2d-vise-for-each
    (lambda (vise)
@@ -45,7 +45,7 @@
   (make-matrix N N (make-rvd rvd)))
 
 (define (make-rhs-vector Th)
-  (define N (mesh2d-nodes-length Th))
+  (define N (mesh2d-vertices-length Th))
   (define rhs (make-vector N 0.))
   (mesh2d-vise-for-each
    (lambda (vise)
@@ -62,8 +62,8 @@
 (define (make-equation Th)
   (define K (make-coeff-matrix Th))
   (define b (make-rhs-vector Th))
-  (define numnodes (mesh2d-nodes-length Th))
-  (mesh2d-nodes-for-each-with-index
+  (define numnodes (mesh2d-vertices-length Th))
+  (mesh2d-vertices-for-each-with-index
    (lambda (k x y)
      (cond
       ((or (= x 0) (= x 1) (= y 0) (= y 1))

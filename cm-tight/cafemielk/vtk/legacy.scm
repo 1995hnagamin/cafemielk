@@ -23,15 +23,15 @@
 
 (define (legacyvtk-print-points mesh port)
   (format port "POINTS ~s float\n"
-          (mesh2d-nodes-length mesh))
-  (mesh2d-nodes-for-each-with-index
+          (mesh2d-vertices-length mesh))
+  (mesh2d-vertices-for-each-with-index
    (lambda (k x y)
      (format port "~s ~s 0\n"  ;; x y z
              x y))
    mesh))
 
 (define (legacyvtk-print-cells mesh port)
-  (define N (mesh2d-triangles-length mesh))
+  (define N (mesh2d-vises-length mesh))
   (format port "CELLS ~s ~s\n"
           N (* 4 N))
   (mesh2d-vise-for-each
@@ -44,7 +44,7 @@
 
 (define (legacyvtk-print-cell-types mesh port)
   (format port "CELL_TYPES ~s\n"
-          (mesh2d-triangles-length mesh))
+          (mesh2d-vises-length mesh))
   (mesh2d-vise-for-each
    (lambda (vise)
      (display "5\n" port))
@@ -57,7 +57,7 @@
   (legacyvtk-print-cell-types mesh port))
 
 (define (legacyvtk-print-point-scalar mesh vec name port)
-  (format port "POINT_DATA ~s\n" (mesh2d-nodes-length mesh))
+  (format port "POINT_DATA ~s\n" (mesh2d-vertices-length mesh))
   (format port "SCALARS ~A float\n" name)
   (display "LOOKUP_TABLE default\n" port)
   (vector-for-each

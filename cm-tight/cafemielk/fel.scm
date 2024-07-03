@@ -18,9 +18,9 @@
 
 (define (func->fel Th func)
   (vector-tabulate
-   (mesh2d-nodes-length Th)
+   (mesh2d-vertices-length Th)
    (lambda (i)
-     (let ((p (mesh2d-nodes-ref Th i)))
+     (let ((p (mesh2d-vertices-ref Th i)))
        (func (vview-ref p #(0))
              (vview-ref p #(1)))))))
 
@@ -28,7 +28,7 @@
 (define (%eval-at-triangle t mesh p fel)
   (define nodes
     (vector-map
-     (lambda (i) (vview->vector (mesh2d-nodes-ref mesh i)))
+     (lambda (i) (vview->vector (mesh2d-vertices-ref mesh i)))
      (vview->vector (mesh2d-vise-ref mesh t))))
   (define xt
     (vector-tabulate 3 (lambda (i) (vector-ref (vector-ref nodes i) 0))))
@@ -54,6 +54,6 @@
 
 (define (eval-at mesh p fel)
   (%eval-at-triangle
-   (find (lambda (i) (trig2d-adherent? (mesh2d-ith-triangle mesh i) p))
-         (iota (mesh2d-triangles-length mesh)))
+   (find (lambda (i) (trig2d-adherent? (mesh2d-trigs-elt mesh i) p))
+         (iota (mesh2d-vises-length mesh)))
    mesh p fel))
