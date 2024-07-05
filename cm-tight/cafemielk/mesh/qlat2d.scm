@@ -38,6 +38,9 @@
 (define (qlmesh2d-vertices-ref mesh i)
   (vview-cut (slot-ref mesh 'vertices) (vector i)))
 
+(define (qlmesh2d-vise-ref mesh i)
+  (vview-cut (slot-ref mesh 'vises) (vector i)))
+
 (define (qlmesh2d-vise->qlat mesh vise)
   (define (node i)
     (vview->vector (qlmesh2d-vertices-ref mesh (vector-ref vise i))))
