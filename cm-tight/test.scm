@@ -29,7 +29,7 @@
 (test*
  "test-mesh2d-unit-square"
  143
- (mesh2d-nodes-length (mesh2d-unit-square 11 13)))
+ (mesh2d-vertices-length (mesh2d-unit-square 11 13)))
 
 ;; / 1  2  0  0  0 \ / 5 \ = / 13 \
 ;; | 3  4  5  0  0 | | 4 |   | 46 |
@@ -49,11 +49,11 @@
    (mv A x)))
 
 (let ((A (make-matrix
-           5 5
-           (make-csr
-            #(1 2 2 4 5 5 7 8 8 10 11 11 13)
-            #(0 2 5 8 11 13)
-            #(0 1 0 1 2 1 2 3 2 3 4 3 4))))
+          5 5
+          (make-csr
+           #(1 2 2 4 5 5 7 8 8 10 11 11 13)
+           #(0 2 5 8 11 13)
+           #(0 1 0 1 2 1 2 3 2 3 4 3 4))))
       (answer #(5 4 3 2 1))
       (b #(13 41 57 55 35))
       (check (lambda (expected result-of-thunk)
