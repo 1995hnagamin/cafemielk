@@ -30,7 +30,7 @@
   (make <qlmesh2d> :vertices vtxs :vises vises))
 
 (define (qlmesh2d-vises-length mesh)
-  (vview-length (slot-ref 'vises)))
+  (vview-length (slot-ref mesh 'vises)))
 
 (define (qlmesh2d-vertices-ref mesh i)
   (vview-cut (slot-ref mesh 'nodes) (vector i)))
