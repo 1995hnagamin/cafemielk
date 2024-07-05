@@ -17,6 +17,9 @@
    qlmesh2d-vertices-ref
    qlmesh2d-vise->qlat
    qlmesh2d-vise-ref
+   qlmesh2d-qlat-for-each
+   qlmesh2d-qlat-fold
+   qlmesh2d-qlat-retrieve
    )
   )
 
@@ -41,13 +44,38 @@
 (define (qlmesh2d-vise-ref mesh i)
   (vview-cut (slot-ref mesh 'vises) (vector i)))
 
-(define (qlmesh2d-vise->qlat mesh vise)
+(define (qlmesh2d-vise-for-each proc mesh)
+  (define N (qlmesh2d-vises-length mesh))
+  (let loop ((i 0))
+    (cond
+     ((= i N) #f)
+     (else (proc (vview->vector (mesh2d-vise-ref mesh t)))
+           (loop (+ i 1))))))
+
+(define-inline (qlmesh2d-vise->qlat mesh vise)
   (define (node i)
     (vview->vector (qlmesh2d-vertices-ref mesh (vector-ref vise i))))
   (define (x_ i) (vector-ref (node i) 0))
   (define (y_ i) (vector-ref (node i) 1))
   (vector (x_ 0) (x_ 1) (x_ 2) (x_ 3)
           (y_ 0) (y_ 1) (y_ 2) (y_ 3)))
+
+(define-inline (qlmesh2d-qlat-retrieve mesh i)
+  (qlmesh2d-vise->qlat mesh (vview->vector (qlmesh2d-vise-ref mesh i))))
+
+(define (qlmesh2d-qlat-fold kons knil mesh)
+  (define N (qlmesh2d-vises-length mesh))
+  (let loop ((i 0) (acc knil))
+    (if (= i N)
+        acc
+        (loop (+ i 1)
+              (kons (qlmesh2d-qlat-retrieve mesh i) acc)))))
+
+(define (qlmesh2d-qlat-for-each proc mesh)
+  (qlmesh2d-vise-for-each
+   (lambda (vise)
+     (proc (qlmesh2d-vise->qlat mesh vise)))
+   mesh))
 
 (define (%grid-mesh xs ys)
   (define nx (vector-length xs))
