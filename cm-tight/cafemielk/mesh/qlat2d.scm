@@ -36,11 +36,11 @@
   (vview-length (slot-ref mesh 'vises) 0))
 
 (define (qlmesh2d-vertices-ref mesh i)
-  (vview-cut (slot-ref mesh 'nodes) (vector i)))
+  (vview-cut (slot-ref mesh 'vertices) (vector i)))
 
 (define (qlmesh2d-vise->qlat mesh vise)
   (define (node i)
-    (vview->vector (qlmesh2d-nodes-ref mesh (vector-ref vise i))))
+    (vview->vector (qlmesh2d-vertices-ref mesh (vector-ref vise i))))
   (define (x_ i) (vector-ref (node i) 0))
   (define (y_ i) (vector-ref (node i) 1))
   (vector (x_ 0) (x_ 1) (x_ 2) (x_ 3)
@@ -73,8 +73,8 @@
      (else
       (vector-set! vec s       (+ (* nx (- j 1)) i -1))
       (vector-set! vec (+ s 1) (+ (* nx (- j 1)) i))
-      (vector-set! vec (+ s 2) (+ (* nx j) i -1))
-      (vector-set! vec (+ s 3) (+ (* nx j) i))
+      (vector-set! vec (+ s 2) (+ (* nx j) i))
+      (vector-set! vec (+ s 3) (+ (* nx j) i -1))
       (loop (+ i 1) j (+ s 4))))))
 
 (define (qlmesh2d-unit-square nx ny)
