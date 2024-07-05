@@ -1,9 +1,9 @@
 ;;;
-;;; cafemielk.mesh.qlat
-;;; Quadrilateral mesh
+;;; cafemielk.mesh.qlat2d
+;;; 2D Quadrilateral mesh
 ;;;
 
-(define-module cafemielk.mesh.qlat
+(define-module cafemielk.mesh.qlat2d
   (use cafemielk.util)
   (use cafemielk.vview)
   (extend
@@ -19,7 +19,7 @@
    )
   )
 
-(select-module cafemielk.mesh.qlat)
+(select-module cafemielk.mesh.qlat2d)
 
 (define-class <qlmesh2d> ()
   ((vertices :init-keyword :vertices)
