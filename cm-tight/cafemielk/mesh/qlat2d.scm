@@ -13,6 +13,7 @@
    qlat2d-xref
    qlat2d-yref
    qlmesh2d-unit-square
+   qlmesh2d-vertices-length
    qlmesh2d-vertices-ref
    qlmesh2d-vise->qlat
    qlmesh2d-vise-ref
@@ -28,8 +29,11 @@
 (define (make-qlmesh2d vtxs vises)
   (make <qlmesh2d> :vertices vtxs :vises vises))
 
+(define (qlmesh2d-vertices-length mesh)
+  (vview-length (slot-ref mesh 'vertices) 0))
+
 (define (qlmesh2d-vises-length mesh)
-  (vview-length (slot-ref mesh 'vises)))
+  (vview-length (slot-ref mesh 'vises) 0))
 
 (define (qlmesh2d-vertices-ref mesh i)
   (vview-cut (slot-ref mesh 'nodes) (vector i)))
