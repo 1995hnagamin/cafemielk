@@ -1,4 +1,10 @@
-(define-module cafemielk.integ
+;;;
+;;; cafemielk.bilqlat2d
+;;; Bilinear quadrilateral elements
+;;;
+
+(define-module cafemielk.fel.bilqlat2d
+  (use cafemielk.mesh.qlat2d)
   (use cafemielk.util)
   (use srfi.133)
   (export
@@ -10,7 +16,8 @@
    )
   )
 
-(select-module cafemielk.integ)
+(select-module cafemielk.fel.bilqlat2d)
+
 
 (define-inline (quadrature2d weights xs ys f)
   (vector-fold (lambda (acc w x y)
