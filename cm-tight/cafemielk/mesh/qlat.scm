@@ -4,10 +4,13 @@
 ;;;
 
 (define-module cafemielk.mesh.qlat
+  (use cafemielk.util)
+  (use cafemielk.vview)
   (export
    <qlmesh2d>
    qlat2d-xref
    qlat2d-yref
+   qlmesh2d-unit-square
    qlmesh2d-vertices-ref
    qlmesh2d-vise->qlat
    qlmesh2d-vise-ref
@@ -43,9 +46,43 @@
   (vector (x_ 0) (x_ 1) (x_ 2) (x_ 3)
           (y_ 0) (y_ 1) (y_ 2) (y_ 3)))
 
+(define (%grid-mesh xs ys)
+  (define nx (vector-length xs))
+  (define ny (vector-length ys))
+  (define vec (make-vector (* 2 nx ny)))
+  (let loop ((i 0) (j 0) (s 0))
+    (cond
+     ((= j ny) vec)
+     ((= i nx) (loop 0 (+ j 1) s))
+     (else
+      (vector-set! vec s       (vector-ref xs i))
+      (vector-set! vec (+ s 1) (vector-ref ys j))
+      (loop (+ i 1) j (+ s 2))))))
+
+(define (%grid-vises nx ny)
+  (define vec (make-vector (* 4 (- nx 1) (- ny 1))))
+  ;; nx*j+i-1     nx*j+i
+  ;;     #--------#
+  ;;     |        |
+  ;;     #--------#
+  ;; nx*(j-1)+i-1 nx*(j-1)+i
+  (let loop ((i 1) (j 1) (s 0))
+    (cond
+     ((= j ny) vec)
+     ((= i nx) (loop 1 (+ j 1) s))
+     (else
+      (vector-set! vec s       (+ (* nx (- j 1)) i -1))
+      (vector-set! vec (+ s 1) (+ (* nx (- j 1)) i))
+      (vector-set! vec (+ s 2) (+ (* nx j) i -1))
+      (vector-set! vec (+ s 3) (+ (* nx j) i))
+      (loop (+ i 1) j (+ s 4))))))
 
 (define (qlmesh2d-unit-square nx ny)
-  ()
   (make-qlmesh2d
-   (make-vview ns 0 (vector (* nx ny) 2))
-   (make-vview qs 0 (vector (* (- nx 1) (- ny 1)) 4))))
+   (make-vview
+    (%grid-mesh (vector-linspace 0. 1. nx)
+                (vector-linspace 0. 1. ny))
+    0 (vector (* nx ny) 2))
+   (make-vview
+    (%grid-vises nx ny)
+    0 (vector (* (- nx 1) (- ny 1)) 4))))
