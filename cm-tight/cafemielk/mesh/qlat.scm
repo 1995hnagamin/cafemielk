@@ -6,6 +6,8 @@
 (define-module cafemielk.mesh.qlat
   (use cafemielk.util)
   (use cafemielk.vview)
+  (extend
+   cafemielk.geom.qlat2d)
   (export
    <qlmesh2d>
    qlat2d-xref
@@ -18,12 +20,6 @@
   )
 
 (select-module cafemielk.mesh.qlat)
-
-(define-inline (qlat2d-xref qlat i)
-  (vector-ref qlat i))
-
-(define-inline (qlat2d-yref qlat i)
-  (vector-ref qlat (+ i 4)))
 
 (define-class <qlmesh2d> ()
   ((vertices :init-keyword :vertices)
