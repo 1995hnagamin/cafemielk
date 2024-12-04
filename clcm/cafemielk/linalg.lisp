@@ -4,7 +4,12 @@
 (defpackage :linalg (:use :cl))
 (in-package :linalg)
 (export
- '(vector-addv!
+ '(dense-matrix
+   make-dense-matrix
+   make-dense-matrix-zero
+   matrix-ref
+   mv-add!
+   vector-addv!
    vector-scale!))
 
 ;;;
@@ -32,9 +37,26 @@
   (loop for i below (length y)
         do (setf (aref y i) (+ (aref y i) (* (aref x i) c)))))
 
+(defstruct dense-matrix
+  (data #2a() :type (array number (* *))))
 
-;(defstruct dense-matrix
-;  (data :type (array number (* *))))
+(defmethod matrix-ref ((M dense-matrix) i j)
+  (aref (dense-matrix-data M) i j))
+
+(defun make-dense-matrix-zero (nrow ncol)
+  (make-dense-matrix
+   :data (make-array `(,nrow ,ncol)
+                     :initial-element 0)))
+
+(defun mv-add! (nrow ncol y M x)
+  "y += M * x"
+  (loop for i below nrow do
+        (loop for j below ncol do
+              (setf (aref y i)
+                    (+ (aref y i)
+                       (* (matrix-ref M i j) (aref x j)))))))
+
+
 
 ;;; Local Variables:
 ;;; mode: lisp
