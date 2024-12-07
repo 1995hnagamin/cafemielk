@@ -38,10 +38,10 @@
         (incf (aref y i) (* (aref x i) c))))
 
 (defstruct dense-matrix
-  (data #2a() :type (array number (* *))))
+  (entries #2a() :type (array number (* *))))
 
 (defmethod matrix-ref ((M dense-matrix) i j)
-  (aref (dense-matrix-data M) i j))
+  (aref (dense-matrix-entries M) i j))
 
 (defun make-dense-matrix-zero (nrow ncol)
   (make-dense-matrix
