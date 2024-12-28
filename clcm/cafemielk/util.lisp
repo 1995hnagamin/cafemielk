@@ -6,6 +6,10 @@
 (export
  '(vec3d-tab))
 
+(defmacro let1 (var init &body body)
+  `(let ((,var ,init))
+     ,@body))
+
 
 (defmacro collect-substitute (collect (params &rest args-list) expr)
   `(,collect
