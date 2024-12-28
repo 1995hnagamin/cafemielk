@@ -29,6 +29,7 @@
                `(let ,(loop :for param :in params
                             :for arg :in args
                             :collecting `(,param ,arg))
+                  (declare (ignorable ,@params))
                   ,expr))))
 
 (defmacro collect-substitute-a3 (collect (i j k) expr)
