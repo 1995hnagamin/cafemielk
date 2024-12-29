@@ -10,13 +10,13 @@
    matrix-ref
    mv-add!
    vector-addv!
-   vector-scale!))
+   vector-rescale!))
 
 ;;;
 ;;; Vector operations
 ;;;
 
-(defun vector-scale! (y c)
+(defun vector-rescale! (y c)
   "y *= c"
   (loop for i below (length y)
         do (setf (aref y i) (* (aref y i) c))))
