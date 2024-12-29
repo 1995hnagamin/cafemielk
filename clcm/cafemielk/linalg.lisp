@@ -1,7 +1,7 @@
 ;;;; Linear Algebra Library
 
 (provide :linalg)
-(defpackage :linalg (:use :cl))
+(defpackage :linalg (:use :cl :util))
 (in-package :linalg)
 (export
  '(dense-matrix

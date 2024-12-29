@@ -4,7 +4,10 @@
 (defpackage :util (:use :cl))
 (in-package :util)
 (export
- '(vec3d-tab))
+ '(let1
+   once-only
+   vec3d-tab
+   with-gensyms))
 
 (defmacro let1 (var init &body body)
   `(let ((,var ,init))
