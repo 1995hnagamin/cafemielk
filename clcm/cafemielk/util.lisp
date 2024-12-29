@@ -10,6 +10,28 @@
   `(let ((,var ,init))
      ,@body))
 
+(defmacro with-gensyms ((&rest names) &body body)
+  `(let ,(loop :for n :in names :collect `(,n (gensym)))
+     ,@body))
+
+(defmacro once-only ((&rest names) &body body)
+  (let ((gensyms (loop :for n :in names :collect (gensym))))
+    `(let (,@(loop :for g :in gensyms
+                   :collect `(,g (gensym))))
+       `(let (,,@(loop :for g :in gensyms
+                       :for n :in names
+                       :collect ``(,,g ,,n)))
+          ,(let (,@(loop :for n :in names
+                         :for g :in gensyms
+                         :collect `(,n ,g)))
+             ,@body)))))
+
+
+(defmacro list1-if (condition then)
+  `(if ,condition
+       (list ,then)
+       nil))
+
 (defun linspace (min max size)
   (let1 step (/ (- max min) (1- size))
     (loop :for i :from 0 :below size
