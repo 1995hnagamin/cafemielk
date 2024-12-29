@@ -45,8 +45,8 @@
 
 (defun make-dense-matrix-zero (nrow ncol)
   (make-dense-matrix
-   :data (make-array `(,nrow ,ncol)
-                     :initial-element 0)))
+   :entries (make-array `(,nrow ,ncol)
+                        :initial-element 0)))
 
 (defun mv-add! (nrow ncol y M x)
   "y += M * x"
