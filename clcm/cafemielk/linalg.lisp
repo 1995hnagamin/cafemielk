@@ -37,6 +37,19 @@
   (loop for i below (length y) do
         (incf (aref y i) (* (aref x i) c))))
 
+
+;;;
+;;; Matrix
+;;;
+
+(defstruct matrix
+  (nrow 0 :type fixnum)
+  (ncol 0 :type fixnum))
+
+;;;
+;;; Dense Matrix
+;;;
+
 (defstruct dense-matrix
   (entries #2a() :type (array number (* *))))
 
