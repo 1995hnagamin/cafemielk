@@ -50,8 +50,8 @@
 ;;; Dense Matrix
 ;;;
 
-(defstruct dense-matrix
-  (entries #2a() :type (array number (* *))))
+(defstruct (dense-matrix (:include matrix))
+  (entries nil :type (simple-array * (* *))))
 
 (defmethod matrix-ref ((M dense-matrix) i j)
   (aref (dense-matrix-entries M) i j))
@@ -72,11 +72,10 @@
 ;;; CSR (compressed sparse row)
 ;;;
 
-
-(defstruct csr
-  (entries)
-  (rowptr #() :type (array fixnum (*)))
-  (colind #() :type (array fixnum (*))))
+(defstruct (csr (:include matrix))
+  (entries nil :type (simple-array * (*)))
+  (rowptr nil :type (simple-array fixnum (*)))
+  (colind nil :type (simple-array fixnum (*))))
 
 (defun csr-addmv! (y nrow ncol A x)
   (declare (ignore ncol))
