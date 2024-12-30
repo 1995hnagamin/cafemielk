@@ -1,16 +1,16 @@
 ;;;; Linear Algebra Library
 
-(provide :linalg)
-(defpackage :linalg (:use :cl :util))
+(defpackage :linalg
+  (:use :cl :util)
+  (:export
+   :dense-matrix
+   :make-dense-matrix
+   :make-dense-matrix-zero
+   :matrix-ref
+   :mv-add!
+   :vector-addv!
+   :vector-rescale!))
 (in-package :linalg)
-(export
- '(dense-matrix
-   make-dense-matrix
-   make-dense-matrix-zero
-   matrix-ref
-   mv-add!
-   vector-addv!
-   vector-rescale!))
 
 ;;;
 ;;; Vector operations
