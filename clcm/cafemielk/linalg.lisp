@@ -98,14 +98,12 @@ The result is contained in OUTPUT-VECTOR."))
   (rowptr nil :type (simple-array fixnum (*)))
   (colind nil :type (simple-array fixnum (*))))
 
-(defun csr-addmv! (y nrow ncol A x)
-  (declare (ignore ncol))
-  (with-slots (entries rowptr colind) A
-    (loop :for i :from 0 :below nrow :do
-      (loop :for j :from (aref rowptr i) :below (aref rowptr (1+ i)) :do
-        (incf (aref y i)
-              (* (aref entries j)
-                 (aref x (aref colind j))))))))
+(defun csr-addmv! (y nrow entries rowptr colind x)
+  (loop :for i :from 0 :below nrow :do
+    (loop :for j :from (aref rowptr i) :below (aref rowptr (1+ i)) :do
+      (incf (aref y i)
+            (* (aref entries j)
+               (aref x (aref colind j)))))))
 
 (defun csr-mv-set! (y nrow ncol A x)
   (loop :for i :from 0 :below nrow :do
