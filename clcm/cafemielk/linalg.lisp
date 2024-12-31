@@ -105,6 +105,10 @@ The result is contained in OUTPUT-VECTOR."))
             (* (aref entries j)
                (aref x (aref colind j)))))))
 
+(defmethod mv-add! (y (A csr) x)
+  (with-slots (nrow entries rowptr colind) A
+    (csr-addmv! y nrow entries rowptr colind x)))
+
 (defun csr-mv-set! (y nrow entries rowptr colind x)
   (loop :for i :from 0 :below nrow :do
     (setf (aref y i) 0))
