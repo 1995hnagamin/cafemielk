@@ -7,7 +7,9 @@
    :make-dense-matrix
    :make-dense-matrix-zero
    :matrix-ref
+   :mv
    :mv-add!
+   :mv-set!
    :vector-addv!
    :vector-rescale!))
 (in-package :linalg)
