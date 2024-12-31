@@ -105,6 +105,12 @@ The result is contained in OUTPUT-VECTOR."))
             (* (aref entries j)
                (aref x (aref colind j)))))))
 
+(defmacro with-expand (symbol expr-list body-expr)
+  (with-gensyms (macro-name)
+    `(symbol-macrolet ((,symbol ',expr-list))
+       (macrolet ((,macro-name () ,body-expr))
+         (,macro-name)))))
+
 (defmethod mv-add! (y (A csr) x)
   (with-slots (nrow entries rowptr colind) A
     (csr-addmv! y nrow entries rowptr colind x)))
