@@ -1,14 +1,13 @@
 ;;;; Cafemielk Ulitity Library
 
-(provide :util)
-(defpackage :util
+(defpackage :cafemielk/util
   (:use :cl)
   (:export
    :let1
    :once-only
    :vec3d-tab
    :with-gensyms))
-(in-package :util)
+(in-package :cafemielk/util)
 
 
 (defmacro let1 (var init &body body)

@@ -1,7 +1,7 @@
 ;;;; Linear Algebra Library
 
-(defpackage :linalg
-  (:use :cl :util)
+(defpackage :cafemielk/linalg
+  (:use :cl :cafemielk/util)
   (:export
    :dense-matrix
    :make-dense-matrix
@@ -12,7 +12,7 @@
    :mv-set!
    :vector-addv!
    :vector-rescale!))
-(in-package :linalg)
+(in-package :cafemielk/linalg)
 
 ;;;
 ;;; Vector operations
