@@ -20,24 +20,24 @@
 
 (defun vector-rescale! (y c)
   "y *= c"
-  (loop for i below (length y)
-        do (setf (aref y i) (* (aref y i) c))))
+  (loop :for i :below (length y) :do
+    (setf (aref y i) (* (aref y i) c))))
 
 (defun vector-addv! (y x)
   "y += x"
-  (loop for i below (length y) do
-        (incf (aref y i) (aref x i))))
+  (loop :for i :below (length y) :do
+    (incf (aref y i) (aref x i))))
 
 (defun vector-rescale-addv! (y c x)
   "y := c * y + x"
-  (loop for i below (length y) do
-        (setf (aref y i)
-              (+ (* (aref y i) c) (aref x i)))))
+  (loop :for i :below (length y) :do
+    (setf (aref y i)
+          (+ (* (aref y i) c) (aref x i)))))
 
 (defun vector-addcv! (y c x)
   "y += c * x"
-  (loop for i below (length y) do
-        (incf (aref y i) (* (aref x i) c))))
+  (loop :for i :below (length y) :do
+    (incf (aref y i) (* (aref x i) c))))
 
 
 ;;;
