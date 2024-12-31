@@ -112,8 +112,9 @@ The result is contained in OUTPUT-VECTOR."))
          (,macro-name)))))
 
 (defmethod mv-add! (y (A csr) x)
-  (with-slots (nrow entries rowptr colind) A
-    (csr-addmv! y nrow entries rowptr colind x)))
+  (with-expand slots (nrow entries rowptr colind)
+    `(with-slots ,slots A
+       (csr-addmv! y ,@slots x))))
 
 (defun csr-mv-set! (y nrow entries rowptr colind x)
   (loop :for i :from 0 :below nrow :do
