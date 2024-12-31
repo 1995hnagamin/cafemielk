@@ -50,6 +50,10 @@
   (:documentation
    "Returns the matrix-vector product of MATRIX and VECTOR."))
 
+(defgeneric mv-add! (output-vector matrix vector)
+  (:documentation
+   "Compute the matrix-vector product of MATRIX and VECTOR."))
+
 (defgeneric mv-set! (output-vector matrix vector)
   (:documentation
    "Compute the matrix-vector product of MATRIX and VECTOR.
@@ -74,12 +78,16 @@ The result is contained in OUTPUT-VECTOR."))
    :entries (make-array `(,nrow ,ncol)
                         :initial-element 0)))
 
-(defun mv-add! (nrow ncol y M x)
-  "y += M * x"
-  (loop for i below nrow do
-        (loop for j below ncol do
-              (incf (aref y i)
-                    (* (matrix-ref M i j) (aref x j))))))
+(defun dense-matrix-mv-add! (y A x)
+  (with-slots (nrow ncol entries) A
+    (loop :for i :below nrow :do
+      (loop :for j :below ncol :do
+        (incf (aref y i)
+              (* (matrix-ref A i j)
+                 (aref x j)))))))
+
+(defmethod mv-add! (y (A dense-matrix) x)
+  (dense-matrix-mv-add! y A x))
 
 ;;;
 ;;; CSR (compressed sparse row)
