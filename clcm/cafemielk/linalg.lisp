@@ -46,6 +46,19 @@
   (nrow 0 :type fixnum)
   (ncol 0 :type fixnum))
 
+(defgeneric mv (matrix vector)
+  (:documentation
+   "Returns the matrix-vector product of MATRIX and VECTOR."))
+
+(defgeneric mv-set! (output-vector matrix vector)
+  (:documentation
+   "Compute the matrix-vector product of MATRIX and VECTOR.
+The result is contained in OUTPUT-VECTOR."))
+
+(defgeneric matrix-ref (matrix i j)
+  (:documentation
+   "Returns the (I, J) element of MATRIX."))
+
 ;;;
 ;;; Dense Matrix
 ;;;
