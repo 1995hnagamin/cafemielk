@@ -105,21 +105,23 @@ The result is contained in OUTPUT-VECTOR."))
             (* (aref entries j)
                (aref x (aref colind j)))))))
 
-(defun csr-mv-set! (y nrow ncol A x)
+(defun csr-mv-set! (y nrow entries rowptr colind x)
   (loop :for i :from 0 :below nrow :do
     (setf (aref y i) 0))
-  (csr-addmv! y nrow ncol A x))
+  (csr-addmv! y nrow entries rowptr colind x))
 
-(defun csr-mv (nrow ncol A x)
+(defun csr-mv (nrow entries rowptr colind x)
   (let1 y (make-array nrow :initial-element 0)
-    (csr-addmv! y nrow ncol A x)
+    (csr-addmv! y nrow entries rowptr colind x)
     y))
 
-(defmethod mv (nrow ncol (A csr) v)
-  (csr-mv nrow ncol A v))
+(defmethod mv ((A csr) v)
+  (with-slots (nrow entries rowptr colind) A
+    (csr-mv nrow entries rowptr colind v)))
 
-(defmethod mv-set! (y nrow ncol (A csr) v)
-  (csr-mv-set! y nrow ncol A v))
+(defmethod mv-set! (y (A csr) v)
+  (with-slots (nrow entries rowptr colind) A
+    (csr-mv-set! y nrow entries rowptr colind v)))
 
 (defun csr-ref (A i j)
   (with-slots (entries rowptr colind) A
