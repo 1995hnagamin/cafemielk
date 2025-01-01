@@ -89,16 +89,19 @@
 (defmacro vec3d-tab ((i j k) expr)
   `(collect-substitute-a3 vector (,i ,j ,k) ,expr))
 
+(declaim (inline cross2d))
 (defun cross2d (u v)
   (- (* (aref u 0) (aref v 1))
      (* (aref u 1) (aref v 0))))
 
+(declaim (inline cross3d))
 (defun cross3d (u v)
   (vec3d-tab
       (i i+1 i+2)
       (- (* (aref u i+1) (aref v i+2))
          (* (aref u i+2) (aref v i+1)))))
 
+(declaim (inline dot-product))
 (defun dot-product (u v)
   (loop :for i :from 0 :below (array-dimension u 0)
         :sum (* (aref u i) (aref v i))))
