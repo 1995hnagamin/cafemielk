@@ -1,4 +1,4 @@
-;;;; Cafemielk Ulitity Library
+;;;; Cafemielk Utility Library
 
 (defpackage :cafemielk/util
   (:use :cl)
