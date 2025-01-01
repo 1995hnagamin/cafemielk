@@ -4,9 +4,18 @@
   (:use :cl)
   (:export
    :let1
+   :list1-if
    :once-only
+   :with-gensyms
+   :linspace
+   :vector-linspace
+   :collect-substitute
+   :collect-substitute-a3
+   :every-substitute-a3
    :vec3d-tab
-   :with-gensyms))
+   :cross2d
+   :cross3d
+   :dot-product))
 (in-package :cafemielk/util)
 
 
@@ -83,4 +92,3 @@
 (defun dot-product (u v)
   (loop :for i :from 0 :below (array-dimension u 0)
         :sum (* (aref u i) (aref v i))))
-
