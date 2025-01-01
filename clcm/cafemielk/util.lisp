@@ -8,6 +8,8 @@
    :once-only
    :with-gensyms
    :linspace
+   :non-negative-p
+   :non-positive-p
    :vector-linspace
    :collect-substitute
    :collect-substitute-a3
@@ -44,6 +46,14 @@
   `(if ,condition
        (list ,then)
        nil))
+
+(declaim (inline non-negative-p))
+(defun non-negative-p (x)
+  (not (minusp x)))
+
+(declaim (inline non-positive-p))
+(defun non-positive-p (x)
+  (not (plusp x)))
 
 (defun linspace (min max size)
   (let1 step (/ (- max min) (1- size))
