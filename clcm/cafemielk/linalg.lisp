@@ -3,6 +3,9 @@
 (defpackage :cafemielk/linalg
   (:use :cl :cafemielk/util)
   (:export
+   :coo
+   :coo-p
+   :make-coo
    :dense-matrix
    :make-dense-matrix
    :make-dense-matrix-zero
@@ -90,6 +93,16 @@ The result is contained in OUTPUT-VECTOR."))
 
 (defmethod mv-add! (y (A dense-matrix) x)
   (dense-matrix-mv-add! y A x))
+
+
+;;;
+;;; COO (coordinate format)
+;;;
+
+(defstruct (coo (:include matrix))
+  (entries nil :type (array * (*)))
+  (rowind nil :type (array * (*)))
+  (colind nil :type (array * (*))))
 
 ;;;
 ;;; CSR (compressed sparse row)
