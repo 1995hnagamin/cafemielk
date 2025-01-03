@@ -8,6 +8,7 @@
    :list1-if
    :once-only
    :with-gensyms
+   :aref-let
    :aref-let1
    :aref-macrolet
    :aref-macrolet1
@@ -74,6 +75,18 @@
                  :for i :from 0
                  :collect `(,var (aref ,array ,i)))
        ,@body)))
+
+(defmacro aref-let ((&rest binds-list) &body body)
+  (let1 array-names (loop :for binds :in binds-list :collect (gensym))
+    `(let ,(loop :for (vars array) :in binds-list
+                 :for a :in array-names
+                 :collect `(,a ,array))
+       (let ,(loop :for (vars array) :in binds-list
+                   :for a :in array-names
+                   :append (loop :for var :in vars
+                                 :for i :from 0
+                                 :collect `(,var (aref ,a ,i))))
+         ,@body))))
 
 (defmacro aref-macrolet1 ((&rest vars) array &body body)
   (once-only (array)
