@@ -6,7 +6,11 @@
    :coo
    :coo-p
    :make-coo
+   :csr
+   :csr-p
+   :make-csr
    :dense-matrix
+   :dense-matrix-p
    :make-dense-matrix
    :make-dense-matrix-zero
    :matrix-ref
