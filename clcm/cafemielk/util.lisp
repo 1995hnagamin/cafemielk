@@ -8,6 +8,7 @@
    :list1-if
    :once-only
    :with-gensyms
+   :aref-let1
    :linspace
    :non-negative-p
    :non-positive-p
@@ -64,6 +65,13 @@
   `(if ,condition
        (list ,then)
        nil))
+
+(defmacro aref-let1 ((&rest vars) array &body body)
+  (once-only (array)
+    `(let ,(loop :for var :in vars
+                 :for i :from 0
+                 :collect `(,var (aref ,array ,i)))
+       ,@body)))
 
 (declaim (inline non-negative-p))
 (defun non-negative-p (x)
