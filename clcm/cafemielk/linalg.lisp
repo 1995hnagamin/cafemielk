@@ -9,6 +9,7 @@
    :csr
    :csr-p
    :make-csr
+   :coo->csr
    :dense-matrix
    :dense-matrix-p
    :make-dense-matrix
@@ -116,6 +117,41 @@ The result is contained in OUTPUT-VECTOR."))
   (entries nil :type (simple-array * (*)))
   (rowptr nil :type (simple-array fixnum (*)))
   (colind nil :type (simple-array fixnum (*))))
+
+(defun rowind->rowptr (rowind nrow)
+  (declare (type fixnum nrow))
+  (let ((rowptr (make-array (1+ nrow)
+                            :element-type 'fixnum))
+        (rowind-size (array-dimension rowind 0)))
+    (setf (aref rowptr 0) 0)
+    (let/goer ((irow 0) (idx 0)) go-loop
+      ;; irow: index of the last updated element in rowptr
+      ;; idx:  index of the first unseeked element in rowind
+      (declare (type fixnum irow idx))
+      (cond
+        ((= idx rowind-size)
+         (loop :for ir :from (1+ irow) :to nrow :do
+           (setf (aref rowptr ir) rowind-size))
+         rowptr)
+        ((> (aref rowind idx) irow)
+         (setf (aref rowptr (1+ irow)) idx)
+         (go-loop (1+ irow) idx))
+        (t
+         (go-loop irow (1+ idx)))))))
+
+(defun coo->csr (A &key (element-type t))
+  (declare (type coo A))
+  (with-slots (nrow ncol entries rowind colind) A
+    (make-csr
+     :nrow nrow
+     :ncol ncol
+     :entries (make-array (array-dimension entries 0)
+                          :initial-contents entries
+                          :element-type element-type)
+     :colind (make-array (array-dimension colind 0)
+                         :initial-contents colind
+                         :element-type 'fixnum)
+     :rowptr (rowind->rowptr rowind nrow))))
 
 (defun csr-addmv! (y nrow entries rowptr colind x)
   (loop :for i :from 0 :below nrow :do
