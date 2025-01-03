@@ -9,6 +9,8 @@
    :once-only
    :with-gensyms
    :aref-let1
+   :aref-macrolet
+   :aref-macrolet1
    :linspace
    :non-negative-p
    :non-positive-p
@@ -73,6 +75,25 @@
                  :collect `(,var (aref ,array ,i)))
        ,@body)))
 
+(defmacro aref-macrolet1 ((&rest vars) array &body body)
+  (once-only (array)
+    `(macrolet ,(loop :for var :in vars
+                      :for i :from 0
+                      :collect `(,var () `(aref ,',array ,',i)))
+       ,@body)))
+
+(defmacro aref-macrolet ((&rest binds-list) &body body)
+  (let1 array-names (loop :for binds :in binds-list :collect (gensym))
+    `(let ,(loop :for (vars array) :in binds-list
+                 :for a :in array-names
+                 :collect `(,a ,array))
+       (macrolet ,(loop :for (vars array) :in binds-list
+                        :for a :in array-names
+                        :append (loop :for var :in vars
+                                      :for i :from 0
+                                      :collect `(,var () `(aref ,',a ,',i))))
+         ,@body))))
+
 (declaim (inline non-negative-p))
 (defun non-negative-p (x)
   (not (minusp x)))
@@ -131,3 +152,4 @@
 (defun dot-product (u v)
   (loop :for i :from 0 :below (array-dimension u 0)
         :sum (* (aref u i) (aref v i))))
+
