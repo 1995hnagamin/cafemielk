@@ -4,6 +4,7 @@
   (:use :cl)
   (:export
    :let1
+   :let/goer
    :list1-if
    :once-only
    :with-gensyms
@@ -24,6 +25,23 @@
 (defmacro let1 (var init &body body)
   `(let ((,var ,init))
      ,@body))
+
+(defmacro let/goer (binds jumper-name &body body)
+  (let ((jumper-params (loop :for bind :in binds :collect (gensym)))
+        (jumper-tag (gensym "JUMP"))
+        (block-tag (gensym)))
+    `(block ,block-tag
+       (let ,binds
+         (tagbody
+            ,jumper-tag
+            (return-from ,block-tag
+              (flet ((,jumper-name ,jumper-params
+                       (psetq ,@(loop :for bind :in binds
+                                      :for param :in jumper-params
+                                      :append (list (car bind) param)))
+                       (go ,jumper-tag)))
+                (declare (inline ,jumper-name))
+                ,@body)))))))
 
 (defmacro with-gensyms ((&rest names) &body body)
   `(let ,(loop :for n :in names :collect `(,n (gensym)))
