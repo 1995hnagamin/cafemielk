@@ -18,6 +18,18 @@
 (defun trig2d-yref (trig i)
   (aref trig (+ i 3)))
 
+(defmacro with-trig2d-accessors ((trig &key (x nil) (y nil) (dx nil) (dy nil))
+                                 &body body)
+  (with-gensyms (i j)
+    (once-only (trig)
+      `(flet (,@(list1-if  x `( ,x (,i) (trig2d-xref ,trig ,i)))
+              ,@(list1-if  y `( ,y (,i) (trig2d-yref ,trig ,i)))
+              ,@(list1-if dx `(,dx (,i ,j) (trig2d-dx ,trig ,i ,j)))
+              ,@(list1-if dy `(,dy (,i ,j) (trig2d-dy ,trig ,i ,j))))
+         (declare (inline ,@(loop :for name in (list x y dx dy)
+                                  :if name :collect name)))
+         ,@body))))
+
 (defmacro with-x_&y_ (trig &body body)
   (with-gensyms (i j)
     (once-only (trig)
