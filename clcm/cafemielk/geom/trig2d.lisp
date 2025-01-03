@@ -30,42 +30,33 @@
                                   :if name :collect name)))
          ,@body))))
 
-(defmacro with-x_&y_ (trig &body body)
-  (with-gensyms (i j)
-    (once-only (trig)
-    `(flet ((x_ (,i) (trig2d-xref ,trig ,i))
-            (y_ (,j) (trig2d-yref ,trig ,j)))
-       (declare (inline x_ y_))
-       (declare (ignorable #'x_ #'y_))
-       ,@body))))
-
 (declaim (inline trig2d-dx))
 (defun trig2d-dx (trig i j)
   (declare (type (simple-array * (6)) trig))
-  (with-x_&y_ trig
-    (- (x_ j) (x_ i))))
+  (with-trig2d-accessors (trig :x x)
+    (- (x j) (x i))))
 
 (declaim (inline trig2d-dy))
 (defun trig2d-dy (trig i j)
-  (with-x_&y_ trig
-    (- (y_ j) (y_ i))))
+  (with-trig2d-accessors (trig :y y)
+    (- (y j) (y i))))
 
 (declaim (inline trig2d-area))
 (defun trig2d-area (trig)
   (declare (type (simple-array * (6)) trig))
-  (flet ((dd (i j) `#(,(trig2d-dx trig i j)
-                      ,(trig2d-dy trig i j))))
-    (declare (inline dd))
-    (/ (cross2d (dd 0 1) (dd 0 2)) 2)))
+  (with-trig2d-accessors (trig :dx dx :dy dy)
+    (flet ((dd (i j) `#(,(dx i j) ,(dy i j))))
+      (declare (inline dd))
+      (/ (cross2d (dd 0 1) (dd 0 2)) 2))))
 
 (defun trig2d-adherent-p (trig pt)
   (declare (type (simple-array * (6)) trig)
            (type (simple-array * (2)) pt))
-  (with-x_&y_ trig
+  (with-trig2d-accessors (trig :x tx :y ty)
     (flet ((check (j k)
              (non-negative-p
-              (cross2d `#(,(- (x_ j) (aref pt 0)) ,(- (y_ j) (aref pt 1)))
-                       `#(,(- (x_ k) (aref pt 0)) ,(- (y_ k) (aref pt 1)))))))
+              (cross2d `#(,(- (tx j) (aref pt 0)) ,(- (ty j) (aref pt 1)))
+                       `#(,(- (tx k) (aref pt 0)) ,(- (ty k) (aref pt 1)))))))
       (and (check 0 1)
            (check 1 2)
            (check 2 0)))))
