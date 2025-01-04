@@ -5,4 +5,5 @@
   :author "Nagamine, Hideaki <nagamine.hideaki.88x@kyoto-u.jp>"
   :license "BSD"
   :class :package-inferred-system
-  :depends-on ("cafemielk/all"))
+  :depends-on ("cafemielk/all")
+  :in-order-to ((test-op (test-op "cafemielk-tests"))))
