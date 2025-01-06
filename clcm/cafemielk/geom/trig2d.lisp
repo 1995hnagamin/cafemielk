@@ -18,8 +18,9 @@
 (defun trig2d-yref (trig i)
   (aref trig (+ i 3)))
 
-(defmacro with-trig2d-accessors ((trig &key (x nil) (y nil) (dx nil) (dy nil) (dd nil))
-                                 &body body)
+(defmacro with-trig2d-accessors
+    ((trig &key (x nil) (y nil) (dx nil) (dy nil) (dd nil))
+     &body body)
   (with-gensyms (i j)
     (once-only (trig)
       `(flet (,@(list1-if  x `( ,x (,i) (trig2d-xref ,trig ,i)))
