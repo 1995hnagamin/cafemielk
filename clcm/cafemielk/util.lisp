@@ -165,4 +165,3 @@
 (defun dot-product (u v)
   (loop :for i :from 0 :below (array-dimension u 0)
         :sum (* (aref u i) (aref v i))))
-
