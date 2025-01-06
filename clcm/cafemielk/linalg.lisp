@@ -56,7 +56,7 @@
   (nrow 0 :type fixnum)
   (ncol 0 :type fixnum))
 
-(defgeneric mv (matrix vector)
+(defgeneric mv (matrix vector &key element-type)
   (:documentation
    "Returns the matrix-vector product of MATRIX and VECTOR."))
 
@@ -177,14 +177,14 @@ The result is contained in OUTPUT-VECTOR."))
     (setf (aref y i) 0))
   (csr-addmv! y nrow entries rowptr colind x))
 
-(defun csr-mv (nrow entries rowptr colind x)
-  (let1 y (make-array nrow :initial-element 0)
+(defun csr-mv (nrow entries rowptr colind x &key (element-type (array-element-type x)))
+  (let1 y (make-array nrow :initial-element 0 :element-type element-type)
     (csr-addmv! y nrow entries rowptr colind x)
     y))
 
-(defmethod mv ((A csr) v)
+(defmethod mv ((A csr) v &key (element-type (array-element-type v)))
   (with-slots (nrow entries rowptr colind) A
-    (csr-mv nrow entries rowptr colind v)))
+    (csr-mv nrow entries rowptr colind v :element-type element-type)))
 
 (defmethod mv-set! (y (A csr) v)
   (with-slots (nrow entries rowptr colind) A
