@@ -6,7 +6,9 @@
    :trig2d-adherent-p
    :trig2d-area
    :trig2d-xref
-   :trig2d-yref))
+   :trig2d-yref
+   :trig2d-dx
+   :trig2d-dy))
 (in-package :cafemielk/geom/trig2d)
 
 
