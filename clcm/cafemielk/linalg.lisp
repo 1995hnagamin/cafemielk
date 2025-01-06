@@ -89,6 +89,7 @@ The result is contained in OUTPUT-VECTOR."))
                         :initial-element 0)))
 
 (defun dense-matrix-mv-add! (y A x)
+  "y += A * x"
   (with-slots (nrow ncol entries) A
     (loop :for i :below nrow :do
       (loop :for j :below ncol :do
