@@ -47,10 +47,8 @@
 (declaim (inline trig2d-area))
 (defun trig2d-area (trig)
   (declare (type (simple-array * (6)) trig))
-  (with-trig2d-accessors (trig :dx dx :dy dy)
-    (flet ((dd (i j) `#(,(dx i j) ,(dy i j))))
-      (declare (inline dd))
-      (/ (cross2d (dd 0 1) (dd 0 2)) 2))))
+  (with-trig2d-accessors (trig :dd dd)
+    (/ (cross2d (dd 0 1) (dd 0 2)) 2)))
 
 (defun trig2d-adherent-p (trig pt)
   (declare (type (simple-array * (6)) trig)
