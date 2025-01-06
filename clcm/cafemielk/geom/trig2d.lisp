@@ -3,6 +3,7 @@
 (defpackage :cafemielk/geom/trig2d
   (:use :cl :cafemielk/util)
   (:export
+   :trig2d-from-3points
    :trig2d-adherent-p
    :trig2d-area
    :trig2d-xref
@@ -11,6 +12,27 @@
    :trig2d-dy))
 (in-package :cafemielk/geom/trig2d)
 
+(defun 2d- (a b)
+  "Returns A - B."
+  (vector (- (aref a 0) (aref b 0))
+          (- (aref a 1) (aref b 1))))
+
+(defun ccw-p (a b c)
+  (non-negative-p (cross2d (2d- b a)
+                           (2d- c a))))
+
+(defun trig2d-from-3points (a b c &key (element-type t))
+  (flet ((make (a b c)
+           (aref-let (((ax ay) a) ((bx by) b) ((cx cy) c))
+             (make-array 6 :initial-contents (map 'vector
+                                                  #'(lambda (z)
+                                                      (coerce z element-type))
+                                                  (vector ax bx cx ay by cy))
+                           :element-type element-type
+                           :adjustable nil))))
+    (if (ccw-p a b c)
+        (make a b c)
+        (make a c b))))
 
 (declaim (inline trig2d-xref))
 (defun trig2d-xref (trig i)
