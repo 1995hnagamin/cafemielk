@@ -4,6 +4,7 @@
   (:use :cl)
   (:export
    :let1
+   :if-let1
    :let/goer
    :list1-if
    :once-only
@@ -29,6 +30,10 @@
 (defmacro let1 (var init &body body)
   `(let ((,var ,init))
      ,@body))
+
+(defmacro if-let1 (var condition then else)
+  `(let1 ,var ,condition
+         (if ,var ,then ,else)))
 
 (defmacro let/goer (binds jumper-name &body body)
   (let ((jumper-params (loop :for bind :in binds :collect (gensym)))
