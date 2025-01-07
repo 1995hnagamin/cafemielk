@@ -39,6 +39,13 @@
     (is (equalp target
                 (cm:rvd->csr A :element-type 'double-float)))))
 
+(test test-dense-matrix
+  (let ((A (cm:create-empty-dense-matrix 3 3)))
+    (loop :for i :below 3 :do
+      (loop :for j :below 3
+            :do (setf (cm:dense-matrix-ref A i j) (* (1+ i) (1+ j)))))
+    (is (equalp (cm:matrix-ref A 2 2) 9))))
+
 ;; / 1  2  0  0  0 \ / 5 \ = / 13 \
 ;; | 3  4  5  0  0 | | 4 |   | 46 |
 ;; | 0  6  7  8  0 | | 3 |   | 61 |
