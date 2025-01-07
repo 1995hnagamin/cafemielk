@@ -131,8 +131,11 @@ The result is contained in OUTPUT-VECTOR."))
                :do (setf (aref rows i) (make-hash-table))
                :finally (return rows))))
 
+(defmacro rvd-rowf (A i)
+  `(aref (rvd-rows ,A) ,i))
+
 (defmacro rvdf (A i j &optional (default nil))
-  `(gethash ,j (aref (rvd-rows ,A) ,i)
+  `(gethash ,j (rvd-rowf ,A ,i)
             ,@(list1-if default default)))
 
 (defun rvd-ref (A i j)
