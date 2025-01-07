@@ -21,7 +21,7 @@
    :rvd
    :rvd-p
    :make-rvd
-   :make-empty-rvd
+   :create-empty-rvd
    :rvd->csr
    :vector-addv!
    :vector-rescale!))
@@ -122,7 +122,7 @@ The result is contained in OUTPUT-VECTOR."))
 (defstruct (rvd (:include matrix))
   (rows nil :type (array * (*))))
 
-(defun make-empty-rvd (nrow ncol)
+(defun create-empty-rvd (nrow ncol)
   (make-rvd
    :nrow nrow
    :ncol ncol
