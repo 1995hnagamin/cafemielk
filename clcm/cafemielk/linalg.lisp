@@ -184,34 +184,14 @@ The result is contained in OUTPUT-VECTOR."))
    :index-arrays (create-nested-array nrow :element-type 'fixnum)
    :value-arrays (create-nested-array nrow :element-type element-type)))
 
-(defmacro rvd-rowf (A i)
-  `(aref (rvd-rows ,A) ,i))
-
-(defmacro rvdf (A i j &optional (default nil))
-  `(gethash ,j (rvd-rowf ,A ,i)
-            ,@(list1-if default default)))
-
-(defun rvd-ref (A i j)
-  (nth-value 0 (rvdf A i j 0)))
-
 (defmethod matrix-ref ((A rvd) i j)
-  (rvd-ref A i j))
+  (get-rvd A i j))
 
 (declaim (inline rvd-row-count))
 (defun rvd-row-count (A i)
   (with-rvd-array-pair (ia va) (A i)
     (declare (ignore va))
     (array-dimension ia 0)))
-
-(defun rvd-set! (A i j value)
-  (setf (rvdf A i j) value))
-
-(defun rvd-inc! (A i j increment)
-  (multiple-value-bind (old-value key-exist-p) (rvdf A i j)
-    (setf (rvdf A i j)
-          (if key-exist-p
-              (+ old-value increment)
-              increment))))
 
 ;;;
 ;;; CSR (compressed sparse row)
