@@ -13,7 +13,7 @@
    :dense-matrix
    :dense-matrix-p
    :make-dense-matrix
-   :make-dense-matrix-zero
+   :create-empty-dense-matrix
    :matrix-ref
    :mv
    :mv-add!
@@ -92,7 +92,7 @@ The result is contained in OUTPUT-VECTOR."))
 (defmethod matrix-ref ((M dense-matrix) i j)
   (aref (dense-matrix-entries M) i j))
 
-(defun make-dense-matrix-zero (nrow ncol)
+(defun create-empty-dense-matrix (nrow ncol)
   (make-dense-matrix
    :entries (make-array `(,nrow ,ncol)
                         :initial-element 0)))
