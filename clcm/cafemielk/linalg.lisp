@@ -18,6 +18,11 @@
    :mv
    :mv-add!
    :mv-set!
+   :rvd
+   :rvd-p
+   :make-rvd
+   :make-empty-rvd
+   :rvd->csr
    :vector-addv!
    :vector-rescale!))
 (in-package :cafemielk/linalg)
@@ -109,6 +114,42 @@ The result is contained in OUTPUT-VECTOR."))
   (entries nil :type (array * (*)))
   (rowind nil :type (array * (*)))
   (colind nil :type (array * (*))))
+
+;;;
+;;; RVD (row-based vector of dictionaries)
+;;;
+
+(defstruct (rvd (:include matrix))
+  (rows nil :type (array * (*))))
+
+(defun make-empty-rvd (nrow ncol)
+  (make-rvd
+   :nrow nrow
+   :ncol ncol
+   :rows (loop :with rows := (make-array nrow)
+               :for i :below nrow
+               :do (setf (aref rows i) (make-hash-table))
+               :finally (return rows))))
+
+(defmacro rvdf (A i j &optional (default nil))
+  `(gethash ,j (aref (rvd-rows ,A) ,i)
+            ,@(list1-if default default)))
+
+(defun rvd-ref (A i j)
+  (nth-value 0 (rvdf A i j 0)))
+
+(defmethod matrix-ref ((A rvd) i j)
+  (rvd-ref A i j))
+
+(defun rvd-set! (A i j value)
+  (setf (rvdf A i j) value))
+
+(defun rvd-inc! (A i j increment)
+  (multiple-value-bind (old-value key-exist-p) (rvdf A i j)
+    (setf (rvdf A i j)
+          (if key-exist-p
+              (+ old-value increment)
+              increment))))
 
 ;;;
 ;;; CSR (compressed sparse row)
