@@ -149,6 +149,12 @@ The result is contained in OUTPUT-VECTOR."))
           (rotatef (aref va (1- position)) (aref va position))
       :finally (return position))))
 
+(defun rvd-add (A i j value)
+  (with-rvd-array-pair (ia va) (A i)
+    (if-let1 it (rvd-find-position ia j)
+             (incf (aref va it) value)
+             (rvd-force-insert A i j value))))
+
 (defun rvd-insert (A i j value)
   (with-rvd-array-pair (ia va) (A i)
     (if-let1 it (rvd-find-position ia j)
