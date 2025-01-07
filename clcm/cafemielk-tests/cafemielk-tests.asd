@@ -5,6 +5,7 @@
   :license "BSD"
   :class :package-inferred-system
   :depends-on ("cafemielk"
-               "cafemielk-tests/all")
+               "cafemielk-tests/all"
+               "fiveam")
   :perform (test-op (o c)
-                    (funcall (find-symbol* :run-tests :cafemielk-tests/all))))
+                    (symbol-call :fiveam :run! :cm-test-all)))
