@@ -15,6 +15,15 @@
   (= (cm:trig2d-area #(3 141 592 653 589 793))
      28508))
 
+(defun test-rvd ()
+  (let ((A (cm:create-empty-rvd 10 10 :element-type 'double-float)))
+    (setf (cm:get-rvd A 3 3) 33.0d0)
+    (incf (cm:get-rvd A 1 0) 10.0d0)
+    (incf (cm:get-rvd A 1 0) 40.0d0)
+    (and
+     (= (cm:get-rvd A 3 3) 33.0d0)
+     (= (cm:get-rvd A 1 0) 50.0d0))))
+
 ;; / 1  2  0  0  0 \ / 5 \ = / 13 \
 ;; | 3  4  5  0  0 | | 4 |   | 46 |
 ;; | 0  6  7  8  0 | | 3 |   | 61 |
@@ -42,4 +51,5 @@
   (report-tests
    (test-cross3d)
    (test-trig2d-area)
+   (test-rvd)
    (test-csr-mv)))
