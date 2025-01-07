@@ -136,12 +136,12 @@ The result is contained in OUTPUT-VECTOR."))
       :finally
          (return rows)))
 
-(defun create-empty-rvd (nrow ncol)
+(defun create-empty-rvd (nrow ncol &key (element-type t))
   (make-rvd
    :nrow nrow
    :ncol ncol
    :index-arrays (create-nested-array nrow :element-type 'fixnum)
-   :value-arrays (create-nested-array nrow)))
+   :value-arrays (create-nested-array nrow :element-type element-type)))
 
 (defmacro rvd-rowf (A i)
   `(aref (rvd-rows ,A) ,i))
