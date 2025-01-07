@@ -22,6 +22,10 @@
    :rvd-p
    :make-rvd
    :create-empty-rvd
+   :get-rvd
+   :rvd-find-position
+   :rvd-insert
+   :rvd-row-count
    :rvd->csr
    :vector-addv!
    :vector-rescale!))
