@@ -144,6 +144,10 @@ The result is contained in OUTPUT-VECTOR."))
 (defmethod matrix-ref ((A rvd) i j)
   (rvd-ref A i j))
 
+(declaim (inline rvd-row-count))
+(defun rvd-row-count (A i)
+  (hash-table-count (aref (rvd-rows A) i)))
+
 (defun rvd-set! (A i j value)
   (setf (rvdf A i j) value))
 
