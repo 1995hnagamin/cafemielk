@@ -290,6 +290,39 @@ The result is contained in OUTPUT-VECTOR."))
                          :element-type 'fixnum)
      :rowptr (rowind->rowptr rowind nrow))))
 
+(defun create-rvd-rowptr (A)
+  (with-slots (nrow) A
+    (loop :with rowptr := (make-array (1+ nrow)
+                                      :initial-element 0
+                                      :element-type 'fixnum)
+          :for i :below nrow
+          :do (setf (aref rowptr (1+ i))
+                    (+ (aref rowptr i) (rvd-row-count A i)))
+          :finally (return rowptr))))
+
+(defun rvd->csr (A &key (element-type t))
+  (declare (type rvd A))
+  (with-slots (nrow ncol index-arrays value-arrays) A
+    (loop
+      :with rowptr := (create-rvd-rowptr A)
+      :with size := (aref rowptr nrow)
+      :with colind := (make-array size :element-type 'fixnum)
+      :with entries := (make-array size :element-type element-type)
+      :for i :below nrow
+      :do
+         (loop :with offset := (aref rowptr i)
+               :for idxj :from 0
+               :for j :across (aref index-arrays i)
+               :for Aij :across (aref value-arrays i)
+               :do (setf (aref colind (+ offset idxj)) j)
+                   (setf (aref entries (+ offset idxj)) Aij))
+      :finally
+         (return (make-csr :nrow nrow
+                           :ncol ncol
+                           :entries entries
+                           :colind colind
+                           :rowptr rowptr)))))
+
 ;;; Local Variables:
 ;;; mode: lisp
 ;;; indent-tabs-mode: nil
