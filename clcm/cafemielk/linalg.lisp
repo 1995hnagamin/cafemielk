@@ -14,6 +14,7 @@
    :dense-matrix-p
    :make-dense-matrix
    :create-empty-dense-matrix
+   :dense-matrix-ref
    :matrix-ref
    :mv
    :mv-add!
@@ -89,8 +90,11 @@ The result is contained in OUTPUT-VECTOR."))
 (defstruct (dense-matrix (:include matrix))
   (entries nil :type (simple-array * (* *))))
 
+(defmacro dense-matrix-ref (A i j)
+  `(aref (dense-matrix-entries ,A) ,i ,j))
+
 (defmethod matrix-ref ((M dense-matrix) i j)
-  (aref (dense-matrix-entries M) i j))
+  (dense-matrix-ref M i j))
 
 (defun create-empty-dense-matrix (nrow ncol)
   (make-dense-matrix
