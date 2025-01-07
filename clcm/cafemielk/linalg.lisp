@@ -129,6 +129,41 @@ The result is contained in OUTPUT-VECTOR."))
            (,va (aref (rvd-value-arrays ,A) ,i)))
        ,@body)))
 
+(defun rvd-find-position (ia j)
+  (loop
+    :for column-index :across ia
+    :for position :from 0
+    :when (= column-index j) :do (return position)
+      :finally (return nil)))
+
+(defun rvd-force-insert (A i j value)
+  (with-rvd-array-pair (ia va) (A i)
+    (loop
+      :with last-index := (progn
+                            (vector-push-extend value va)
+                            (vector-push-extend j ia))
+      :for position :downfrom last-index :above 0
+      :until (< (aref ia (1- position))
+                (aref ia position))
+      :do (rotatef (aref ia (1- position)) (aref ia position))
+          (rotatef (aref va (1- position)) (aref va position))
+      :finally (return position))))
+
+(defun rvd-insert (A i j value)
+  (with-rvd-array-pair (ia va) (A i)
+    (if-let1 it (rvd-find-position ia j)
+             (setf (aref va it) value)
+             (rvd-force-insert A i j value))))
+
+(defun get-rvd (A i j)
+  (with-rvd-array-pair (ia va) (A i)
+    (if-let1 it (rvd-find-position ia j)
+             (aref va it)
+             0)))
+
+(defsetf get-rvd (A i j) (new-value)
+  `(rvd-insert ,A ,i ,j ,new-value))
+
 (defun create-nested-array (n &key (element-type t))
     (loop
       :with rows := (make-array n)
