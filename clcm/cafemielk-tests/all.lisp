@@ -40,10 +40,3 @@
              :colind #(0 1 0 1 2 1 2 3 2 3 4 3 4))))
         (x #(5 4 3 2 1)))
     (is (equalp (cm:mv A x) #(13 46 61 58 37)))))
-
-(defmacro report-tests (&rest test-exprs)
-  `(progn
-     ,@(loop :for expr :in test-exprs
-             :collect `(format t "TEST ~a: ~:[FAIL~;PASS~]~%"
-                               ',expr
-                               ,expr))))
