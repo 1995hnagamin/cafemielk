@@ -113,6 +113,16 @@ The result is contained in OUTPUT-VECTOR."))
 (defmethod mv-add! (y (A dense-matrix) x)
   (dense-matrix-mv-add! y A x))
 
+(defun dense-matrix-mv (A x &key (element-type t))
+  (with-slots (nrow) A
+    (let ((y (make-array nrow
+                         :initial-element 0
+                         :element-type element-type)))
+      (dense-matrix-mv-add! y A x)
+      y)))
+
+(defmethod mv ((A dense-matrix) x &key (element-type t))
+  (dense-matrix-mv A x :element-type element-type))
 
 ;;;
 ;;; COO (coordinate format)
