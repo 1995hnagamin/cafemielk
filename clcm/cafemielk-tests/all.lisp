@@ -32,9 +32,11 @@
     (incf (cm:get-rvd A 2 1) 21.0d0)
     (incf (cm:get-rvd A 2 9) 29.0d0)
     (incf (cm:get-rvd A 1 0) 10.0d0)
+    (is (= 10.0d0 (cm:get-rvd A 1 0)))
     (incf (cm:get-rvd A 1 0) 40.0d0)
     (is (= 33.0d0 (cm:get-rvd A 3 3)))
     (is (= 50.0d0 (cm:get-rvd A 1 0)))
+    (is (= 0.0d0 (cm:get-rvd A 8 8)))
     (is (= 2 (cm:rvd-row-count A 2)))
     (is (equalp target
                 (cm:rvd->csr A :element-type 'double-float)))))
