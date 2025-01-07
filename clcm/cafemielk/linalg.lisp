@@ -123,6 +123,12 @@ The result is contained in OUTPUT-VECTOR."))
   (index-arrays nil :type (array (array fixnum (*)) (*)))
   (value-arrays nil :type (array (array * (*)) (*))))
 
+(defmacro with-rvd-array-pair ((ia va) (A i) &body body)
+  (once-only (A i)
+    `(let ((,ia (aref (rvd-index-arrays ,A) ,i))
+           (,va (aref (rvd-value-arrays ,A) ,i)))
+       ,@body)))
+
 (defun create-nested-array (n &key (element-type t))
     (loop
       :with rows := (make-array n)
@@ -158,7 +164,9 @@ The result is contained in OUTPUT-VECTOR."))
 
 (declaim (inline rvd-row-count))
 (defun rvd-row-count (A i)
-  (hash-table-count (aref (rvd-rows A) i)))
+  (with-rvd-array-pair (ia va) (A i)
+    (declare (ignore va))
+    (array-dimension ia 0)))
 
 (defun rvd-set! (A i j value)
   (setf (rvdf A i j) value))
