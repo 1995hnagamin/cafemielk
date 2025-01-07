@@ -120,16 +120,28 @@ The result is contained in OUTPUT-VECTOR."))
 ;;;
 
 (defstruct (rvd (:include matrix))
-  (rows nil :type (array * (*))))
+  (index-arrays nil :type (array (array fixnum (*)) (*)))
+  (value-arrays nil :type (array (array * (*)) (*))))
+
+(defun create-nested-array (n &key (element-type t))
+    (loop
+      :with rows := (make-array n)
+      :for i :below n
+      :do
+         (setf (aref rows i)
+               (make-array 0
+                           :adjustable t
+                           :fill-pointer 0
+                           :element-type element-type))
+      :finally
+         (return rows)))
 
 (defun create-empty-rvd (nrow ncol)
   (make-rvd
    :nrow nrow
    :ncol ncol
-   :rows (loop :with rows := (make-array nrow)
-               :for i :below nrow
-               :do (setf (aref rows i) (make-hash-table))
-               :finally (return rows))))
+   :index-arrays (create-nested-array nrow :element-type 'fixnum)
+   :value-arrays (create-nested-array nrow)))
 
 (defmacro rvd-rowf (A i)
   `(aref (rvd-rows ,A) ,i))
