@@ -22,6 +22,21 @@
   (vertices nil :type (array * (* 2)))
   (vises nil :type (array fixnum (* 3))))
 
+(defun mesh2d-trig-coordinate-type (mesh)
+  (array-element-type (mesh2d-trig-vertices mesh)))
+
+(defmacro with-mesh2d-trig-accessors
+    ((mesh &key (x nil) (y nil)) &body body)
+  (with-gensyms (i)
+    (once-only (mesh)
+      `(flet (,@(list1-if x `(,x (,i)
+                                 (aref (mesh2d-trig-vertices ,mesh) ,i 0)))
+              ,@(list1-if y `(,y (,i)
+                                 (aref (mesh2d-trig-vertices ,mesh) ,i 1))))
+         (declare (inline ,@(loop :for name :in (list x y)
+                                  :if name :collect name)))
+         ,@body))))
+
 (defun mesh2d-trig-vertex-elt (mesh vertex-index)
   (with-slots (vertices) mesh
     (let1 array (make-array 2 :element-type (array-element-type vertices))
