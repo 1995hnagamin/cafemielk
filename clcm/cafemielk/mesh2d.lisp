@@ -5,9 +5,17 @@
 (defpackage :cafemielk/mesh2d
   (:use :cl :cafemielk/util)
   (:export
+   :mesh2d-trig
+   :mesh2d-trig-p
+   :make-mesh2d-trig
    :create-square-point-array
    :create-square-vise-array))
 (in-package :cafemielk/mesh2d)
+
+
+(defstruct mesh2d-trig
+  (vertices nil :type (array * (* 2)))
+  (vises nil :type (array fixnum (* 3))))
 
 (defun create-square-point-array
     (x-coordinates y-coordinates &key (element-type t))
