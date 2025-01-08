@@ -62,3 +62,8 @@
              :colind #(0 1 0 1 2 1 2 3 2 3 4 3 4))))
         (x #(5 4 3 2 1)))
     (is (equalp (cm:mv A x) #(13 46 61 58 37)))))
+
+(test test-create-square-vise-array
+  (is (equalp #2a((3 0 4) (1 4 0) (4 1 5) (2 5 1)
+                  (6 3 7) (4 7 3) (7 4 8) (5 8 4))
+              (cm:create-square-vise-array 3 3))))
