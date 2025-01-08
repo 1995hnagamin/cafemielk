@@ -8,6 +8,7 @@
    :mesh2d-trig
    :mesh2d-trig-p
    :make-mesh2d-trig
+   :mesh2d-unit-square
    :create-square-point-array
    :create-square-vise-array))
 (in-package :cafemielk/mesh2d)
@@ -67,6 +68,14 @@
               (setf (aref array (1+ tij) 2) pij)))
     :finally
        (return array)))
+
+(defun mesh2d-unit-square (nx ny)
+  (make-mesh2d-trig
+   :vertices (create-square-point-array
+              (vector-linspace 0d0 1d0 nx :element-type 'double-float)
+              (vector-linspace 0d0 1d0 ny :element-type 'double-float)
+              :element-type 'double-float)
+   :vises (create-square-vise-array nx ny)))
 
 ;;; Local Variables:
 ;;; mode: lisp
