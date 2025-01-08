@@ -80,12 +80,12 @@
   (with-trig2d-accessors (trig :x tx :y ty)
     (aref-let1 (px py) pt
       (flet ((check (j k)
-             (non-negative-p
-              (cross2d `#(,(- (tx j) px) ,(- (ty j) py))
-                       `#(,(- (tx k) px) ,(- (ty k) py))))))
-      (and (check 0 1)
-           (check 1 2)
-           (check 2 0))))))
+               (non-negative-p
+                (cross2d `#(,(- (tx j) px) ,(- (ty j) py))
+                         `#(,(- (tx k) px) ,(- (ty k) py))))))
+        (and (check 0 1)
+             (check 1 2)
+             (check 2 0))))))
 
 ;;; Local Variables:
 ;;; mode: lisp
