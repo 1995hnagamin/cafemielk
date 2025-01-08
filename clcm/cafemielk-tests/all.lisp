@@ -63,7 +63,13 @@
         (x #(5 4 3 2 1)))
     (is (equalp (cm:mv A x) #(13 46 61 58 37)))))
 
-(test test-create-square-vise-array
+(test test-create-square
+  (is (equalp #2a((0 7) (1 7) (2 7)
+                  (0 8) (1 8) (2 8)
+                  (0 9) (1 9) (2 9))
+              (cm:create-square-point-array #(0 1 2)
+                                            #(7 8 9)
+                                            :element-type 'fixnum)))
   (is (equalp #2a((3 0 4) (1 4 0) (4 1 5) (2 5 1)
                   (6 3 7) (4 7 3) (7 4 8) (5 8 4))
               (cm:create-square-vise-array 3 3))))
