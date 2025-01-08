@@ -38,10 +38,10 @@
          ,@body))))
 
 (defun mesh2d-trig-vertex-elt (mesh vertex-index)
-  (with-slots (vertices) mesh
-    (let1 array (make-array 2 :element-type (array-element-type vertices))
-      (setf (aref array 0) (aref vertices vertex-index 0))
-      (setf (aref array 1) (aref vertices vertex-index 1))
+  (with-mesh2d-trig-accessors (mesh :x x :y y)
+    (let1 array (make-array 2 :element-type (mesh2d-trig-coordinate-type mesh))
+      (setf (aref array 0) (x vertex-index))
+      (setf (aref array 1) (y vertex-index))
       array)))
 
 (defun mesh2d-trig-vise-elt (mesh vise-index)
