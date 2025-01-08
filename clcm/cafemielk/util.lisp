@@ -125,8 +125,9 @@
     (loop :for i :from 0 :below size
           :collecting (+ min (* step i)))))
 
-(defun vector-linspace (min max size)
-  (let ((vec (make-array size))
+(defun vector-linspace (min max size &key (element-type t))
+  (let ((vec (make-array size
+                         :element-type element-type))
         (step (/ (- max min) (1- size))))
     (loop :for i :from 0 :below size
           :do (setf (aref vec i) (+ min (* step i))))
