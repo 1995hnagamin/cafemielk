@@ -78,7 +78,10 @@
     (is (equalp #(0.5d0 0.5d0)
                 (cm:mesh2d-trig-vertex-elt mesh 12)))
     (is (equalp #(5 0 6)
-                (cm:mesh2d-trig-vise-elt mesh 0)))))
+                (cm:mesh2d-trig-vise-elt mesh 0)))
+    (is (equalp #(  0   0 1/4
+                  1/4   0 1/4)
+                (cm:mesh2d-trig-vise->trig2d mesh #(5 0 6))))))
 
 ;;; Local Variables:
 ;;; mode: lisp
