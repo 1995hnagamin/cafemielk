@@ -3,7 +3,10 @@
 ;;;;
 
 (defpackage :cafemielk/mesh2d
-  (:use :cl :cafemielk/util)
+  (:use
+   :cl
+   :cafemielk/geom/trig2d
+   :cafemielk/util)
   (:export
    :mesh2d-trig
    :mesh2d-trig-p
@@ -12,6 +15,7 @@
    :mesh2d-trig-vertex-elt
    :mesh2d-trig-vise-count
    :mesh2d-trig-vise-elt
+   :mesh2d-trig-vise->trig2d
    :mesh2d-unit-square
    :create-square-point-array
    :create-square-vise-array))
@@ -60,6 +64,24 @@
 (defun mesh2d-trig-vise-count (mesh)
   (with-slots (vises) mesh
     (array-dimension vises 0)))
+
+(defun mesh2d-trig-vise->trig2d (mesh vise)
+  (with-mesh2d-trig-accessors (mesh :x x :y y)
+    (loop
+      :with cv := (make-array
+                   6
+                   :element-type (mesh2d-trig-coordinate-type mesh))
+      :for i :from 0
+      :for vertex-index :across vise
+      :do
+         (setf (aref cv i) (x vertex-index))
+         (setf (aref cv (+ i 3)) (y vertex-index))
+      :finally
+         (return cv))))
+
+;;;
+;;; unit square utility
+;;;
 
 (defun create-square-point-array
     (x-coordinates y-coordinates &key (element-type t))
