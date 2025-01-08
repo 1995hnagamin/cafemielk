@@ -5,14 +5,14 @@ exec ros -Q -- $0 "$@"
 |#
 (progn ;;init forms
   (ros:ensure-asdf)
-  #+quicklisp(ql:quickload '() :silent t)
+  #+quicklisp(ql:quickload '(:clcm-magstat-square2d-simple) :silent t)
   )
 
 (defpackage :ros.script.main.3945313027
-  (:use :cl))
+  (:use :cl :clcm-magstat-square2d-simple))
 (in-package :ros.script.main.3945313027)
 
 (defun main (&rest argv)
   (declare (ignorable argv))
-  (format t "Hello, World!~%"))
+  (run-analysis))
 ;;; vim: set ft=lisp lisp:
