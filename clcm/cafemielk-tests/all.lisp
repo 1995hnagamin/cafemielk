@@ -73,3 +73,8 @@
   (is (equalp #2a((3 0 4) (1 4 0) (4 1 5) (2 5 1)
                   (6 3 7) (4 7 3) (7 4 8) (5 8 4))
               (cm:create-square-vise-array 3 3))))
+
+;;; Local Variables:
+;;; mode: lisp
+;;; indent-tabs-mode: nil
+;;; End:

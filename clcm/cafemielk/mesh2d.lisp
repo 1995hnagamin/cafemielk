@@ -59,3 +59,8 @@
               (setf (aref array (1+ tij) 2) pij)))
     :finally
        (return array)))
+
+;;; Local Variables:
+;;; mode: lisp
+;;; indent-tabs-mode: nil
+;;; End:

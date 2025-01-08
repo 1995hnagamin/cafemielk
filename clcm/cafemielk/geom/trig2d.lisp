@@ -86,3 +86,8 @@
       (and (check 0 1)
            (check 1 2)
            (check 2 0))))))
+
+;;; Local Variables:
+;;; mode: lisp
+;;; indent-tabs-mode: nil
+;;; End:
