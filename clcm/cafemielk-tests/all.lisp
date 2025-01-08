@@ -72,7 +72,13 @@
                                             :element-type 'fixnum)))
   (is (equalp #2a((3 0 4) (1 4 0) (4 1 5) (2 5 1)
                   (6 3 7) (4 7 3) (7 4 8) (5 8 4))
-              (cm:create-square-vise-array 3 3))))
+              (cm:create-square-vise-array 3 3)))
+  (let ((mesh (cm:mesh2d-unit-square 5 5)))
+    (is (= 25 (cm:mesh2d-trig-vertex-count mesh)))
+    (is (equalp #(0.5d0 0.5d0)
+                (cm:mesh2d-trig-vertex-elt mesh 12)))
+    (is (equalp #(5 0 6)
+                (cm:mesh2d-trig-vise-elt mesh 0)))))
 
 ;;; Local Variables:
 ;;; mode: lisp
