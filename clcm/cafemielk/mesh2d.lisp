@@ -8,6 +8,10 @@
    :mesh2d-trig
    :mesh2d-trig-p
    :make-mesh2d-trig
+   :mesh2d-trig-vertex-count
+   :mesh2d-trig-vertex-elt
+   :mesh2d-trig-vise-count
+   :mesh2d-trig-vise-elt
    :mesh2d-unit-square
    :create-square-point-array
    :create-square-vise-array))
@@ -17,6 +21,28 @@
 (defstruct mesh2d-trig
   (vertices nil :type (array * (* 2)))
   (vises nil :type (array fixnum (* 3))))
+
+(defun mesh2d-trig-vertex-elt (mesh vertex-index)
+  (with-slots (vertices) mesh
+    (vector (aref vertices vertex-index 0)
+            (aref vertices vertex-index 1))))
+
+(defun mesh2d-trig-vise-elt (mesh vise-index)
+  (with-slots (vises) mesh
+    (loop
+      :with array := (make-array 3
+                                 :element-type (array-element-type vises))
+      :for i :below 3
+      :do (setf (aref array i) (aref vises vise-index i))
+      :finally (return array))))
+
+(defun mesh2d-trig-vertex-count (mesh)
+  (with-slots (vertices) mesh
+    (array-dimension vertices 0)))
+
+(defun mesh2d-trig-vise-count (mesh)
+  (with-slots (vises) mesh
+    (array-dimension vises 0)))
 
 (defun create-square-point-array
     (x-coordinates y-coordinates &key (element-type t))
