@@ -5,9 +5,29 @@
 (defpackage :cafemielk/mesh2d
   (:use :cl :cafemielk/util)
   (:export
+   :create-square-point-array
    :create-square-vise-array))
 (in-package :cafemielk/mesh2d)
 
+(defun create-square-point-array
+    (x-coordinates y-coordinates &key (element-type t))
+  (loop
+    :with nx :of-type fixnum := (array-dimension x-coordinates 0)
+    :with ny :of-type fixnum := (array-dimension y-coordinates 0)
+    :with array := (make-array `(,(* nx ny) 2)
+                               :element-type element-type)
+    :for j :of-type fixnum :from 0
+    :for yj :across y-coordinates
+    :do
+       (loop
+         :with offset :of-type fixnum := (* nx j)
+         :for i :of-type fixnum :from 0
+         :for xi :across x-coordinates
+         :do
+            (setf (aref array (+ offset i) 0) xi)
+            (setf (aref array (+ offset i) 1) yj))
+    :finally
+       (return array)))
 
 (defun create-square-vise-array (nx ny)
   (loop
