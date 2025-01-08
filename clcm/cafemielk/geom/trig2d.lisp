@@ -9,7 +9,8 @@
    :trig2d-xref
    :trig2d-yref
    :trig2d-dx
-   :trig2d-dy))
+   :trig2d-dy
+   :with-trig2d-accessors))
 (in-package :cafemielk/geom/trig2d)
 
 (defun 2d- (a b)
