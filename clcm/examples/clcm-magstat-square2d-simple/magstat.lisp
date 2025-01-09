@@ -58,10 +58,11 @@
                   :for j :of-type fixnum :from 0
                   :for vj :of-type fixnum :across vise
                   :do
-                     (incf (cm:get-rvd rvd vi vj)
-                           (* (+ (* (aref b i) (aref b j))
-                                 (* (aref c i) (aref c j)))
-                              (/ *permeability* (* 4 trig-area))))))))
+                     (cm:rvd-add
+                      rvd vi vj
+                      (* (+ (* (aref b i) (aref b j))
+                            (* (aref c i) (aref c j)))
+                         (/ *permeability* (* 4 trig-area))))))))
     :finally (return (values rvd rhs))))
 
 (defun run-analysis ()
