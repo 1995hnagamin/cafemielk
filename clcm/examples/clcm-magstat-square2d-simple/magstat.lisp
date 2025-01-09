@@ -67,4 +67,8 @@
 
 (defun run-analysis ()
   (format t "Hello, World~%")
-  (format t "Cafemielk version: ~a~%" (cm:cafemielk-version)))
+  (format t "Cafemielk version: ~a~%~%" (cm:cafemielk-version))
+  (multiple-value-bind (rvd rhs) (create-free-equation *mesh*)
+    (let ((*print-length* 10))
+      (format t "RVD:~%~W~%~%RHS:~%~W~%" rvd rhs)))
+  (format t "Bye.~%"))
