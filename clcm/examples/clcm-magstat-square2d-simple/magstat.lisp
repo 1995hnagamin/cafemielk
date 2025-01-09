@@ -11,14 +11,15 @@
 (defvar *mesh* (cm:let1 npoint (1+ *num-mesh-div*)
                  (cm:mesh2d-unit-square npoint npoint)))
 
-(defvar *permeability* 1) ; H/m
+(defvar *permeability* 1.0d0) ; H/m
 
-(defvar *current-density* 1) ; A/m^2
+(defvar *current-density* 1.0d0) ; A/m^2
 
 (defun create-free-equation (mesh)
   "Construct the coefficient matrix and right-hand side vector.
    This function does not consider the boundary conditions."
   (declare (optimize (speed 3)))
+  (declare (type double-float *permeability* *current-density*))
   (loop
     :with nvertex := (cm:mesh2d-trig-vertex-count mesh)
     :with rvd := (cm:create-empty-rvd nvertex nvertex
