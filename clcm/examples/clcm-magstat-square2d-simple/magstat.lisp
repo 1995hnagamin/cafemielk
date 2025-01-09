@@ -15,6 +15,12 @@
 
 (defvar *current-density* 1.0d0) ; A/m^2
 
+(defmacro array3-tab ((i j k) expr)
+  `(make-array
+    3
+    :element-type 'double-float
+    :initial-contents (cm:vec3d-tab (,i ,j ,k) ,expr)))
+
 (defun create-free-equation (mesh)
   "Construct the coefficient matrix and right-hand side vector.
    This function does not consider the boundary conditions."
@@ -39,8 +45,9 @@
          :for vi :of-type fixnum :across vise
          :do
             (cm:with-trig2d-accessors (trig :x tx :y ty)
-              (let ((b (cm:vec3d-tab (i i+1 i+2) (- (ty i+1) (ty i+2))))
-                    (c (cm:vec3d-tab (i i+1 i+2) (- (tx i+2) (tx i+1)))))
+              (let ((b (array3-tab (i i+1 i+2) (- (ty i+1) (ty i+2))))
+                    (c (array3-tab (i i+1 i+2) (- (tx i+2) (tx i+1)))))
+                (declare (type (simple-array double-float (3)) b c))
 
                 ;; Update right-hand side vector.
                 (incf (aref rhs vi)
