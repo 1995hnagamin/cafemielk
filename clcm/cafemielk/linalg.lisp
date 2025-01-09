@@ -24,6 +24,7 @@
    :make-rvd
    :create-empty-rvd
    :get-rvd
+   :rvd-add
    :rvd-find-position
    :rvd-insert
    :rvd-row-count
@@ -167,6 +168,7 @@ The result is contained in OUTPUT-VECTOR."))
           (rotatef (aref va (1- position)) (aref va position))
       :finally (return position))))
 
+(declaim (inline rvd-add))
 (defun rvd-add (A i j value)
   (with-rvd-array-pair (ia va) (A i)
     (if-let1 it (rvd-find-position ia j)
@@ -179,7 +181,9 @@ The result is contained in OUTPUT-VECTOR."))
              (setf (aref va it) value)
              (rvd-force-insert A i j value))))
 
+(declaim (inline get-rvd))
 (defun get-rvd (A i j)
+  (declare (type rvd A))
   (with-rvd-array-pair (ia va) (A i)
     (if-let1 it (rvd-find-position ia j)
              (aref va it)
