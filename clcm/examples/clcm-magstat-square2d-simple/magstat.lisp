@@ -18,6 +18,7 @@
 (defun create-free-equation (mesh)
   "Construct the coefficient matrix and right-hand side vector.
    This function does not consider the boundary conditions."
+  (declare (optimize (speed 3)))
   (loop
     :with nvertex := (cm:mesh2d-trig-vertex-count mesh)
     :with rvd := (cm:create-empty-rvd nvertex nvertex
@@ -25,13 +26,15 @@
     :with rhs := (make-array nvertex
                              :initial-element 0d0
                              :element-type 'double-float)
-    :for vise-idx :below (cm:mesh2d-trig-vise-count mesh)
+    :for vise-idx :of-type fixnum :below (cm:mesh2d-trig-vise-count mesh)
     :do
        (loop
-         :with vise := (cm:mesh2d-trig-vise-elt mesh vise-idx)
-         :with trig := (cm:mesh2d-trig-vise->trig2d mesh vise)
-         :with trig-area := (cm:trig2d-area trig)
-         :for i :from 0
+         :with vise :of-type (simple-array fixnum (3))
+           := (cm:mesh2d-trig-vise-elt mesh vise-idx)
+         :with trig :of-type (simple-array double-float (6))
+           := (cm:mesh2d-trig-vise->trig2d mesh vise)
+         :with trig-area :of-type double-float := (cm:trig2d-area trig)
+         :for i :of-type fixnum :from 0
          :for vi :of-type fixnum :across vise
          :do
             (cm:with-trig2d-accessors (trig :x tx :y ty)
@@ -44,7 +47,7 @@
 
                 ;; Update coefficient matrix.
                 (loop
-                  :for j :from 0
+                  :for j :of-type fixnum :from 0
                   :for vj :of-type fixnum :across vise
                   :do
                      (incf (cm:get-rvd rvd vi vj)
