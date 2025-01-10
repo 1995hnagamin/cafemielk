@@ -38,6 +38,9 @@
     (is (= 50.0d0 (cm:get-rvd A 1 0)))
     (is (= 0.0d0 (cm:get-rvd A 8 8)))
     (is (= 2 (cm:rvd-row-count A 2)))
+    (cm:rvd-delete! A 3 3)
+    (is (= 0.0d0 (cm:get-rvd A 3 3)))
+    (setf (cm:get-rvd A 3 3) 33.0d0)
     (is (equalp target
                 (cm:rvd->csr A :element-type 'double-float)))))
 
