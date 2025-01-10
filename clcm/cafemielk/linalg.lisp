@@ -223,17 +223,14 @@ The result is contained in OUTPUT-VECTOR."))
   `(rvd-insert ,A ,i ,j ,new-value))
 
 (defun create-nested-array (n &key (element-type t))
-    (loop
-      :with rows := (make-array n)
-      :for i :below n
-      :do
-         (setf (aref rows i)
-               (make-array 0
-                           :adjustable t
-                           :fill-pointer 0
-                           :element-type element-type))
-      :finally
-         (return rows)))
+  (loop
+    :with rows := (make-array n)
+    :for i :below n
+    :do (setf (aref rows i)
+              (make-array 0 :adjustable t
+                            :fill-pointer 0
+                            :element-type element-type))
+    :finally (return rows)))
 
 (defun create-empty-rvd (nrow ncol &key (element-type t))
   (make-rvd
