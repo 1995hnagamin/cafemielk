@@ -25,6 +25,7 @@
    :create-empty-rvd
    :get-rvd
    :rvd-add
+   :rvd-delete!
    :rvd-find-position
    :rvd-insert
    :rvd-row-count
@@ -148,6 +149,11 @@ The result is contained in OUTPUT-VECTOR."))
            (,va (aref (rvd-value-arrays ,A) ,i)))
        ,@body)))
 
+(defun rvd-row-entry-count (A i)
+  (with-rvd-array-pair (ia va) (A i)
+    (declare (ignore va))
+    (array-dimension ia 0)))
+
 (defun rvd-find-position (ia j)
   (loop
     :for column-index :across ia
@@ -174,6 +180,19 @@ The result is contained in OUTPUT-VECTOR."))
     (if-let1 it (rvd-find-position ia j)
              (incf (aref va it) value)
              (rvd-force-insert A i j value))))
+
+(defun rvd-delete! (A i j)
+  (with-rvd-array-pair (ia va) (A i)
+    (if-let1 aij-position (rvd-find-position ia j)
+             (loop
+               :for k :from (1+ aij-position) :below (rvd-row-entry-count A i)
+               :do
+                  (rotatef (aref ia (1- k)) (aref ia k))
+                  (rotatef (aref va (1- k)) (aref va k))
+               :finally
+                  (vector-pop ia)
+                  (vector-pop va))
+             nil)))
 
 (defun rvd-insert (A i j value)
   (with-rvd-array-pair (ia va) (A i)
