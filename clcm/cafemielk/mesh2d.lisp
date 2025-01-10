@@ -86,8 +86,8 @@
 (defun create-square-point-array
     (x-coordinates y-coordinates &key (element-type t))
   (loop
-    :with nx :of-type fixnum := (array-dimension x-coordinates 0)
-    :with ny :of-type fixnum := (array-dimension y-coordinates 0)
+    :with nx :of-type fixnum := (length x-coordinates)
+    :with ny :of-type fixnum := (length y-coordinates)
     :with array := (make-array `(,(* nx ny) 2)
                                :element-type element-type)
     :for j :of-type fixnum :from 0

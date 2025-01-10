@@ -155,7 +155,7 @@ The result is contained in OUTPUT-VECTOR."))
 (defun rvd-row-entry-count (A i)
   (with-rvd-array-pair (ia va) (A i)
     (declare (ignore va))
-    (array-dimension ia 0)))
+    (length ia)))
 
 (defun rvd-entry-count (A)
   (with-slots (nrow) A
@@ -248,7 +248,7 @@ The result is contained in OUTPUT-VECTOR."))
 (defun rvd-row-count (A i)
   (with-rvd-array-pair (ia va) (A i)
     (declare (ignore va))
-    (array-dimension ia 0)))
+    (length ia)))
 
 (defun rvd->coo (A &key (element-type t))
   (with-slots (nrow ncol) A
@@ -295,7 +295,7 @@ The result is contained in OUTPUT-VECTOR."))
 
 (defun csr-entry-count (A)
   (with-slots (entries) A
-    (array-dimension entries 0)))
+    (length entries)))
 
 (defun csr-addmv! (y nrow entries rowptr colind x)
   (loop :for i :from 0 :below nrow :do
@@ -348,7 +348,7 @@ The result is contained in OUTPUT-VECTOR."))
   (declare (type fixnum nrow))
   (let ((rowptr (make-array (1+ nrow)
                             :element-type 'fixnum))
-        (rowind-size (array-dimension rowind 0)))
+        (rowind-size (length rowind)))
     (setf (aref rowptr 0) 0)
     (let/goer ((irow 0) (idx 0)) go-loop
       ;; irow: index of the last updated element in rowptr
@@ -371,10 +371,10 @@ The result is contained in OUTPUT-VECTOR."))
     (make-csr
      :nrow nrow
      :ncol ncol
-     :entries (make-array (array-dimension entries 0)
+     :entries (make-array (length entries)
                           :initial-contents entries
                           :element-type element-type)
-     :colind (make-array (array-dimension colind 0)
+     :colind (make-array (length colind)
                          :initial-contents colind
                          :element-type 'fixnum)
      :rowptr (rowind->rowptr rowind nrow))))
