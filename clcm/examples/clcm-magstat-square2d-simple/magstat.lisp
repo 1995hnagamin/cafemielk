@@ -119,7 +119,7 @@
          (loop
            :for vj :below nvertex
            :when (/= vk~ vj)
-             :do (cm:rvd-insert rvd vk~ vj 0.0d0))
+             :do (cm:rvd-delete! rvd vk~ vj))
          (setf (cm:get-rvd rvd vk~ vk~) 1.0d0)
          ;; Update RHS vector
          (setf (aref rhs vk~) dirichlet-value)
@@ -130,7 +130,7 @@
              :do
                 (decf (aref rhs vi) (* (cm:get-rvd rvd vi vk~)
                                        dirichlet-value))
-                (cm:rvd-insert rvd vi vk~ 0.0d0))
+                (cm:rvd-delete! rvd vi vk~))
       :finally (return (values rvd rhs)))))
 
 (defun run-analysis ()
