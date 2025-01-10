@@ -143,5 +143,14 @@
   (multiple-value-bind (A b) (create-equation *mesh*)
     (let ((sol (cm:cg-solve A b :eps 1e-8 :max-iter 1000))
           (*print-length* 450))
+      (with-open-file (stream #P"output.vtk"
+                              :if-does-not-exist :create
+                              :if-exists :supersede
+                              :direction :output)
+        (cm:legacyvtk-print-header stream)
+        (cm:legacyvtk-print-unstructured-grid stream *mesh*)
+        (cm:legacyvtk-print-point-scalar stream *mesh*
+                                         :vector sol
+                                         :name "A"))
       (format t "Solution:~%~W~%" sol)))
   (format t "Bye.~%"))
