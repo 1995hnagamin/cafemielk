@@ -317,13 +317,17 @@ The result is contained in OUTPUT-VECTOR."))
        (csr-addmv! y ,@slots x))))
 
 (defun csr-mv-set! (y nrow entries rowptr colind x)
-  (loop :for i :from 0 :below nrow :do
-    (setf (aref y i) 0))
+  (loop
+    :with zero := (coerce 0 (array-element-type y))
+    :for i :from 0 :below nrow :do
+      (setf (aref y i) zero))
   (csr-addmv! y nrow entries rowptr colind x))
 
 (defun csr-mv (nrow entries rowptr colind x
                &key (element-type (array-element-type x)))
-  (let1 y (make-array nrow :initial-element 0 :element-type element-type)
+  (let* ((zero (coerce 0 element-type))
+         (y (make-array nrow :initial-element zero
+                             :element-type element-type)))
     (csr-addmv! y nrow entries rowptr colind x)
     y))
 
