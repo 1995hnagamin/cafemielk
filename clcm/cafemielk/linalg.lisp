@@ -26,9 +26,11 @@
    :get-rvd
    :rvd-add
    :rvd-delete!
+   :rvd-entry-count
    :rvd-find-position
    :rvd-insert
    :rvd-row-count
+   :rvd->coo
    :rvd->csr
    :vector-addv!
    :vector-rescale!))
@@ -154,6 +156,11 @@ The result is contained in OUTPUT-VECTOR."))
     (declare (ignore va))
     (array-dimension ia 0)))
 
+(defun rvd-entry-count (A)
+  (with-slots (nrow) A
+    (loop :for i :below nrow
+          :sum (rvd-row-entry-count A i))))
+
 (defun rvd-find-position (ia j)
   (loop
     :for column-index :across ia
@@ -241,6 +248,40 @@ The result is contained in OUTPUT-VECTOR."))
   (with-rvd-array-pair (ia va) (A i)
     (declare (ignore va))
     (array-dimension ia 0)))
+
+(defun rvd->coo (A &key (element-type t))
+  (with-slots (nrow ncol) A
+    (loop
+      :with entry-count := (rvd-entry-count A)
+      :with entries := (make-array entry-count
+                                   :adjustable t
+                                   :fill-pointer 0
+                                   :element-type element-type)
+      :with rowind := (make-array entry-count
+                                  :adjustable t
+                                  :fill-pointer 0
+                                  :element-type 'fixnum)
+      :with colind := (make-array entry-count
+                                  :adjustable t
+                                  :fill-pointer 0
+                                  :element-type 'fixnum)
+      :for i :below nrow
+      :do
+         (with-rvd-array-pair (ia va) (A i)
+           (loop
+             :for j :across ia
+             :for value :across va
+             :do
+                (when (not (zerop value))
+                  (vector-push-extend i rowind)
+                  (vector-push-extend j colind)
+                  (vector-push-extend value entries))))
+      :finally (return
+                 (make-coo :nrow nrow
+                           :ncol ncol
+                           :entries (copy-seq entries)
+                           :rowind (copy-seq rowind)
+                           :colind (copy-seq colind))))))
 
 ;;;
 ;;; CSR (compressed sparse row)
