@@ -131,12 +131,16 @@
                 (decf (aref rhs vi) (* (cm:get-rvd rvd vi vk~)
                                        dirichlet-value))
                 (cm:rvd-delete! rvd vi vk~))
-      :finally (return (values rvd rhs)))))
+      :finally
+         (return (values (cm:coo->csr
+                          (cm:rvd->coo rvd :element-type 'double-float)
+                          :element-type 'double-float)
+                         rhs)))))
 
 (defun run-analysis ()
   (format t "Hello, World~%")
   (format t "Cafemielk version: ~a~%~%" (cm:cafemielk-version))
-  (multiple-value-bind (rvd rhs) (create-free-equation *mesh*)
+  (multiple-value-bind (rvd rhs) (create-equation *mesh*)
     (let ((*print-length* 10))
       (format t "RVD:~%~W~%~%RHS:~%~W~%" rvd rhs)))
   (format t "Bye.~%"))
