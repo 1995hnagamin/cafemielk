@@ -51,6 +51,24 @@
             :do (setf (cm:dense-matrix-ref A i j) (* (1+ i) (1+ j)))))
     (is (equalp (cm:matrix-ref A 2 2) 9))))
 
+(test test-coo
+  (let ((entries (make-array 10 :adjustable t :fill-pointer 0))
+        (rowind (make-array 10 :adjustable t :fill-pointer 0))
+        (colind (make-array 10 :adjustable t :fill-pointer 0)))
+    (vector-push-extend 1.25d0 entries)
+    (vector-push-extend 0 rowind)
+    (vector-push-extend 2 colind)
+    ;; Check whether cm:make-coo correctly handles arrays with fill-pointers.
+    (is (equalp (cm:make-csr :nrow 3 :ncol 3
+                             :rowptr (coerce #(0 1 1 1)
+                                             '(simple-array fixnum (4)))
+                             :colind (coerce #(2) '(simple-array fixnum (1)))
+                             :entries #(1.25d0))
+                (cm:coo->csr (cm:make-coo :nrow 3 :ncol 3
+                                          :rowind rowind
+                                          :colind colind
+                                          :entries entries))))))
+
 ;; / 1  2  0  0  0 \ / 5 \ = / 13 \
 ;; | 3  4  5  0  0 | | 4 |   | 46 |
 ;; | 0  6  7  8  0 | | 3 |   | 61 |
