@@ -3,6 +3,7 @@
 (defpackage :cafemielk/linalg
   (:use :cl :cafemielk/util)
   (:export
+   :cg-solve
    :coo
    :coo-p
    :make-coo
@@ -411,6 +412,49 @@ The result is contained in OUTPUT-VECTOR."))
                            :entries entries
                            :colind colind
                            :rowptr rowptr)))))
+
+;;;
+;;; Solvers
+;;;
+
+;; Conjugate gradient method
+;; (Saad 2003, 199-200)
+;; #|
+(defun cg-solve (mat rhs &key eps (max-iter most-positive-fixnum))
+  (loop
+    ;; constants
+    :with rhs-size := (length rhs)
+    :with threshold^2 := (expt (* eps (sqrt (dot-product rhs rhs))) 2)
+    :with element-type := (array-element-type rhs)
+
+    ;; loop vectors
+    :with x := (make-array rhs-size
+                           :initial-element (coerce 0 element-type)
+                           :element-type element-type)
+    :with r := (map `(simple-array ,element-type (,rhs-size))
+                    #'- rhs (mv mat x :element-type 'double-float))
+
+    :with p := (copy-seq r)
+    :for iter :from 0
+    :for Ap := (mv mat p)
+    :for r^2 := (dot-product r r)
+
+    :when (>= iter max-iter)
+      :do (return (values x nil))
+    :end
+
+    :when (< r^2 threshold^2)
+      :do (return (values x t))
+    :end
+
+    :do
+       (let (alpha beta r~^2)
+         (setq alpha (/ r^2 (dot-product p Ap)))
+         (vector-addcv! x alpha p)
+         (vector-addcv! r (- alpha) Ap)
+         (setq r~^2 (dot-product r r))
+         (setq beta (/ r~^2 r^2))
+         (vector-rescale-addv! p beta r))))
 
 ;;; Local Variables:
 ;;; mode: lisp
