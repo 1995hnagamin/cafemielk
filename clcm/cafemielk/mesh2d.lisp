@@ -16,6 +16,7 @@
    :mesh2d-trig-vise-count
    :mesh2d-trig-vise-elt
    :mesh2d-trig-vise->trig2d
+   :with-mesh2d-trig-vertex-accessors
    :mesh2d-unit-square
    :create-square-point-array
    :create-square-vise-array))
@@ -29,7 +30,7 @@
 (defun mesh2d-trig-coordinate-type (mesh)
   (array-element-type (mesh2d-trig-vertices mesh)))
 
-(defmacro with-mesh2d-trig-accessors
+(defmacro with-mesh2d-trig-vertex-accessors
     ((mesh &key (x nil) (y nil)) &body body)
   (with-gensyms (i)
     (once-only (mesh)
@@ -42,7 +43,7 @@
          ,@body))))
 
 (defun mesh2d-trig-vertex-elt (mesh vertex-index)
-  (with-mesh2d-trig-accessors (mesh :x x :y y)
+  (with-mesh2d-trig-vertex-accessors (mesh :x x :y y)
     (let1 array (make-array 2 :element-type (mesh2d-trig-coordinate-type mesh))
       (setf (aref array 0) (x vertex-index))
       (setf (aref array 1) (y vertex-index))
@@ -66,7 +67,7 @@
     (array-dimension vises 0)))
 
 (defun mesh2d-trig-vise->trig2d (mesh vise)
-  (with-mesh2d-trig-accessors (mesh :x x :y y)
+  (with-mesh2d-trig-vertex-accessors (mesh :x x :y y)
     (loop
       :with cv := (make-array
                    6
