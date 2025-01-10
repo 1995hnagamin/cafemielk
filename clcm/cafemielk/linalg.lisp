@@ -9,6 +9,7 @@
    :csr
    :csr-p
    :make-csr
+   :csr-entry-count
    :coo->csr
    :dense-matrix
    :dense-matrix-p
@@ -291,6 +292,10 @@ The result is contained in OUTPUT-VECTOR."))
   (entries nil :type (simple-array * (*)))
   (rowptr nil :type (simple-array fixnum (*)))
   (colind nil :type (simple-array fixnum (*))))
+
+(defun csr-entry-count (A)
+  (with-slots (entries) A
+    (array-dimension entries 0)))
 
 (defun csr-addmv! (y nrow entries rowptr colind x)
   (loop :for i :from 0 :below nrow :do
