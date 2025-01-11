@@ -16,6 +16,7 @@
    :aref-macrolet1
    :clone-array-with-zeros
    :fill-array-with
+   :create-arith-seq
    :linspace
    :non-negative-p
    :non-positive-p
@@ -126,6 +127,14 @@
 (declaim (inline non-positive-p))
 (defun non-positive-p (x)
   (not (plusp x)))
+
+(defun create-arith-seq (&key size initial-value step (element-type t))
+  (loop
+    :with array := (make-array size :element-type element-type)
+    :for i :from 0 :below size
+    :for value :from initial-value :by step
+    :do (setf (aref array i) value)
+    :finally (return array)))
 
 (defun linspace (min max size)
   (let1 step (/ (- max min) (1- size))

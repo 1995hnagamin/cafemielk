@@ -65,14 +65,6 @@
                        (/ *permeability* (* 4 trig-area)))))))
     :finally (return (values rvd rhs))))
 
-(defun create-arith-seq (&key size initial-value step (element-type t))
-  (loop
-    :with array := (make-array size :element-type element-type)
-    :for i :from 0 :below size
-    :for value :from initial-value :by step
-    :do (setf (aref array i) value)
-    :finally (return array)))
-
 (defun unit-square-boundary-vertices (ndiv)
   ;;
   ;;       R       U
@@ -83,22 +75,22 @@
   ;;     0 *-------* n
   ;;       B       L
   ;;
-  (let ((bottom (create-arith-seq :size ndiv
-                                  :initial-value 0
+  (let ((bottom (cm:create-arith-seq :size ndiv
+                                     :initial-value 0
+                                     :step 1
+                                     :element-type 'fixnum))
+        (top (cm:create-arith-seq :size ndiv
+                                  :initial-value (+ (expt ndiv 2) ndiv 1)
                                   :step 1
                                   :element-type 'fixnum))
-        (top (create-arith-seq :size ndiv
-                               :initial-value (+ (expt ndiv 2) ndiv 1)
-                               :step 1
-                               :element-type 'fixnum))
-        (left (create-arith-seq :size ndiv
-                                :initial-value ndiv
-                                :step (1+ ndiv)
-                                :element-type 'fixnum))
-        (right (create-arith-seq :size ndiv
-                                 :initial-value (1+ ndiv)
-                                 :step (1+ ndiv)
-                                 :element-type 'fixnum)))
+        (left (cm:create-arith-seq :size ndiv
+                                   :initial-value ndiv
+                                   :step (1+ ndiv)
+                                   :element-type 'fixnum))
+        (right (cm:create-arith-seq :size ndiv
+                                    :initial-value (1+ ndiv)
+                                    :step (1+ ndiv)
+                                    :element-type 'fixnum)))
     (sort (concatenate `(simple-array fixnum (,(* 4 ndiv)))
                        bottom top left right)
           #'<)))
