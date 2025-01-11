@@ -33,9 +33,9 @@
     :with rhs := (make-array nvertex
                              :initial-element 0d0
                              :element-type 'double-float)
-    :for vise-idx :of-type fixnum :below (cm:mesh2d-trig-vise-count mesh)
+    :for vise-index :of-type fixnum :below (cm:mesh2d-trig-vise-count mesh)
     :for vise :of-type (simple-array fixnum (3))
-      := (cm:mesh2d-trig-vise-elt mesh vise-idx)
+      := (cm:mesh2d-trig-vise-elt mesh vise-index)
     :for trig :of-type (simple-array double-float (6))
       := (cm:mesh2d-trig-vise->trig2d mesh vise)
     :do
