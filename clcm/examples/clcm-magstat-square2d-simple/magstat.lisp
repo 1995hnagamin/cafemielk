@@ -132,9 +132,7 @@
                                        dirichlet-value))
                 (cm:rvd-delete! rvd vi vk~))
       :finally
-         (return (values (cm:coo->csr
-                          (cm:rvd->coo rvd :element-type 'double-float)
-                          :element-type 'double-float)
+         (return (values (cm:coo->csr (cm:rvd->coo rvd))
                          rhs)))))
 
 (defun run-analysis ()
