@@ -34,12 +34,12 @@
                              :initial-element 0d0
                              :element-type 'double-float)
     :for vise-idx :of-type fixnum :below (cm:mesh2d-trig-vise-count mesh)
+    :for vise :of-type (simple-array fixnum (3))
+      := (cm:mesh2d-trig-vise-elt mesh vise-idx)
+    :for trig :of-type (simple-array double-float (6))
+      := (cm:mesh2d-trig-vise->trig2d mesh vise)
     :do
        (loop
-         :with vise :of-type (simple-array fixnum (3))
-           := (cm:mesh2d-trig-vise-elt mesh vise-idx)
-         :with trig :of-type (simple-array double-float (6))
-           := (cm:mesh2d-trig-vise->trig2d mesh vise)
          :with trig-area :of-type double-float := (cm:trig2d-area trig)
          :for i :of-type fixnum :from 0
          :for vi :of-type fixnum :across vise
