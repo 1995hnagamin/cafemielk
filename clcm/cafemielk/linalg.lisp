@@ -428,7 +428,7 @@ The result is contained in OUTPUT-VECTOR."))
     ;; loop vectors
     :with x := (clone-array-with-zeros rhs)
     :with r := (map `(simple-array ,element-type (,rhs-size))
-                    #'- rhs (mv mat x :element-type 'double-float))
+                    #'- rhs (mv mat x))
 
     :with p := (copy-seq r)
     :for iter :from 0
