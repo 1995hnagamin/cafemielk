@@ -39,30 +39,30 @@
     :for trig :of-type (simple-array double-float (6))
       := (cm:mesh2d-trig-vise->trig2d mesh vise)
     :do
-       (loop
-         :with trig-area :of-type double-float := (cm:trig2d-area trig)
-         :for i :of-type fixnum :from 0
-         :for vi :of-type fixnum :across vise
-         :do
-            (cm:with-trig2d-accessors (trig :x tx :y ty)
-              (let ((b (array3-tab (i i+1 i+2) (- (ty i+1) (ty i+2))))
-                    (c (array3-tab (i i+1 i+2) (- (tx i+2) (tx i+1)))))
-                (declare (type (simple-array double-float (3)) b c))
+       (cm:with-trig2d-accessors (trig :x tx :y ty)
+         (loop
+           :with trig-area :of-type double-float := (cm:trig2d-area trig)
+           :with b :of-type (simple-array double-float (3))
+             := (array3-tab (i i+1 i+2) (- (ty i+1) (ty i+2)))
+           :with c :of-type (simple-array double-float (3))
+             := (array3-tab (i i+1 i+2) (- (tx i+2) (tx i+1)))
+           :for i :of-type fixnum :from 0
+           :for vi :of-type fixnum :across vise
+           :do
+              ;; Update right-hand side vector.
+              (incf (aref rhs vi)
+                    (* 1/3 trig-area *current-density*)) ; J_0 S/3
 
-                ;; Update right-hand side vector.
-                (incf (aref rhs vi)
-                      (* 1/3 trig-area *current-density*)) ; J_0 S/3
-
-                ;; Update coefficient matrix.
-                (loop
-                  :for j :of-type fixnum :from 0
-                  :for vj :of-type fixnum :across vise
-                  :do
-                     (cm:rvd-add
-                      rvd vi vj
-                      (* (+ (* (aref b i) (aref b j))
-                            (* (aref c i) (aref c j)))
-                         (/ *permeability* (* 4 trig-area))))))))
+              ;; Update coefficient matrix.
+              (loop
+                :for j :of-type fixnum :from 0
+                :for vj :of-type fixnum :across vise
+                :do
+                   (cm:rvd-add
+                    rvd vi vj
+                    (* (+ (* (aref b i) (aref b j))
+                          (* (aref c i) (aref c j)))
+                       (/ *permeability* (* 4 trig-area)))))))
     :finally (return (values rvd rhs))))
 
 (defun create-arith-seq (&key size initial-value step (element-type t))
