@@ -119,7 +119,7 @@ The result is contained in OUTPUT-VECTOR."))
 (defmethod mv-add! (y (A dense-matrix) x)
   (dense-matrix-mv-add! y A x))
 
-(defun dense-matrix-mv (A x &key (element-type t))
+(defun dense-matrix-mv (A x &key (element-type (array-element-type x)))
   (with-slots (nrow) A
     (let ((y (make-array nrow
                          :initial-element 0
@@ -127,7 +127,7 @@ The result is contained in OUTPUT-VECTOR."))
       (dense-matrix-mv-add! y A x)
       y)))
 
-(defmethod mv ((A dense-matrix) x &key (element-type t))
+(defmethod mv ((A dense-matrix) x &key (element-type (array-element-type x)))
   (dense-matrix-mv A x :element-type element-type))
 
 ;;;
@@ -138,6 +138,11 @@ The result is contained in OUTPUT-VECTOR."))
   (entries nil :type (array * (*)))
   (rowind nil :type (array * (*)))
   (colind nil :type (array * (*))))
+
+(defun coo-entry-type (A)
+  (declare (type coo A))
+  (with-slots (entries) A
+    (array-element-type entries)))
 
 ;;;
 ;;; RVD (row-based vector of dictionaries)
@@ -162,6 +167,11 @@ The result is contained in OUTPUT-VECTOR."))
   (with-slots (nrow) A
     (loop :for i :below nrow
           :sum (rvd-row-entry-count A i))))
+
+(defun rvd-entry-type (A)
+  (with-slots (value-arrays) A
+    ;; All rows must have the common element-type.
+    (array-element-type (aref value-arrays 0))))
 
 (defun rvd-find-position (ia j)
   (loop
@@ -248,7 +258,7 @@ The result is contained in OUTPUT-VECTOR."))
     (declare (ignore va))
     (length ia)))
 
-(defun rvd->coo (A &key (element-type t))
+(defun rvd->coo (A &key (element-type (rvd-entry-type A)))
   (with-slots (nrow ncol) A
     (loop
       :with entry-count := (rvd-entry-count A)
@@ -364,7 +374,7 @@ The result is contained in OUTPUT-VECTOR."))
         (t
          (go-loop irow (1+ idx)))))))
 
-(defun coo->csr (A &key (element-type t))
+(defun coo->csr (A &key (element-type (coo-entry-type A)))
   (declare (type coo A))
   (with-slots (nrow ncol entries rowind colind) A
     (make-csr
@@ -388,7 +398,7 @@ The result is contained in OUTPUT-VECTOR."))
                     (+ (aref rowptr i) (rvd-row-count A i)))
           :finally (return rowptr))))
 
-(defun rvd->csr (A &key (element-type t))
+(defun rvd->csr (A &key (element-type (rvd-entry-type A)))
   (declare (type rvd A))
   (with-slots (nrow ncol index-arrays value-arrays) A
     (loop
