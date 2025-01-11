@@ -22,33 +22,37 @@
   (format stream "ASCII~%"))
 
 (defun legacyvtk-print-points (stream mesh)
-  (loop
-    :with z-value := 0
-    :with nvertex := (mesh2d-trig-vertex-count mesh)
-      :initially (format stream "POINTS ~a float~%" nvertex)
-    :for vertex-index :below nvertex
-    :do
-       (with-mesh2d-trig-vertex-accessors (mesh :x x :y y)
-         (format stream "~f ~f ~f~%"
-                 (x vertex-index) (y vertex-index) z-value))))
+  (with-mesh2d-trig-vertex-accessors (mesh :x x :y y)
+    (loop
+      :with z-value := 0
+      :with nvertex := (mesh2d-trig-vertex-count mesh)
+        :initially (format stream "POINTS ~a float~%" nvertex)
+      :for vertex-index :below nvertex :do
+        (format stream "~f ~f ~f~%"
+                (x vertex-index) (y vertex-index) z-value))))
 
 (defun legacyvtk-print-cells (stream mesh)
   (loop
     :with trig-npoint := 3
     :with nvise := (mesh2d-trig-vise-count mesh)
-      :initially (format stream "CELLS ~a ~a~%" nvise (* 4 nvise))
+      :initially (format stream "CELLS ~a ~a~%"
+                         nvise (* (1+ trig-npoint) nvise))
     :for vise-index :below nvise
     :for vise := (mesh2d-trig-vise-elt mesh vise-index)
     :do
-       (format stream "~a ~a ~a ~a~%"
-               trig-npoint (aref vise 0) (aref vise 1) (aref vise 2))))
+       (loop
+         :initially (format stream "~a" trig-npoint)
+         :for vertex-index :across vise
+         :do (format stream " ~a" vertex-index)
+         :finally (format stream "~%"))))
 
 (defun legacyvtk-print-cell-types (stream mesh)
   (loop
+    :with vtk-triangle := 5
     :with nvise := (mesh2d-trig-vise-count mesh)
       :initially (format stream "CELL_TYPES ~a~%" nvise)
     :for i :below nvise
-    :do (format stream "5~%")))
+    :do (format stream "~a~%" vtk-triangle)))
 
 (defun legacyvtk-print-unstructured-grid (stream mesh)
   (format stream "DATASET UNSTRUCTURED_GRID~%")
@@ -62,9 +66,9 @@
       :initially (format stream "POINT_DATA ~a~%" nvertex)
                  (format stream "SCALARS ~a float~%" name)
                  (format stream "LOOKUP_TABLE default~%")
-    :for vi :across vector
+    :for point-value :across vector
     :do
-       (format stream "~f~%" vi)))
+       (format stream "~f~%" point-value)))
 
 ;;; Local Variables:
 ;;; mode: lisp
