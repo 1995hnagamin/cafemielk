@@ -38,10 +38,15 @@
       := (cm:mesh2d-trig-vise-elt mesh vise-index)
     :for trig :of-type (simple-array double-float (6))
       := (cm:mesh2d-trig-vise->trig2d mesh vise)
+    :for trig-area :of-type double-float := (cm:trig2d-area trig)
     :do
+       ;; Update right-hand side vector.
+       (loop :for vi :of-type fixnum :across vise :do
+         (incf (aref rhs vi) (* 1/3 trig-area *current-density*))) ; J_0 S/3
+
+       ;; Update coefficient matrix.
        (cm:with-trig2d-accessors (trig :x tx :y ty)
          (loop
-           :with trig-area :of-type double-float := (cm:trig2d-area trig)
            :with b :of-type (simple-array double-float (3))
              := (array3-tab (i i+1 i+2) (- (ty i+1) (ty i+2)))
            :with c :of-type (simple-array double-float (3))
@@ -49,11 +54,6 @@
            :for i :of-type fixnum :from 0
            :for vi :of-type fixnum :across vise
            :do
-              ;; Update right-hand side vector.
-              (incf (aref rhs vi)
-                    (* 1/3 trig-area *current-density*)) ; J_0 S/3
-
-              ;; Update coefficient matrix.
               (loop
                 :for j :of-type fixnum :from 0
                 :for vj :of-type fixnum :across vise
