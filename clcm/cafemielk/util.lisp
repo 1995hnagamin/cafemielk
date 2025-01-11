@@ -14,6 +14,7 @@
    :aref-let1
    :aref-macrolet
    :aref-macrolet1
+   :clone-array-with-zeros
    :fill-array-with
    :linspace
    :non-negative-p
@@ -184,6 +185,13 @@
     :with fill := (coerce value (array-element-type array))
     :for i :below (length array)
     :do (setf (aref array i) fill)))
+
+(declaim (inline clone-array-with-zeros))
+(defun clone-array-with-zeros (prototype-array)
+  (let ((element-type (array-element-type prototype-array)))
+    (make-array (length prototype-array)
+              :initial-element (coerce 0 element-type)
+              :element-type element-type)))
 
 ;;; Local Variables:
 ;;; mode: lisp

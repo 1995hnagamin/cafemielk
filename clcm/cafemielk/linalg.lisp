@@ -426,9 +426,7 @@ The result is contained in OUTPUT-VECTOR."))
     :with element-type := (array-element-type rhs)
 
     ;; loop vectors
-    :with x := (make-array rhs-size
-                           :initial-element (coerce 0 element-type)
-                           :element-type element-type)
+    :with x := (clone-array-with-zeros rhs)
     :with r := (map `(simple-array ,element-type (,rhs-size))
                     #'- rhs (mv mat x :element-type 'double-float))
 
