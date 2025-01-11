@@ -14,6 +14,7 @@
    :aref-let1
    :aref-macrolet
    :aref-macrolet1
+   :fill-array-with
    :linspace
    :non-negative-p
    :non-positive-p
@@ -176,6 +177,13 @@
 (defun dot-product (u v)
   (loop :for i :from 0 :below (length u)
         :sum (* (aref u i) (aref v i))))
+
+(declaim (inline fill-array-with-zero))
+(defun fill-array-with (array value)
+  (loop
+    :with fill := (coerce value (array-element-type array))
+    :for i :below (length array)
+    :do (setf (aref array i) fill)))
 
 ;;; Local Variables:
 ;;; mode: lisp

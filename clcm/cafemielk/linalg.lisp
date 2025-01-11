@@ -314,10 +314,7 @@ The result is contained in OUTPUT-VECTOR."))
        (csr-addmv! y ,@slots x))))
 
 (defun csr-mv-set! (y nrow entries rowptr colind x)
-  (loop
-    :with zero := (coerce 0 (array-element-type y))
-    :for i :from 0 :below nrow :do
-      (setf (aref y i) zero))
+  (fill-array-with y 0)
   (csr-addmv! y nrow entries rowptr colind x))
 
 (defun csr-mv (nrow entries rowptr colind x
