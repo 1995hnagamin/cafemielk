@@ -109,6 +109,7 @@ The result is contained in OUTPUT-VECTOR."))
 
 (defun dense-matrix-mv-add! (y A x)
   "y += A * x"
+  (declare (type dense-matrix A))
   (with-slots (nrow ncol entries) A
     (loop :for i :below nrow :do
       (loop :for j :below ncol :do
@@ -120,6 +121,7 @@ The result is contained in OUTPUT-VECTOR."))
   (dense-matrix-mv-add! y A x))
 
 (defun dense-matrix-mv (A x &key (element-type (array-element-type x)))
+  (declare (type dense-matrix A))
   (with-slots (nrow) A
     (let ((y (make-array nrow
                          :initial-element 0
@@ -156,6 +158,7 @@ The result is contained in OUTPUT-VECTOR."))
   (once-only (A i)
     `(let ((,ia (aref (rvd-index-arrays ,A) ,i))
            (,va (aref (rvd-value-arrays ,A) ,i)))
+       (declare (type rvd ,A))
        ,@body)))
 
 (defun rvd-row-entry-count (A i)
@@ -164,11 +167,13 @@ The result is contained in OUTPUT-VECTOR."))
     (length ia)))
 
 (defun rvd-entry-count (A)
+  (declare (type rvd A))
   (with-slots (nrow) A
     (loop :for i :below nrow
           :sum (rvd-row-entry-count A i))))
 
 (defun rvd-entry-type (A)
+  (declare (type rvd A))
   (with-slots (value-arrays) A
     ;; All rows must have the common element-type.
     (array-element-type (aref value-arrays 0))))
@@ -181,6 +186,7 @@ The result is contained in OUTPUT-VECTOR."))
       :finally (return nil)))
 
 (defun rvd-force-insert (A i j value)
+  (declare (type rvd A))
   (with-rvd-array-pair (ia va) (A i)
     (loop
       :with last-index := (progn
@@ -195,6 +201,7 @@ The result is contained in OUTPUT-VECTOR."))
 
 (declaim (inline rvd-add))
 (defun rvd-add (A i j value)
+  (declare (type rvd A))
   (with-rvd-array-pair (ia va) (A i)
     (if-let1 it (rvd-find-position ia j)
              (incf (aref va it) value)
@@ -259,6 +266,7 @@ The result is contained in OUTPUT-VECTOR."))
     (length ia)))
 
 (defun rvd->coo (A &key (element-type (rvd-entry-type A)))
+  (declare (type rvd A))
   (with-slots (nrow ncol) A
     (loop
       :with entry-count := (rvd-entry-count A)
@@ -302,6 +310,7 @@ The result is contained in OUTPUT-VECTOR."))
   (colind nil :type (simple-array fixnum (*))))
 
 (defun csr-entry-count (A)
+  (declare (type csr A))
   (with-slots (entries) A
     (length entries)))
 
@@ -344,6 +353,8 @@ The result is contained in OUTPUT-VECTOR."))
     (csr-mv-set! y nrow entries rowptr colind v)))
 
 (defun csr-ref (A i j)
+  (declare (type csr A)
+           (type fixnum i j))
   (with-slots (entries rowptr colind) A
     (loop :for idx :from (aref rowptr i) :below (aref rowptr (1+ i))
             :thereis (and (= j (aref colind idx))
@@ -389,6 +400,7 @@ The result is contained in OUTPUT-VECTOR."))
      :rowptr (rowind->rowptr rowind nrow))))
 
 (defun create-rvd-rowptr (A)
+  (declare (type rvd A))
   (with-slots (nrow) A
     (loop :with rowptr := (make-array (1+ nrow)
                                       :initial-element 0
