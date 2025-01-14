@@ -182,8 +182,9 @@ The result is contained in OUTPUT-VECTOR."))
   (loop
     :for column-index :across ia
     :for position :from 0
-    :when (= column-index j) :do (return position)
-      :finally (return nil)))
+    :when (= column-index j)
+      :do (return position)
+    :finally (return nil)))
 
 (defun rvd-force-insert (A i j value)
   (declare (type rvd A))
@@ -293,12 +294,13 @@ The result is contained in OUTPUT-VECTOR."))
                   (vector-push-extend i rowind)
                   (vector-push-extend j colind)
                   (vector-push-extend value entries))))
-      :finally (return
-                 (make-coo :nrow nrow
-                           :ncol ncol
-                           :entries (copy-seq entries)
-                           :rowind (copy-seq rowind)
-                           :colind (copy-seq colind))))))
+      :finally
+         (return
+           (make-coo :nrow nrow
+                     :ncol ncol
+                     :entries (copy-seq entries)
+                     :rowind (copy-seq rowind)
+                     :colind (copy-seq colind))))))
 
 ;;;
 ;;; CSR (compressed sparse row)
@@ -406,13 +408,14 @@ The result is contained in OUTPUT-VECTOR."))
 (defun create-rvd-rowptr (A)
   (declare (type rvd A))
   (with-slots (nrow) A
-    (loop :with rowptr := (make-array (1+ nrow)
-                                      :initial-element 0
-                                      :element-type 'fixnum)
-          :for i :below nrow
-          :do (setf (aref rowptr (1+ i))
-                    (+ (aref rowptr i) (rvd-row-count A i)))
-          :finally (return rowptr))))
+    (loop
+      :with rowptr := (make-array (1+ nrow)
+                                  :initial-element 0
+                                  :element-type 'fixnum)
+      :for i :below nrow
+      :do (setf (aref rowptr (1+ i))
+                (+ (aref rowptr i) (rvd-row-count A i)))
+      :finally (return rowptr))))
 
 (defun rvd->csr (A &key (element-type (rvd-entry-type A)))
   (declare (type rvd A))
@@ -424,12 +427,13 @@ The result is contained in OUTPUT-VECTOR."))
       :with entries := (make-array size :element-type element-type)
       :for i :below nrow
       :do
-         (loop :with offset := (aref rowptr i)
-               :for idxj :from 0
-               :for j :across (aref index-arrays i)
-               :for Aij :across (aref value-arrays i)
-               :do (setf (aref colind (+ offset idxj)) j)
-                   (setf (aref entries (+ offset idxj)) Aij))
+         (loop
+           :with offset := (aref rowptr i)
+           :for idxj :from 0
+           :for j :across (aref index-arrays i)
+           :for Aij :across (aref value-arrays i)
+           :do (setf (aref colind (+ offset idxj)) j)
+               (setf (aref entries (+ offset idxj)) Aij))
       :finally
          (return (make-csr :nrow nrow
                            :ncol ncol
