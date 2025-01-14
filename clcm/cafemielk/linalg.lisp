@@ -289,11 +289,11 @@ The result is contained in OUTPUT-VECTOR."))
            (loop
              :for j :across ia
              :for value :across va
-             :do
-                (when (not (zerop value))
+             :unless (zerop value)
+               :do
                   (vector-push-extend i rowind)
                   (vector-push-extend j colind)
-                  (vector-push-extend value entries))))
+                  (vector-push-extend value entries)))
       :finally
          (return
            (make-coo :nrow nrow
