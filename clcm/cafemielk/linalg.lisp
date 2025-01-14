@@ -380,8 +380,8 @@ The result is contained in OUTPUT-VECTOR."))
       (declare (type fixnum irow idx))
       (cond
         ((= idx rowind-size)
-         (loop :for ir :from (1+ irow) :to nrow :do
-           (setf (aref rowptr ir) rowind-size))
+         (array-set rowptr :begin (1+ irow) :end (1+ nrow)
+                           :value rowind-size)
          rowptr)
         ((> (aref rowind idx) irow)
          (setf (aref rowptr (1+ irow)) idx)

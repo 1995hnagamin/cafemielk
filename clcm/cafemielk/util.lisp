@@ -14,6 +14,7 @@
    :aref-let1
    :aref-macrolet
    :aref-macrolet1
+   :array-set
    :clone-array-with-zeros
    :fill-array-with
    :create-arith-seq
@@ -201,6 +202,11 @@
     (make-array (length prototype-array)
               :initial-element (coerce 0 element-type)
               :element-type element-type)))
+
+(declaim (inline array-set))
+(defun array-set (array &key begin end value)
+  (loop :for i :from begin :below end :do
+    (setf (aref array i) value)))
 
 ;;; Local Variables:
 ;;; mode: lisp
