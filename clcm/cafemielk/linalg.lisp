@@ -356,10 +356,14 @@ The result is contained in OUTPUT-VECTOR."))
   (declare (type csr A)
            (type fixnum i j))
   (with-slots (entries rowptr colind) A
-    (loop :for idx :from (aref rowptr i) :below (aref rowptr (1+ i))
-            :thereis (and (= j (aref colind idx))
-                          (aref entries idx))
-          :finally (return 0))))
+    (loop
+      :with index-begin := (aref rowptr i)
+      :with index-end := (aref rowptr (1+ i))
+      :for index :from index-begin :below index-end
+      :for index-j := (aref colind index)
+      :when (= j index-j)
+        :do (return (aref entries index))
+      :finally (return 0))))
 
 (defmethod matrix-ref ((M csr) i j)
   (csr-ref M i j))
