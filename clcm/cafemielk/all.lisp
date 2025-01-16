@@ -5,6 +5,7 @@
    :cafemielk/geom/trig2d
    :cafemielk/linalg
    :cafemielk/mesh2d
+   :cafemielk/mesh2d-quad
    :cafemielk/vtk/legacy
    :cafemielk/package-info))
 
