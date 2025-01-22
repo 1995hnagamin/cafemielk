@@ -151,14 +151,15 @@
     vec))
 
 (defmacro collect-substitute (collect (params &rest args-list) expr)
-  `(,collect
-       ,@(loop :for args :in args-list
-               :collecting
-               `(let ,(loop :for param :in params
-                            :for arg :in args
-                            :collecting `(,param ,arg))
-                  (declare (ignorable ,@params))
-                  ,expr))))
+  (with-gensyms (fname)
+    `(flet ((,fname ,params
+              (declare (ignorable ,@params))
+              ,expr))
+       (declare (inline ,fname))
+       (,collect
+           ,@(loop
+               :for args :in args-list
+               :collecting `(,fname ,@args))))))
 
 (defmacro collect-substitute-a3 (collect (i j k) expr)
   `(collect-substitute
