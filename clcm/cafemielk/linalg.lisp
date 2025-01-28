@@ -447,20 +447,20 @@ The result is contained in OUTPUT-VECTOR."))
 
 ;; Conjugate gradient method
 ;; (Saad 2003, 199-200)
-;; #|
 (defun cg-solve (mat rhs &key eps (max-iter most-positive-fixnum))
   (loop
     ;; constants
-    :with rhs-size := (length rhs)
     :with threshold^2 := (expt (* eps (sqrt (dot-product rhs rhs))) 2)
     :with element-type := (array-element-type rhs)
+    :with rhs-size := (length rhs)
 
-    ;; loop vectors
+    ;; temporary vectors
     :with x := (clone-array-with-zeros rhs)
     :with r := (map `(simple-array ,element-type (,rhs-size))
                     #'- rhs (mv mat x))
-
     :with p := (copy-seq r)
+
+    ;; loop-local variables
     :for iter :from 0
     :for Ap := (mv mat p)
     :for r^2 := (dot-product r r)
