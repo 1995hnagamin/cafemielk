@@ -81,21 +81,22 @@
   (array-dimension point-array 0))
 
 (defmacro lexicographic-< ((i j) (param) &rest clauses)
-  (reduce
-   #'(lambda (clause tail)
-       (destructuring-bind (form &key (less '<) (equ '=)) clause
-         (with-gensyms (form-* form-i form-j)
-           `(flet ((,form-* (,param) ,form))
-              (declare (inline ,form-*))
-              (let ((,form-i (,form-* ,i))
-                    (,form-j (,form-* ,j)))
-                (or (,less ,form-i ,form-j)
-                    (and (,equ ,form-i ,form-j)
-                         ,tail)))))))
-   clauses
-   :from-end t
-   :start 0 :end (length clauses)
-   :initial-value nil))
+  (once-only (i j)
+    (reduce
+     #'(lambda (clause tail)
+         (destructuring-bind (form &key (less '<) (equ '=)) clause
+           (with-gensyms (form-* form-i form-j)
+             `(flet ((,form-* (,param) ,form))
+                (declare (inline ,form-*))
+                (let ((,form-i (,form-* ,i))
+                      (,form-j (,form-* ,j)))
+                  (or (,less ,form-i ,form-j)
+                      (and (,equ ,form-i ,form-j)
+                           ,tail)))))))
+     clauses
+     :from-end t
+     :start 0 :end (length clauses)
+     :initial-value nil)))
 
 (defun get-shuffled-indexes (point-array)
   (declare (type (array * (* *)) point-array))
