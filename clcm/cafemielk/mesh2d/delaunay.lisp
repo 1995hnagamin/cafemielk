@@ -121,14 +121,8 @@
                          ,tail)))))))
    clauses
    :from-end t
-   :start 0 :end (1- (length clauses))
-   :initial-value (destructuring-bind ((form &key (less '<) (equ '=)))
-                      (last clauses)
-                    (declare (ignorable equ))
-                    (with-gensyms (last-*)
-                      `(flet ((,last-* (,param) ,form))
-                         (declare (inline ,last-*))
-                         (,less (,last-* ,i) (,last-* ,j)))))))
+   :start 0 :end (length clauses)
+   :initial-value nil))
 
 (defun get-shuffled-indexes (point-array)
   (declare (type (array * (* *)) point-array))
