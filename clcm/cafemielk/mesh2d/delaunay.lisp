@@ -60,6 +60,26 @@
     :finally
        (vector-pop vector)))
 
+(defun vise->trig (points vise)
+  `#(,(aref (aref points (aref vise 0)) 0)
+     ,(aref (aref points (aref vise 0)) 1)
+     ,(aref (aref points (aref vise 1)) 0)
+     ,(aref (aref points (aref vise 1)) 1)
+     ,(aref (aref points (aref vise 2)) 0)
+     ,(aref (aref points (aref vise 2)) 1)))
+
+(declaim (inline point-array-xref))
+(defun point-array-xref (point-array i)
+  (aref point-array i 0))
+
+(declaim (inline point-array-yref))
+(defun point-array-yref (point-array i)
+  (aref point-array i 1))
+
+(declaim (inline point-array-count))
+(defun point-array-count (point-array)
+  (array-dimension point-array 0))
+
 (declaim (inline <=>))
 (defun <=> (a b)
   (cond
