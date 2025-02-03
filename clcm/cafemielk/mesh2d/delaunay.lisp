@@ -1,7 +1,7 @@
 ;;;; Delaunay triangulation
 
 (defpackage :cafemielk/mesh2d/delaunay
-  (:use :cl :cafemielk/geom/trig2d)
+  (:use :cl :cafemielk/geom/trig2d :cafemielk/util)
   (:export
    ))
 (in-package :cafemielk/mesh2d/delaunay)
@@ -66,3 +66,68 @@
     ((< a b) :<)
     ((> a b) :>)
     (t :=)))
+
+(defmacro lexicographic-comparator ((param) &rest forms)
+  (with-gensyms (i j)
+    `(lambda (,i ,j)
+       ,(reduce
+         #'(lambda (form tail)
+             (with-gensyms (form-*)
+               `(flet ((,form-* (,param) ,form))
+                  (declare (inline ,form-*))
+                  (case (<=> (,form-* ,i) (,form-* ,j))
+                      (:< :<)
+                      (:> :>)
+                      (:= ,tail)))))
+         forms
+         :from-end t
+         :start 0 :end (1- (length forms))
+         :initial-value (with-gensyms (last-*)
+                          `(flet ((,last-* (,param) ,(car (last forms))))
+                             (declare (inline ,last-*))
+                             (<=> (,last-* ,i) (,last-* ,j))))))))
+
+(defmacro lexicographic-< ((i j) (param) &rest clauses)
+  (reduce
+   #'(lambda (clause tail)
+       (destructuring-bind (form &key (less '<) (equ '=)) clause
+         (with-gensyms (form-* form-i form-j)
+           `(flet ((,form-* (,param) ,form))
+              (declare (inline ,form-*))
+              (let ((,form-i (,form-* ,i))
+                    (,form-j (,form-* ,j)))
+                (or (,less ,form-i ,form-j)
+                    (and (,equ ,form-i ,form-j)
+                         ,tail)))))))
+   clauses
+   :from-end t
+   :start 0 :end (1- (length clauses))
+   :initial-value (destructuring-bind ((form &key (less '<) (equ '=)))
+                      (last clauses)
+                    (declare (ignorable equ))
+                    (with-gensyms (last-*)
+                      `(flet ((,last-* (,param) ,form))
+                         (declare (inline ,last-*))
+                         (,less (,last-* ,i) (,last-* ,j)))))))
+
+(defun get-shuffled-indexes (point-array)
+  (declare (type (array * (* *)) point-array))
+  (flet ((lex-< (i j)
+           (declare (type fixnum i j))
+           (lexicographic-< (i j)
+               (k)
+               ((point-array-yref point-array k))
+               ((point-array-xref point-array k)))))
+    (let* ((npoint (point-array-count point-array))
+           (indexes (iota-array npoint :element-type 'fixnum))
+           (highest-point-index (loop
+                                  :with m := 0
+                                  :for i :from 1 :below npoint
+                                  :when (lex-< m i)
+                                    :do (setf m i)
+                                  :finally
+                                     (return m))))
+      (declare (type (array fixnum (*)) indexes)
+               (type fixnum npoint))
+      (rotatef (aref indexes 0) (aref indexes highest-point-index))
+      (fisher-yates-shuffle indexes 1 npoint))))
