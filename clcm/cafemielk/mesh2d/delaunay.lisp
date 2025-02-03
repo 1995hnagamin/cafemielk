@@ -6,13 +6,13 @@
    ))
 (in-package :cafemielk/mesh2d/delaunay)
 
-(defun random-begin-end (start end)
+(defun random-range (start end)
   (+ start (random (- end start))))
 
 (defun fisher-yates-shuffle (array start end)
   (loop
     :for i :downfrom (1- end) :above start
-    :for j := (random-begin-end start (1+ i))
+    :for j := (random-range start (1+ i))
     :do
        (rotatef (aref array i) (aref array j))
     :finally
