@@ -151,3 +151,8 @@
                (type fixnum npoint))
       (rotatef (aref indexes 0) (aref indexes highest-point-index))
       (fisher-yates-shuffle indexes 1 npoint))))
+
+;;; Local Variables:
+;;; mode: lisp
+;;; indent-tabs-mode: nil
+;;; End:
