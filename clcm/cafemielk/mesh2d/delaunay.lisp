@@ -80,33 +80,6 @@
 (defun point-array-count (point-array)
   (array-dimension point-array 0))
 
-(declaim (inline <=>))
-(defun <=> (a b)
-  (cond
-    ((< a b) :<)
-    ((> a b) :>)
-    (t :=)))
-
-(defmacro lexicographic-comparator ((param) &rest forms)
-  (with-gensyms (i j)
-    `(lambda (,i ,j)
-       ,(reduce
-         #'(lambda (form tail)
-             (with-gensyms (form-*)
-               `(flet ((,form-* (,param) ,form))
-                  (declare (inline ,form-*))
-                  (case (<=> (,form-* ,i) (,form-* ,j))
-                      (:< :<)
-                      (:> :>)
-                      (:= ,tail)))))
-         forms
-         :from-end t
-         :start 0 :end (1- (length forms))
-         :initial-value (with-gensyms (last-*)
-                          `(flet ((,last-* (,param) ,(car (last forms))))
-                             (declare (inline ,last-*))
-                             (<=> (,last-* ,i) (,last-* ,j))))))))
-
 (defmacro lexicographic-< ((i j) (param) &rest clauses)
   (reduce
    #'(lambda (clause tail)
