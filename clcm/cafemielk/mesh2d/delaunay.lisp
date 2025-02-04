@@ -80,6 +80,13 @@
 (defun point-array-count (point-array)
   (array-dimension point-array 0))
 
+(declaim (inline point-array-nth))
+(defun point-array-nth (n point-array)
+  (declare (type fixnum n)
+           (type (array * (* *)) point-array))
+  `#(,(point-array-xref point-array n)
+     ,(point-array-yref point-array n)))
+
 (defmacro lexicographic< ((i j) (param) &rest clauses)
   (once-only (i j)
     (reduce
