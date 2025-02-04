@@ -80,7 +80,7 @@
 (defun point-array-count (point-array)
   (array-dimension point-array 0))
 
-(defmacro lexicographic-< ((i j) (param) &rest clauses)
+(defmacro lexicographic< ((i j) (param) &rest clauses)
   (once-only (i j)
     (reduce
      #'(lambda (clause tail)
@@ -100,9 +100,9 @@
 
 (defun get-shuffled-indexes (point-array)
   (declare (type (array * (* *)) point-array))
-  (flet ((lex-< (i j)
+  (flet ((lex< (i j)
            (declare (type fixnum i j))
-           (lexicographic-< (i j)
+           (lexicographic< (i j)
                (k)
                ((point-array-yref point-array k))
                ((point-array-xref point-array k)))))
@@ -111,7 +111,7 @@
            (highest-point-index (loop
                                   :with m := 0
                                   :for i :from 1 :below npoint
-                                  :when (lex-< m i)
+                                  :when (lex< m i)
                                     :do (setf m i)
                                   :finally
                                      (return m))))
