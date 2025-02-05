@@ -19,8 +19,8 @@
           (- (aref a 1) (aref b 1))))
 
 (defun ccw-p (a b c)
-  (non-negative-p (cross2d (2d- b a)
-                           (2d- c a))))
+  (plusp (cross2d (2d- b a)
+                  (2d- c a))))
 
 (defun trig2d-from-3points (a b c &key (element-type t))
   (flet ((make (a b c)
