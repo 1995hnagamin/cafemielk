@@ -18,9 +18,11 @@
   (vector (- (aref a 0) (aref b 0))
           (- (aref a 1) (aref b 1))))
 
-(defun ccw-p (a b c)
-  (plusp (cross2d (2d- b a)
-                  (2d- c a))))
+(declaim (inline counterclockwisep))
+(defun counterclockwisep (origin pivot target)
+  (declare (type (array * (2)) origin pivot target))
+  (plusp (cross2d (2d- pivot origin)
+                  (2d- target origin))))
 
 (defun trig2d-from-3points (a b c &key (element-type t))
   (flet ((make (a b c)
@@ -31,7 +33,7 @@
                                                   (vector ax bx cx ay by cy))
                            :element-type element-type
                            :adjustable nil))))
-    (if (ccw-p a b c)
+    (if (counterclockwisep a b c)
         (make a b c)
         (make a c b))))
 
