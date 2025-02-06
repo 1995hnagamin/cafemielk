@@ -3,6 +3,8 @@
 (defpackage :cafemielk/geom/trig2d
   (:use :cl :cafemielk/util)
   (:export
+   :clockwisep
+   :counterclockwisep
    :trig2d-from-3points
    :trig2d-adherent-p
    :trig2d-area
@@ -23,6 +25,12 @@
   (declare (type (array * (2)) origin pivot target))
   (plusp (cross2d (2d- pivot origin)
                   (2d- target origin))))
+
+(declaim (inline clockwisep))
+(defun clockwisep (origin pivot target)
+  (declare (type (array * (2)) origin pivot target))
+  (minusp (cross2d (2d- pivot origin)
+                   (2d- target origin))))
 
 (defun trig2d-from-3points (a b c &key (element-type t))
   (flet ((make (a b c)
