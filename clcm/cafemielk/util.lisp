@@ -209,6 +209,19 @@
   (loop :for i :from begin :below end :do
     (setf (aref array i) value)))
 
+(defun fast-two-sum (big small)
+  (let* ((sum (+ big small))
+         (eps (- small (- sum big))))
+    (values sum eps)))
+
+(declaim (inline knuth-two-sum))
+(defun knuth-two-sum (a b)
+  (let* ((sum (+ a b))
+         (b~ (- sum a))
+         (a~ (- sum b~)))
+    (values sum
+            (+ (- a a~) (- b b~)))))
+
 (defun partition (array first last)
   (flet ((swap (i j)
            (declare (type fixnum i j))
