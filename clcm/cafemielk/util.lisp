@@ -209,6 +209,56 @@
   (loop :for i :from begin :below end :do
     (setf (aref array i) value)))
 
+(defun partition (array first last)
+  (flet ((swap (i j)
+           (declare (type fixnum i j))
+           (rotatef (aref array i) (aref array j))))
+    (declare (inline swap))
+    (loop
+      :with pivot := (aref array last)
+      :with i := first
+      :for j :from first :below last
+      :when (<= (aref array j) pivot) :do
+        (swap i j)
+        (incf i)
+      :finally
+         (swap i last)
+         (return (values i array)))))
+
+(defun sequence->array (sequence &key (start 0) (end (length sequence)))
+  (let* ((length (- end start))
+         (array (make-array length)))
+    (replace array sequence
+             :start1 0 :end1 length
+             :start2 start :end2 end)
+    array))
+
+(defun %select-min (array k &key start end)
+  (declare (type vector array)
+           (type fixnum k start end))
+  (let* ((pivot-index (partition array start (1- end)))
+         (smaller-count (- pivot-index start)))
+    (cond
+      ((< k smaller-count)
+       (%select-min array k
+                    :start start :end pivot-index))
+      ((> k smaller-count)
+       (%select-min array (- k 1 smaller-count)
+                    :start (1+ pivot-index) :end end))
+      (t (aref array pivot-index)))))
+
+(defun select-min (sequence index
+                   &key (start 0) (end (length sequence)) (in-place nil))
+  (declare (type fixnum index))
+  (let1 length (- end start)
+    (assert (< index length))
+    (if in-place
+        (progn
+          (assert (arrayp sequence))
+          (%select-min sequence index :start start :end end))
+        (%select-min (sequence->array sequence :start start :end end)
+                     index :start 0 :end length))))
+
 ;;; Local Variables:
 ;;; mode: lisp
 ;;; indent-tabs-mode: nil
