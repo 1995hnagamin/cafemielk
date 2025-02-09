@@ -172,7 +172,7 @@
                (format t "(ccwp ~a ~a ~a)~%" r i j)
                (cond
                  ((and (>= i 0) (>= j 0) (>= r 0))
-                  (clockwisep (point-ref i) (point-ref j) (point-ref r)))
+                  (counterclockwisep (point-ref i) (point-ref j) (point-ref r)))
                  ((= i -2) (lex< j r))
                  ((= j -1) (lex< i r))
                  (t (ccwp i j r))))
