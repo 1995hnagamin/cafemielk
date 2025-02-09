@@ -127,6 +127,135 @@
       (rotatef (aref indexes 0) (aref indexes highest-point-index))
       (fisher-yates-shuffle indexes 1 npoint))))
 
+;; Mark Berg, Otfried Cheong, Marc Kreveld, and Mark Overmars
+;; _Computational Geometry: Algorithms and Applications_
+(defun delaunay-triangulate (point-array)
+  (let* ((npoint (array-dimension point-array 0))
+         (vises (make-array 0 :adjustable t :fill-pointer 0))
+         (flags (make-array 0 :adjustable t :fill-pointer 0))
+         (indexes (get-shuffled-indexes point-array))
+         (super-trig `#(-2 -1 ,(aref indexes 0))))
+    (labels ((push-vise (vise)
+               (format t "push-vise ~a~%" vise)
+               (vector-push-extend vise vises)
+               (vector-push-extend t flags))
+             (adherent-p (point vise)
+               (format t "adherent-p ~a ~a~%" point vise)
+               (or (and (find -2 vise) (find -1 vise))
+                   (trig2d-adherent-p (vise->trig point-array vise) point)))
+             (find-trig (r)
+               (format t "find-trig ~a[~a]~%"
+                       r (point-array-nth r point-array))
+               (loop
+                 :for tr :from 0 :below npoint
+                 :when (and
+                        (elt flags tr)
+                        (adherent-p (point-array-nth r point-array)
+                                    (aref vises tr)))
+                   :do
+                      (return tr)
+                 :finally
+                    (error "not found")))
+             (find-adjoint (i j tr)
+               (format t "find-adjoint ~a[~a] ~a[~a] ~a[~a]~%"
+                       i (if (>=  i 0)
+                             (point-array-nth i point-array)
+                             "###")
+                       j (if (>= j 0)
+                             (point-array-nth j point-array)
+                             "###")
+                       tr (aref vises tr))
+               (loop
+                 :for ti :from 0 :below (length vises)
+                 :when (and
+                        (/= ti tr)
+                        (elt flags ti)
+                        (find i (aref vises ti))
+                        (find j (aref vises ti)))
+                   :do
+                      (return
+                        (values ti
+                                (- (reduce #'+ (aref vises ti)) i j)))
+                 :finally
+                    (error "adjoint point not found")))
+             (legalp (r i j tr)
+               (format t "legalp ~a[~a] ~a[~a] ~a[~a] ~a[~a]~%"
+                       r (if (>= r 0)
+                             (point-array-nth r point-array)
+                             "###")
+                       i (if (>= i 0)
+                             (point-array-nth i point-array)
+                             "###")
+                       j (if (>= j 0)
+                             (point-array-nth j point-array)
+                             "###")
+                       tr (aref vises tr))
+               (if (and (find i super-trig) (find j super-trig))
+                   (values t nil nil)
+                   (multiple-value-bind (ts k) (find-adjoint i j tr)
+                     (format t "found adjoint: ~a[~a] ~a[~a]~%"
+                             ts (aref vises tr)
+                             k (if (>= k 0) (point-array-nth k point-array)
+                                   "###"))
+                     (if (and (>= r 0) (>= i 0) (>= j 0) (>= k 0))
+                         (values
+                          (in-circle-p (point-array-nth r point-array)
+                                       (point-array-nth i point-array)
+                                       (point-array-nth j point-array)
+                                       (point-array-nth k point-array))
+                          ts k)
+                         (values (< (min k r) (min i j))
+                                 ts k)))))
+             (legalize-edge (r i j tr)
+               (sleep 0.5)
+               (format t "legalize-edge ~a ~a ~a ~a~%" r i j tr)
+               (multiple-value-bind (legal ts k) (legalp r i j tr)
+                 (when legal
+                   (format t "legal. no operations needed.~%"))
+                 (when (not legal)
+                   (format t "illegal~%")
+                   (setf (aref flags tr) nil)
+                   (format t "(aref flags ~a) = nil~%" tr)
+                   (setf (aref flags ts) nil)
+                   (format t "(aref flags ~a) = nil~%" ts)
+                   (let ((t1 (push-vise `#(,r ,i ,k)))
+                         (t2 (push-vise `#(,r ,k ,j))))
+                     (legalize-edge r i k t1)
+                     (legalize-edge r k j t2))))))
+      (push-vise super-trig)
+      (loop
+        :initially (format t "loop: indexes: ~a~%" indexes)
+        :for r-index :from 1 :below npoint
+        :for r := (aref indexes r-index)
+        :for tr := (find-trig r)
+        :do
+           (format t "loop: r = ~a~%" r)
+        :if (adherent-p (point-array-nth r point-array) (aref vises tr)) :do
+          (format t "~a~%" (aref vises tr))
+          (aref-let (((i j k) (aref vises tr)))
+            (format t "i: ~a, j: ~a, k: ~a~%" i j k)
+            (setf (aref flags tr) nil)
+            (format t "(aref flags ~a) = nil~%" tr)
+            ;; add edges r-i, r-j, r-k
+            (let ((tr1 (push-vise `#(,r ,i ,j)))
+                  (tr2 (push-vise `#(,r ,j ,k)))
+                  (tr3 (push-vise `#(,r ,k ,i))))
+              (format t "Yee~%")
+              ;; legalize edges
+              (legalize-edge r i j tr1)
+              (legalize-edge r j k tr2)
+              (legalize-edge r k i tr3)))
+        :else :do
+          (error "not implemented")
+        :end)
+      (loop
+        :with array := (make-array 0 :fill-pointer 0 :adjustable t)
+        :for i :below (length vises)
+        :when (aref flags i) :do
+          (vector-push-extend (aref vises i) array)
+        :finally
+           (return array)))))
+
 ;;; Local Variables:
 ;;; mode: lisp
 ;;; indent-tabs-mode: nil
