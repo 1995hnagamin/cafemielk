@@ -231,7 +231,6 @@
                          (values (< (min k r) (min i j))
                                  ts k)))))
              (legalize-edge (r i j tr)
-               (sleep 0.5)
                (format t "(legalize-edge ~a[~a] ~a[~a] ~a[~a] ~a[~a:~a])~%"
                        r (if (>= r 0) (point-ref r) "---")
                        i (if (>= i 0) (point-ref i) "---")
