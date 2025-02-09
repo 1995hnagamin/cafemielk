@@ -134,24 +134,50 @@
          (vises (make-array 0 :adjustable t :fill-pointer 0))
          (flags (make-array 0 :adjustable t :fill-pointer 0))
          (indexes (get-shuffled-indexes point-array))
-         (super-trig `#(-2 -1 ,(aref indexes 0))))
+         (pzero (aref indexes 0))
+         (super-trig `#(-2 -1 ,pzero)))
     (labels ((push-vise (vise)
                (format t "push-vise ~a~%" vise)
                (vector-push-extend vise vises)
                (vector-push-extend t flags))
-             (adherent-p (point vise)
-               (format t "adherent-p ~a ~a~%" point vise)
-               (or (and (find -2 vise) (find -1 vise))
-                   (trig2d-adherent-p (vise->trig point-array vise) point)))
+             (point-ref (i)
+               (point-array-nth i point-array))
+             (bounding-point-p (i)
+               (declare (type fixnum i))
+               (or (= i -2) (= i -1) (= i pzero)))
+             (lex< (i j)
+               (declare (type fixnum i j))
+               ;; (format t "(lex< ~a ~a)~%" i j)
+               (cond
+                 ((= j -2) t)
+                 ((= i -2) nil)
+                 ((= i -1) t)
+                 ((= j -1) nil)
+                 (t (aref-let (((xi yi) (point-ref i))
+                               ((xj yj) (point-ref j)))
+                      (cond
+                        ((< yi yj) t)
+                        ((< yj yi) nil)
+                        (t (> xi xj)))))))
+             (ccwp (r i j)
+               (declare (type fixnum r i j))
+               ;; (format t "(ccwp ~a ~a ~a)~%" r i j)
+               (cond
+                 ((and (>= i 0) (>= j 0) (>= r 0))
+                  (clockwisep (point-ref i) (point-ref j) (point-ref r)))
+                 ((= i -2) (lex< j r))
+                 ((= j -1) (lex< i r))
+                 (t (ccwp i j r))))
+             (adherent-p (r vise)
+               (aref-let (((i j k) vise))
+                 (and (ccwp r i j) (ccwp r j k) (ccwp r k i))))
              (find-trig (r)
                (format t "find-trig ~a[~a]~%"
                        r (point-array-nth r point-array))
                (loop
-                 :for tr :from 0 :below npoint
-                 :when (and
-                        (elt flags tr)
-                        (adherent-p (point-array-nth r point-array)
-                                    (aref vises tr)))
+                 :for tr :from 0 :below (length vises)
+                 :for trig := (aref vises tr)
+                 :when (and (elt flags tr) (adherent-p r trig))
                    :do
                       (return tr)
                  :finally
@@ -230,7 +256,7 @@
         :for tr := (find-trig r)
         :do
            (format t "loop: r = ~a~%" r)
-        :if (adherent-p (point-array-nth r point-array) (aref vises tr)) :do
+        :if (adherent-p r (aref vises tr)) :do
           (format t "~a~%" (aref vises tr))
           (aref-let (((i j k) (aref vises tr)))
             (format t "i: ~a, j: ~a, k: ~a~%" i j k)
