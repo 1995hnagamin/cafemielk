@@ -127,6 +127,12 @@
       (rotatef (aref indexes 0) (aref indexes highest-point-index))
       (fisher-yates-shuffle indexes 1 npoint))))
 
+(declaim (inline min&max))
+(defun min&max (x y)
+  (if (< x y)
+      (values x y)
+      (values y x)))
+
 ;; Mark Berg, Otfried Cheong, Marc Kreveld, and Mark Overmars
 ;; _Computational Geometry: Algorithms and Applications_
 (defun delaunay-triangulate (point-array)
@@ -221,15 +227,26 @@
                      (format t "found adjoint: ~a[~a] ~a[~a]~%"
                              ts (aref vises ts)
                              k (if (>= k 0) (point-ref k) "---"))
-                     (if (and (>= r 0) (>= i 0) (>= j 0) (>= k 0))
-                         (values
-                          (in-circle-p (point-array-nth r point-array)
-                                       (point-array-nth i point-array)
-                                       (point-array-nth j point-array)
-                                       (point-array-nth k point-array))
-                          ts k)
-                         (values (< (min k r) (min i j))
-                                 ts k)))))
+                     (values
+                      (or
+                       ;; if not flippable, return true
+                       (not (ccwp r i k))
+                       (not (ccwp r k j))
+                       ;; now rik and rkj is CCW
+                       (cond
+                         ((every #'non-negative-p `#(,r ,i ,j ,k))
+                          (in-circle-p (point-ref r)
+                                       (point-ref i)
+                                       (point-ref j)
+                                       (point-ref k)))
+                         ((= k pzero)
+                          (multiple-value-bind (i j) (min&max i j)
+                            (cond
+                              ((= i -2) (ccwp r k j))
+                              ((= i -1) (ccwp r j k))
+                              (t (error "unimplemented")))))
+                         (t (< (min k r) (min i j)))))
+                      ts k))))
              (legalize-edge (r i j tr)
                (format t "(legalize-edge ~a[~a] ~a[~a] ~a[~a] ~a[~a:~a])~%"
                        r (if (>= r 0) (point-ref r) "---")
