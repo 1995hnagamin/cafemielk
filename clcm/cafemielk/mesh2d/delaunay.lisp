@@ -159,7 +159,7 @@
     (t (delaunay-ccw-p i j r :point-array point-array))))
 
 (defun delaunay-inner-p (r trig-vise point-array)
-  (aref-let (((i j k) trig-vise))
+  (aref-let1 (i j k) trig-vise
     (and (delaunay-ccw-p r i j :point-array point-array)
          (delaunay-ccw-p r j k :point-array point-array)
          (delaunay-ccw-p r k i :point-array point-array))))
@@ -185,7 +185,7 @@
          (pzero (aref indexes 0))
          (super-trig `#(-2 -1 ,pzero)))
     (labels ((push-vise (vise)
-               (aref-let (((i j k) vise))
+               (aref-let1 (i j k) vise
                  (assert (and (/= i j) (/= j k) (/= k i)))
                  (assert (ccwp i j k)))
                (vector-push-extend vise vises)
@@ -251,7 +251,7 @@
         :for r := (aref indexes r-index)
         :for tr := (find-trig r)
         :if (adherent-p r (aref vises tr)) :do
-          (aref-let (((i j k) (aref vises tr)))
+          (aref-let1 (i j k) (aref vises tr)
             (nullify-vise tr)
             ;; add edges r-i, r-j, r-k
             (let ((tr1 (push-vise `#(,r ,i ,j)))
