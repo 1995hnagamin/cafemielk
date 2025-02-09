@@ -133,6 +133,20 @@
       (values x y)
       (values y x)))
 
+(defun delaunay-lex< (i k &key point-array)
+  (declare (type fixnum i k))
+  (cond
+    ((= k -2) t)
+    ((= i -2) nil)
+    ((= i -1) t)
+    ((= k -1) nil)
+    (t (aref-let (((xi yi) (point-array-nth i point-array))
+                  ((xk yk) (point-array-nth k point-array)))
+         (cond
+           ((< yi yk) t)
+           ((< yk yi) nil)
+           (t (< xi xk))))))) ; rightmost is the highest
+
 ;; Mark Berg, Otfried Cheong, Marc Kreveld, and Mark Overmars
 ;; _Computational Geometry: Algorithms and Applications_
 (defun delaunay-triangulate (point-array)
@@ -157,17 +171,7 @@
                (or (= i -2) (= i -1) (= i pzero)))
              (lex< (i k)
                (declare (type fixnum i k))
-               (cond
-                 ((= k -2) t)
-                 ((= i -2) nil)
-                 ((= i -1) t)
-                 ((= k -1) nil)
-                 (t (aref-let (((xi yi) (point-ref i))
-                               ((xk yk) (point-ref k)))
-                      (cond
-                        ((< yi yk) t)
-                        ((< yk yi) nil)
-                        (t (< xi xk))))))) ; rightmost is the highest
+               (delaunay-lex< i k :point-array point-array))
              (ccwp (r i j)
                (declare (type fixnum r i j))
                (cond
