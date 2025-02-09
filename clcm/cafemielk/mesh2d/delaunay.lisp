@@ -171,8 +171,8 @@
                (declare (type fixnum r i j))
                (format t "(ccwp ~a ~a ~a)~%" r i j)
                (cond
-                 ((and (>= i 0) (>= j 0) (>= r 0))
-                  (counterclockwisep (point-ref i) (point-ref j) (point-ref r)))
+                 ((and (>= r 0) (>= i 0) (>= j 0))
+                  (counterclockwisep (point-ref r) (point-ref i) (point-ref j)))
                  ((= i -2) (lex< j r))
                  ((= j -1) (lex< i r))
                  (t (ccwp i j r))))
