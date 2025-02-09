@@ -209,7 +209,7 @@
                    (values t nil nil)
                    (multiple-value-bind (ts k) (find-adjoint i j tr)
                      (format t "found adjoint: ~a[~a] ~a[~a]~%"
-                             ts (aref vises tr)
+                             ts (aref vises ts)
                              k (if (>= k 0) (point-array-nth k point-array)
                                    "###"))
                      (if (and (>= r 0) (>= i 0) (>= j 0) (>= k 0))
