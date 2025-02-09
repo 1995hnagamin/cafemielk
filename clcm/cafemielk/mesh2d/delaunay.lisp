@@ -158,6 +158,12 @@
     ((= j -1) (delaunay-lex< i r :point-array point-array))
     (t (delaunay-ccw-p i j r :point-array point-array))))
 
+(defun delaunay-inner-p (r trig-vise point-array)
+  (aref-let (((i j k) trig-vise))
+    (and (delaunay-ccw-p r i j :point-array point-array)
+         (delaunay-ccw-p r j k :point-array point-array)
+         (delaunay-ccw-p r k i :point-array point-array))))
+
 ;; Mark Berg, Otfried Cheong, Marc Kreveld, and Mark Overmars
 ;; _Computational Geometry: Algorithms and Applications_
 (defun delaunay-triangulate (point-array)
@@ -184,8 +190,7 @@
                (declare (type fixnum r i j))
                (delaunay-ccw-p r i j :point-array point-array))
              (adherent-p (r vise)
-               (aref-let (((i j k) vise))
-                 (and (ccwp r i j) (ccwp r j k) (ccwp r k i))))
+               (delaunay-inner-p r vise point-array))
              (find-trig (r)
                (loop
                  :for tr :from 0 :below (length vises)
