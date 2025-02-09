@@ -215,7 +215,7 @@
                        i (if (>= i 0) (point-ref i) "---")
                        j (if (>= j 0) (point-ref j) "---")
                        tr (aref vises tr))
-               (if (and (find i super-trig) (find j super-trig))
+               (if (and (bounding-point-p i) (bounding-point-p j))
                    (values t nil nil)
                    (multiple-value-bind (ts k) (find-adjoint i j tr)
                      (format t "found adjoint: ~a[~a] ~a[~a]~%"
