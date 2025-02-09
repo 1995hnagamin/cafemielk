@@ -234,12 +234,6 @@
                                        (point-ref i)
                                        (point-ref j)
                                        (point-ref k)))
-                         ((= k pzero)
-                          (multiple-value-bind (i j) (min&max i j)
-                            (cond
-                              ((= i -2) (ccwp r k j))
-                              ((= i -1) (ccwp r j k))
-                              (t (error "unimplemented")))))
                          (t (< (min k r) (min i j)))))
                       ts k))))
              (legalize-edge (r i j tr)
