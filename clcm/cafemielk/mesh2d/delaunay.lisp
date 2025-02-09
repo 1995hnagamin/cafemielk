@@ -147,6 +147,17 @@
            ((< yk yi) nil)
            (t (< xi xk))))))) ; rightmost is the highest
 
+(defun delaunay-ccw-p (r i j &key point-array)
+  (declare (type fixnum r i j))
+  (cond
+    ((and (>= r 0) (>= i 0) (>= j 0))
+     (counterclockwisep (point-array-nth r point-array)
+                        (point-array-nth i point-array)
+                        (point-array-nth j point-array)))
+    ((= i -2) (delaunay-lex< j r :point-array point-array))
+    ((= j -1) (delaunay-lex< i r :point-array point-array))
+    (t (delaunay-ccw-p i j r :point-array point-array))))
+
 ;; Mark Berg, Otfried Cheong, Marc Kreveld, and Mark Overmars
 ;; _Computational Geometry: Algorithms and Applications_
 (defun delaunay-triangulate (point-array)
@@ -169,17 +180,9 @@
              (bounding-point-p (i)
                (declare (type fixnum i))
                (or (= i -2) (= i -1) (= i pzero)))
-             (lex< (i k)
-               (declare (type fixnum i k))
-               (delaunay-lex< i k :point-array point-array))
              (ccwp (r i j)
                (declare (type fixnum r i j))
-               (cond
-                 ((and (>= r 0) (>= i 0) (>= j 0))
-                  (counterclockwisep (point-ref r) (point-ref i) (point-ref j)))
-                 ((= i -2) (lex< j r))
-                 ((= j -1) (lex< i r))
-                 (t (ccwp i j r))))
+               (delaunay-ccw-p r i j :point-array point-array))
              (adherent-p (r vise)
                (aref-let (((i j k) vise))
                  (and (ccwp r i j) (ccwp r j k) (ccwp r k i))))
