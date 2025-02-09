@@ -275,7 +275,7 @@
       (loop
         :with array := (make-array 0 :fill-pointer 0 :adjustable t)
         :for i :below (length vises)
-        :when (aref flags i) :do
+        :when (and (aref flags i) (every #'non-negative-p (aref vises i))) :do
           (vector-push-extend (aref vises i) array)
         :finally
            (return array)))))
