@@ -164,6 +164,17 @@
          (delaunay-ccw-p r j k :point-array point-array)
          (delaunay-ccw-p r k i :point-array point-array))))
 
+(defun delaunay-find-trig (r vises flags point-array)
+  (loop
+    :for vise-index :from 0 :below (length vises)
+    :for vise := (aref vises vise-index)
+    :when (and (elt flags vise-index)
+               (delaunay-inner-p r vise point-array))
+      :do
+         (return vise-index)
+    :finally
+       (error "not found")))
+
 ;; Mark Berg, Otfried Cheong, Marc Kreveld, and Mark Overmars
 ;; _Computational Geometry: Algorithms and Applications_
 (defun delaunay-triangulate (point-array)
@@ -192,14 +203,7 @@
              (adherent-p (r vise)
                (delaunay-inner-p r vise point-array))
              (find-trig (r)
-               (loop
-                 :for tr :from 0 :below (length vises)
-                 :for trig := (aref vises tr)
-                 :when (and (elt flags tr) (adherent-p r trig))
-                   :do
-                      (return tr)
-                 :finally
-                    (error "not found")))
+               (delaunay-find-trig r vises flags point-array))
              (find-adjoint (i j tr)
                (loop
                  :for ti :from 0 :below (length vises)
