@@ -5,6 +5,8 @@
   (:export
    :clockwisep
    :counterclockwisep
+   :in-circle
+   :in-circle-p
    :trig2d-from-3points
    :trig2d-adherent-p
    :trig2d-area
@@ -31,6 +33,25 @@
   (declare (type (array * (2)) origin pivot target))
   (minusp (cross2d (2d- pivot origin)
                    (2d- target origin))))
+
+(defmacro sum-square (&rest numbers)
+  `(+ ,@(loop :for num :in numbers :collect `(expt ,num 2))))
+
+(declaim (inline in-circle in-circle-p))
+(defun in-circle (a b c target)
+  (declare (type (array * (2)) a b c target))
+  (aref-let (((ax ay) (2d- a target))
+             ((bx by) (2d- b target))
+             ((cx cy) (2d- c target)))
+    (+ (* ax by (sum-square cx cy))
+       (* bx cy (sum-square ax ay))
+       (* cx ay (sum-square bx by))
+       (- (* ax cy (sum-square bx by)))
+       (- (* bx ay (sum-square cx cy)))
+       (- (* cx by (sum-square ax ay))))))
+
+(defun in-circle-p (a b c target)
+  (plusp (in-circle a b c target)))
 
 (defun trig2d-from-3points (a b c &key (element-type t))
   (flet ((make (a b c)
