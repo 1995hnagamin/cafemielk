@@ -155,7 +155,7 @@
                (or (= i -2) (= i -1) (= i pzero)))
              (lex< (i k)
                (declare (type fixnum i k))
-               ;; (format t "(lex< ~a ~a)~%" i k)
+               (format t "(lex< ~a ~a)~%" i k)
                (cond
                  ((= k -2) t)
                  ((= i -2) nil)
@@ -169,7 +169,7 @@
                         (t (> xi xk)))))))
              (ccwp (r i j)
                (declare (type fixnum r i j))
-               ;; (format t "(ccwp ~a ~a ~a)~%" r i j)
+               (format t "(ccwp ~a ~a ~a)~%" r i j)
                (cond
                  ((and (>= i 0) (>= j 0) (>= r 0))
                   (clockwisep (point-ref i) (point-ref j) (point-ref r)))
@@ -177,10 +177,12 @@
                  ((= j -1) (lex< i r))
                  (t (ccwp i j r))))
              (adherent-p (r vise)
+               (format t "(adherent-p ~a[~a] ~a)~%"
+                       r (point-ref r) vise)
                (aref-let (((i j k) vise))
                  (and (ccwp r i j) (ccwp r j k) (ccwp r k i))))
              (find-trig (r)
-               (format t "find-trig ~a[~a]~%" r (point-ref r))
+               (format t "(find-trig ~a[~a])~%" r (point-ref r))
                (loop
                  :for tr :from 0 :below (length vises)
                  :for trig := (aref vises tr)
@@ -190,10 +192,10 @@
                  :finally
                     (error "not found")))
              (find-adjoint (i j tr)
-               (format t "find-adjoint ~a[~a] ~a[~a] ~a[~a]~%"
-                       i (if (>= i 0) (point-ref i) "###")
-                       j (if (>= j 0) (point-ref j) "###")
-                       tr (aref vises tr))
+               (format t "(find-adjoint ~a[~a] ~a[~a] ~a[~a:~a])~%"
+                       i (if (>= i 0) (point-ref i) "---")
+                       j (if (>= j 0) (point-ref j) "---")
+                       tr (aref vises tr) (aref flags tr))
                (loop
                  :for ti :from 0 :below (length vises)
                  :when (and
@@ -208,18 +210,17 @@
                  :finally
                     (error "adjoint point not found")))
              (legalp (r i j tr)
-               (format t "legalp ~a[~a] ~a[~a] ~a[~a] ~a[~a]~%"
-                       r (if (>= r 0) (point-ref r) "###")
-                       i (if (>= i 0) (point-ref i) "###")
-                       j (if (>= j 0) (point-ref j) "###")
+               (format t "(legalp ~a[~a] ~a[~a] ~a[~a] ~a[~a])~%"
+                       r (if (>= r 0) (point-ref r) "---")
+                       i (if (>= i 0) (point-ref i) "---")
+                       j (if (>= j 0) (point-ref j) "---")
                        tr (aref vises tr))
                (if (and (find i super-trig) (find j super-trig))
                    (values t nil nil)
                    (multiple-value-bind (ts k) (find-adjoint i j tr)
                      (format t "found adjoint: ~a[~a] ~a[~a]~%"
                              ts (aref vises ts)
-                             k (if (>= k 0) (point-array-nth k point-array)
-                                   "###"))
+                             k (if (>= k 0) (point-ref k) "---"))
                      (if (and (>= r 0) (>= i 0) (>= j 0) (>= k 0))
                          (values
                           (in-circle-p (point-array-nth r point-array)
@@ -231,12 +232,16 @@
                                  ts k)))))
              (legalize-edge (r i j tr)
                (sleep 0.5)
-               (format t "legalize-edge ~a ~a ~a ~a~%" r i j tr)
+               (format t "(legalize-edge ~a[~a] ~a[~a] ~a[~a] ~a[~a:~a])~%"
+                       r (if (>= r 0) (point-ref r) "---")
+                       i (if (>= i 0) (point-ref i) "---")
+                       j (if (>= j 0) (point-ref j) "---")
+                       tr (aref vises tr) (aref flags tr))
                (multiple-value-bind (legal ts k) (legalp r i j tr)
                  (when legal
-                   (format t "legal. no operations needed.~%"))
+                   (format t "    legal. no operations needed.~%"))
                  (when (not legal)
-                   (format t "illegal~%")
+                   (format t "    illegal~%")
                    (nullify-vise tr)
                    (nullify-vise ts)
                    (let ((t1 (push-vise `#(,r ,i ,k)))
@@ -260,7 +265,6 @@
             (let ((tr1 (push-vise `#(,r ,i ,j)))
                   (tr2 (push-vise `#(,r ,j ,k)))
                   (tr3 (push-vise `#(,r ,k ,i))))
-              (format t "Yee~%")
               ;; legalize edges
               (legalize-edge r i j tr1)
               (legalize-edge r j k tr2)
