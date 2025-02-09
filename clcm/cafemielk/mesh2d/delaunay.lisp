@@ -166,7 +166,7 @@
                       (cond
                         ((< yi yk) t)
                         ((< yk yi) nil)
-                        (t (> xi xk)))))))
+                        (t (< xi xk))))))) ; rightmost is the highest
              (ccwp (r i j)
                (declare (type fixnum r i j))
                (format t "(ccwp ~a ~a ~a)~%" r i j)
