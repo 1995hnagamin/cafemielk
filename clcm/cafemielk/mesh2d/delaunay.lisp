@@ -231,8 +231,10 @@
                                     (point-ref k))))
                  (t (< (min k r) (min i j)))))
              (legalize-edge (r i j tr)
-               (when (or (not (bounding-point-p i))
-                         (not (bounding-point-p j)))
+               (block body
+                 (when (and (bounding-point-p i) (bounding-point-p j))
+                   ;; Super-triangle edges are not flippable
+                   (return-from body))
                  (multiple-value-bind (ts k) (find-adjoint i j tr)
                    (when (not (legalp r i j k))
                      (nullify-vise tr)
