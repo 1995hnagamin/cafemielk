@@ -147,7 +147,7 @@
            ((< yk yi) nil)
            (t (< xi xk))))))) ; rightmost is the highest
 
-(defun %ccw-p (r i j point-array)
+(defun %counterclockwisep (r i j point-array)
   (declare (type fixnum r i j))
   (labels ((point-ref (k)
              (declare (type fixnum k))
@@ -165,18 +165,20 @@
             ((= j -1) (lex< i r))
             (t (go-loop i j r)))))))
 
-(defun %inner-p (r trig-vise point-array)
-  (aref-let1 (i j k) trig-vise
-    (and (%ccw-p r i j point-array)
-         (%ccw-p r j k point-array)
-         (%ccw-p r k i point-array))))
+(defun %innerp (r trig-vise point-array)
+  (flet ((ccwp (r i j)
+           (%counterclockwisep r i j point-array)))
+    (aref-let1 (i j k) trig-vise
+      (and (ccwp r i j)
+           (ccwp r j k)
+           (ccwp r k i)))))
 
 (defun %find-trig (r vises flags point-array)
   (loop
     :for vise-index :from 0 :below (length vises)
     :for vise := (aref vises vise-index)
     :when (and (elt flags vise-index)
-               (%inner-p r vise point-array))
+               (%innerp r vise point-array))
       :do
          (return vise-index)
     :finally
@@ -197,7 +199,7 @@
 
 (defun %legalp (r i j k point-array)
   (flet ((ccwp (r i j)
-           (%ccw-p r i j point-array))
+           (%counterclockwisep r i j point-array))
          (point-ref (i)
            (point-array-nth i point-array)))
     (cond
@@ -235,7 +237,7 @@
     (labels ((push-vise (vise)
                (aref-let1 (i j k) vise
                  (assert (and (/= i j) (/= j k) (/= k i)))
-                 (assert (%ccw-p i j k point-array)))
+                 (assert (%counterclockwisep i j k point-array)))
                (vector-push-extend vise vises)
                (vector-push-extend t flags))
              (nullify-vise (vise-index)
@@ -244,7 +246,7 @@
                (declare (type fixnum i))
                (or (= i -2) (= i -1) (= i pzero)))
              (adherent-p (r vise)
-               (%inner-p r vise point-array))
+               (%innerp r vise point-array))
              (legalize-edge (r i j tr)
                (block body
                  (when (and (bounding-point-p i)
