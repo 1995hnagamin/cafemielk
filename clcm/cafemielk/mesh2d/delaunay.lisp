@@ -147,7 +147,7 @@
            ((< yk yi) nil)
            (t (< xi xk))))))) ; rightmost is the highest
 
-(defun %ccw-p (r i j &key point-array)
+(defun %ccw-p (r i j point-array)
   (declare (type fixnum r i j))
   (labels ((point-ref (k)
              (declare (type fixnum k))
@@ -167,9 +167,9 @@
 
 (defun %inner-p (r trig-vise point-array)
   (aref-let1 (i j k) trig-vise
-    (and (%ccw-p r i j :point-array point-array)
-         (%ccw-p r j k :point-array point-array)
-         (%ccw-p r k i :point-array point-array))))
+    (and (%ccw-p r i j point-array)
+         (%ccw-p r j k point-array)
+         (%ccw-p r k i point-array))))
 
 (defun %find-trig (r vises flags point-array)
   (loop
@@ -197,7 +197,7 @@
 
 (defun %legalp (r i j k point-array)
   (flet ((ccwp (r i j)
-           (%ccw-p r i j :point-array point-array))
+           (%ccw-p r i j point-array))
          (point-ref (i)
            (point-array-nth i point-array)))
     (cond
@@ -234,7 +234,7 @@
                (or (= i -2) (= i -1) (= i pzero)))
              (ccwp (r i j)
                (declare (type fixnum r i j))
-               (%ccw-p r i j :point-array point-array))
+               (%ccw-p r i j point-array))
              (adherent-p (r vise)
                (%inner-p r vise point-array))
              (legalize-edge (r i j tr)
