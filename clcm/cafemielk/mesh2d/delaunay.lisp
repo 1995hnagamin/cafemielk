@@ -133,7 +133,7 @@
       (values x y)
       (values y x)))
 
-(defun delaunay-lex< (i k &key point-array)
+(defun %lex< (i k &key point-array)
   (declare (type fixnum i k))
   (cond
     ((= i -2) nil)
@@ -147,13 +147,13 @@
            ((< yk yi) nil)
            (t (< xi xk))))))) ; rightmost is the highest
 
-(defun delaunay-ccw-p (r i j &key point-array)
+(defun %ccw-p (r i j &key point-array)
   (declare (type fixnum r i j))
   (labels ((point-ref (k)
              (declare (type fixnum k))
              (point-array-nth k point-array))
            (lex< (a b)
-             (delaunay-lex< a b :point-array point-array)))
+             (%lex< a b :point-array point-array)))
     (if (and (>= r 0) (>= i 0) (>= j 0))
         ;; Normal case
         (counterclockwisep (point-ref r) (point-ref i) (point-ref j))
@@ -165,18 +165,18 @@
             ((= j -1) (lex< i r))
             (t (go-loop i j r)))))))
 
-(defun delaunay-inner-p (r trig-vise point-array)
+(defun %inner-p (r trig-vise point-array)
   (aref-let1 (i j k) trig-vise
-    (and (delaunay-ccw-p r i j :point-array point-array)
-         (delaunay-ccw-p r j k :point-array point-array)
-         (delaunay-ccw-p r k i :point-array point-array))))
+    (and (%ccw-p r i j :point-array point-array)
+         (%ccw-p r j k :point-array point-array)
+         (%ccw-p r k i :point-array point-array))))
 
-(defun delaunay-find-trig (r vises flags point-array)
+(defun %find-trig (r vises flags point-array)
   (loop
     :for vise-index :from 0 :below (length vises)
     :for vise := (aref vises vise-index)
     :when (and (elt flags vise-index)
-               (delaunay-inner-p r vise point-array))
+               (%inner-p r vise point-array))
       :do
          (return vise-index)
     :finally
@@ -219,11 +219,11 @@
                (or (= i -2) (= i -1) (= i pzero)))
              (ccwp (r i j)
                (declare (type fixnum r i j))
-               (delaunay-ccw-p r i j :point-array point-array))
+               (%ccw-p r i j :point-array point-array))
              (adherent-p (r vise)
-               (delaunay-inner-p r vise point-array))
+               (%inner-p r vise point-array))
              (find-trig (r)
-               (delaunay-find-trig r vises flags point-array))
+               (%find-trig r vises flags point-array))
              (find-adjacent-trig (i j tr)
                (%find-adjacent-trig i j tr vises flags))
              (legalp (r i j k)
