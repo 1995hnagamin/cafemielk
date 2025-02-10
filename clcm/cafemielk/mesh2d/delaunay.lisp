@@ -212,6 +212,17 @@
                          (point-ref k))))
       (t (< (min k r) (min i j))))))
 
+(defun %remove-virtual-points (vises flags)
+  (loop
+    :with array := (make-array 0 :fill-pointer 0 :adjustable t)
+    :for i :below (length vises)
+    :when (and (aref flags i)
+               (every #'non-negative-p (aref vises i)))
+      :do
+         (vector-push-extend (aref vises i) array)
+    :finally
+       (return array)))
+
 ;; Mark Berg, Otfried Cheong, Marc Kreveld, and Mark Overmars
 ;; _Computational Geometry: Algorithms and Applications_
 (defun delaunay-triangulate (point-array)
@@ -266,14 +277,8 @@
               (legalize-edge r k i tr3)))
         :else :do
           (error "not implemented")
-        :end)
-      (loop
-        :with array := (make-array 0 :fill-pointer 0 :adjustable t)
-        :for i :below (length vises)
-        :when (and (aref flags i) (every #'non-negative-p (aref vises i))) :do
-          (vector-push-extend (aref vises i) array)
-        :finally
-           (return array)))))
+        :end
+        :finally (return (%remove-virtual-points vises flags))))))
 
 ;;; Local Variables:
 ;;; mode: lisp
