@@ -152,10 +152,12 @@
   (labels ((point-ref (k)
              (declare (type fixnum k))
              (point-array-nth k point-array))
+           (lex< (a b)
+             (delaunay-lex< a b :point-array point-array))
            (ccwp (r i j)
              (cond
-               ((= i -2) (delaunay-lex< j r :point-array point-array))
-               ((= j -1) (delaunay-lex< i r :point-array point-array))
+               ((= i -2) (lex< j r))
+               ((= j -1) (lex< i r))
                (t (ccwp i j r)))))
     (if (and (>= r 0) (>= i 0) (>= j 0))
         ;; Normal case
