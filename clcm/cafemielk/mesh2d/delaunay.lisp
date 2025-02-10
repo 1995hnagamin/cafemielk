@@ -153,17 +153,17 @@
              (declare (type fixnum k))
              (point-array-nth k point-array))
            (lex< (a b)
-             (delaunay-lex< a b :point-array point-array))
-           (ccwp (r i j)
-             (cond
-               ((= i -2) (lex< j r))
-               ((= j -1) (lex< i r))
-               (t (ccwp i j r)))))
+             (delaunay-lex< a b :point-array point-array)))
     (if (and (>= r 0) (>= i 0) (>= j 0))
         ;; Normal case
         (counterclockwisep (point-ref r) (point-ref i) (point-ref j))
         ;; Parameters involve at least one virtual point
-        (ccwp r i j))))
+        (let/goer ((r r) (i i) (j j)) go-loop
+          (declare (type fixnum r i j))
+          (cond
+            ((= i -2) (lex< j r))
+            ((= j -1) (lex< i r))
+            (t (go-loop i j r)))))))
 
 (defun delaunay-inner-p (r trig-vise point-array)
   (aref-let1 (i j k) trig-vise
