@@ -222,10 +222,6 @@
                (%ccw-p r i j :point-array point-array))
              (adherent-p (r vise)
                (%inner-p r vise point-array))
-             (find-trig (r)
-               (%find-trig r vises flags point-array))
-             (find-adjacent-trig (i j tr)
-               (%find-adjacent-trig i j tr vises flags))
              (legalp (r i j k)
                (cond
                  ;; If not flippable, return t
@@ -243,7 +239,8 @@
                  (when (and (bounding-point-p i) (bounding-point-p j))
                    ;; Super-triangle edges are not flippable
                    (return-from body))
-                 (multiple-value-bind (ts k) (find-adjacent-trig i j tr)
+                 (multiple-value-bind
+                       (ts k) (%find-adjacent-trig i j tr vises flags)
                    (when (not (legalp r i j k))
                      (nullify-vise tr)
                      (nullify-vise ts)
@@ -255,7 +252,7 @@
       (loop
         :for r-index :from 1 :below npoint
         :for r := (aref indexes r-index)
-        :for tr := (find-trig r)
+        :for tr := (%find-trig r vises flags point-array)
         :if (adherent-p r (aref vises tr)) :do
           (aref-let1 (i j k) (aref vises tr)
             (nullify-vise tr)
