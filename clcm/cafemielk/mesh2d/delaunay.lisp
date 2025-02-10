@@ -219,18 +219,17 @@
                  :finally
                     (error "adjoint point not found")))
              (legalp (r i j k)
-               (or
-                ;; if not flippable, return true
-                (not (ccwp r i k))
-                (not (ccwp r k j))
-                ;; now rik and rkj is CCW
-                (cond
-                  ((every #'non-negative-p `#(,r ,i ,j ,k))
-                   (in-circle-p (point-ref r)
-                                (point-ref i)
-                                (point-ref j)
-                                (point-ref k)))
-                  (t (< (min k r) (min i j))))))
+               (cond
+                 ;; If not flippable, return t
+                 ((not (ccwp r i k)) t)
+                 ((not (ccwp r k j)) t)
+                 ;; Normal case: compute circumcircle
+                 ((every #'non-negative-p `#(,r ,i ,j ,k))
+                  (in-circle-p (point-ref r)
+                               (point-ref i)
+                               (point-ref j)
+                               (point-ref k)))
+                 (t (< (min k r) (min i j)))))
              (legalize-edge (r i j tr)
                (when (or (not (bounding-point-p i))
                          (not (bounding-point-p j)))
