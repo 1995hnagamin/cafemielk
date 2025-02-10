@@ -218,33 +218,30 @@
                                 (- (reduce #'+ (aref vises ti)) i j)))
                  :finally
                     (error "adjoint point not found")))
-             (legalp (r i j tr)
-               (if (and (bounding-point-p i) (bounding-point-p j))
-                   (values t nil nil)
-                   (multiple-value-bind (ts k) (find-adjoint i j tr)
-                     (values
-                      (or
-                       ;; if not flippable, return true
-                       (not (ccwp r i k))
-                       (not (ccwp r k j))
-                       ;; now rik and rkj is CCW
-                       (cond
-                         ((every #'non-negative-p `#(,r ,i ,j ,k))
-                          (in-circle-p (point-ref r)
-                                       (point-ref i)
-                                       (point-ref j)
-                                       (point-ref k)))
-                         (t (< (min k r) (min i j)))))
-                      ts k))))
+             (legalp (r i j k)
+               (or
+                ;; if not flippable, return true
+                (not (ccwp r i k))
+                (not (ccwp r k j))
+                ;; now rik and rkj is CCW
+                (cond
+                  ((every #'non-negative-p `#(,r ,i ,j ,k))
+                   (in-circle-p (point-ref r)
+                                (point-ref i)
+                                (point-ref j)
+                                (point-ref k)))
+                  (t (< (min k r) (min i j))))))
              (legalize-edge (r i j tr)
-               (multiple-value-bind (legal ts k) (legalp r i j tr)
-                 (when (not legal)
-                   (nullify-vise tr)
-                   (nullify-vise ts)
-                   (let ((t1 (push-vise `#(,r ,i ,k)))
-                         (t2 (push-vise `#(,r ,k ,j))))
-                     (legalize-edge r i k t1)
-                     (legalize-edge r k j t2))))))
+               (when (or (not (bounding-point-p i))
+                         (not (bounding-point-p j)))
+                 (multiple-value-bind (ts k) (find-adjoint i j tr)
+                   (when (not (legalp r i j k))
+                     (nullify-vise tr)
+                     (nullify-vise ts)
+                     (let ((t1 (push-vise `#(,r ,i ,k)))
+                           (t2 (push-vise `#(,r ,k ,j))))
+                       (legalize-edge r i k t1)
+                       (legalize-edge r k j t2)))))))
       (push-vise super-trig)
       (loop
         :for r-index :from 1 :below npoint
