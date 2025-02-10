@@ -204,7 +204,7 @@
                (delaunay-inner-p r vise point-array))
              (find-trig (r)
                (delaunay-find-trig r vises flags point-array))
-             (find-adjoint (i j tr)
+             (find-adjacent-trig (i j tr)
                (loop
                  :for ti :from 0 :below (length vises)
                  :when (and
@@ -217,7 +217,7 @@
                         (values ti
                                 (- (reduce #'+ (aref vises ti)) i j)))
                  :finally
-                    (error "adjoint point not found")))
+                    (error "adjacent triangle not found")))
              (legalp (r i j k)
                (cond
                  ;; If not flippable, return t
@@ -235,7 +235,7 @@
                  (when (and (bounding-point-p i) (bounding-point-p j))
                    ;; Super-triangle edges are not flippable
                    (return-from body))
-                 (multiple-value-bind (ts k) (find-adjoint i j tr)
+                 (multiple-value-bind (ts k) (find-adjacent-trig i j tr)
                    (when (not (legalp r i j k))
                      (nullify-vise tr)
                      (nullify-vise ts)
