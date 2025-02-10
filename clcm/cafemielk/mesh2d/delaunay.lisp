@@ -149,16 +149,17 @@
 
 (defun delaunay-ccw-p (r i j &key point-array)
   (declare (type fixnum r i j))
-  (labels ((ccwp (r i j)
+  (labels ((point-ref (k)
+             (declare (type fixnum k))
+             (point-array-nth k point-array))
+           (ccwp (r i j)
              (cond
                ((= i -2) (delaunay-lex< j r :point-array point-array))
                ((= j -1) (delaunay-lex< i r :point-array point-array))
                (t (ccwp i j r)))))
     (if (and (>= r 0) (>= i 0) (>= j 0))
         ;; Normal case
-        (counterclockwisep (point-array-nth r point-array)
-                           (point-array-nth i point-array)
-                           (point-array-nth j point-array))
+        (counterclockwisep (point-ref r) (point-ref i) (point-ref j))
         ;; Parameters involve at least one virtual point
         (ccwp r i j))))
 
