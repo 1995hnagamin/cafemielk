@@ -223,12 +223,12 @@
                  ;; If not flippable, return t
                  ((not (ccwp r i k)) t)
                  ((not (ccwp r k j)) t)
-                 ;; Normal case: compute circumcircle
+                 ;; Normal case: check if k is outside circumcircle
                  ((every #'non-negative-p `#(,r ,i ,j ,k))
-                  (in-circle-p (point-ref r)
-                               (point-ref i)
-                               (point-ref j)
-                               (point-ref k)))
+                  (not (in-circle-p (point-ref r)
+                                    (point-ref i)
+                                    (point-ref j)
+                                    (point-ref k))))
                  (t (< (min k r) (min i j)))))
              (legalize-edge (r i j tr)
                (when (or (not (bounding-point-p i))
