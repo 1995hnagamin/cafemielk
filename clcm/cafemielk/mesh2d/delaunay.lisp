@@ -182,6 +182,19 @@
     :finally
        (error "not found")))
 
+(defun %find-adjacent-trig (i j tr vises flags)
+  (loop
+    :for ti :from 0 :below (length vises)
+    :when (and (/= ti tr)
+               (elt flags ti)
+               (find i (aref vises ti))
+               (find j (aref vises ti)))
+      :do
+         (let1 k (- (reduce #'+ (aref vises ti)) i j)
+           (return (values ti k)))
+    :finally
+       (error "adjacent triangle not found")))
+
 ;; Mark Berg, Otfried Cheong, Marc Kreveld, and Mark Overmars
 ;; _Computational Geometry: Algorithms and Applications_
 (defun delaunay-triangulate (point-array)
@@ -212,19 +225,7 @@
              (find-trig (r)
                (delaunay-find-trig r vises flags point-array))
              (find-adjacent-trig (i j tr)
-               (loop
-                 :for ti :from 0 :below (length vises)
-                 :when (and
-                        (/= ti tr)
-                        (elt flags ti)
-                        (find i (aref vises ti))
-                        (find j (aref vises ti)))
-                   :do
-                      (return
-                        (values ti
-                                (- (reduce #'+ (aref vises ti)) i j)))
-                 :finally
-                    (error "adjacent triangle not found")))
+               (%find-adjacent-trig i j tr vises flags))
              (legalp (r i j k)
                (cond
                  ;; If not flippable, return t
