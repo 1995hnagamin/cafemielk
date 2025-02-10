@@ -247,7 +247,8 @@
                (%inner-p r vise point-array))
              (legalize-edge (r i j tr)
                (block body
-                 (when (and (bounding-point-p i) (bounding-point-p j))
+                 (when (and (bounding-point-p i)
+                            (bounding-point-p j))
                    ;; Super-triangle edges are not flippable
                    (return-from body))
                  (multiple-value-bind
@@ -259,8 +260,9 @@
                            (t2 (push-vise `#(,r ,k ,j))))
                        (legalize-edge r i k t1)
                        (legalize-edge r k j t2)))))))
-      (push-vise super-trig)
       (loop
+        :initially
+           (push-vise super-trig)
         :for r-index :from 1 :below npoint
         :for r := (aref indexes r-index)
         :for tr := (%find-trig r vises flags point-array)
@@ -278,7 +280,8 @@
         :else :do
           (error "not implemented")
         :end
-        :finally (return (%remove-virtual-points vises flags))))))
+        :finally
+           (return (%remove-virtual-points vises flags))))))
 
 ;;; Local Variables:
 ;;; mode: lisp
