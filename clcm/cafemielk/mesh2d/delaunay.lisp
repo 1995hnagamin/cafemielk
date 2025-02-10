@@ -224,7 +224,7 @@
     (labels ((push-vise (vise)
                (aref-let1 (i j k) vise
                  (assert (and (/= i j) (/= j k) (/= k i)))
-                 (assert (ccwp i j k)))
+                 (assert (%ccw-p i j k point-array)))
                (vector-push-extend vise vises)
                (vector-push-extend t flags))
              (nullify-vise (vise-index)
@@ -232,9 +232,6 @@
              (bounding-point-p (i)
                (declare (type fixnum i))
                (or (= i -2) (= i -1) (= i pzero)))
-             (ccwp (r i j)
-               (declare (type fixnum r i j))
-               (%ccw-p r i j point-array))
              (adherent-p (r vise)
                (%inner-p r vise point-array))
              (legalize-edge (r i j tr)
