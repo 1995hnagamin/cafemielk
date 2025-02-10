@@ -136,10 +136,10 @@
 (defun delaunay-lex< (i k &key point-array)
   (declare (type fixnum i k))
   (cond
-    ((= k -2) t)
     ((= i -2) nil)
-    ((= i -1) t)
+    ((= k -2) t)
     ((= k -1) nil)
+    ((= i -1) t)
     (t (aref-let (((xi yi) (point-array-nth i point-array))
                   ((xk yk) (point-array-nth k point-array)))
          (cond
