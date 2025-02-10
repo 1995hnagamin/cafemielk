@@ -218,10 +218,11 @@
   (loop
     :with array := (make-array 0 :fill-pointer 0 :adjustable t)
     :for i :below (length vises)
+    :for vise := (aref vises i)
     :when (and (aref flags i)
-               (every #'non-negative-p (aref vises i)))
+               (every #'non-negative-p vise))
       :do
-         (vector-push-extend (aref vises i) array)
+         (vector-push-extend vise array)
     :finally
        (return array)))
 
