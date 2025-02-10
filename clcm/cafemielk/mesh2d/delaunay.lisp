@@ -195,6 +195,23 @@
     :finally
        (error "adjacent triangle not found")))
 
+(defun %legalp (r i j k point-array)
+  (flet ((ccwp (r i j)
+           (%ccw-p r i j :point-array point-array))
+         (point-ref (i)
+           (point-array-nth i point-array)))
+    (cond
+      ;; If not flippable, return t
+      ((not (ccwp r i k)) t)
+      ((not (ccwp r k j)) t)
+      ;; Normal case: check if k is outside circumcircle
+      ((every #'non-negative-p `#(,r ,i ,j ,k))
+       (not (in-circle-p (point-ref r)
+                         (point-ref i)
+                         (point-ref j)
+                         (point-ref k))))
+      (t (< (min k r) (min i j))))))
+
 ;; Mark Berg, Otfried Cheong, Marc Kreveld, and Mark Overmars
 ;; _Computational Geometry: Algorithms and Applications_
 (defun delaunay-triangulate (point-array)
@@ -212,8 +229,6 @@
                (vector-push-extend t flags))
              (nullify-vise (vise-index)
                (setf (aref flags vise-index) nil))
-             (point-ref (i)
-               (point-array-nth i point-array))
              (bounding-point-p (i)
                (declare (type fixnum i))
                (or (= i -2) (= i -1) (= i pzero)))
@@ -222,18 +237,6 @@
                (%ccw-p r i j :point-array point-array))
              (adherent-p (r vise)
                (%inner-p r vise point-array))
-             (legalp (r i j k)
-               (cond
-                 ;; If not flippable, return t
-                 ((not (ccwp r i k)) t)
-                 ((not (ccwp r k j)) t)
-                 ;; Normal case: check if k is outside circumcircle
-                 ((every #'non-negative-p `#(,r ,i ,j ,k))
-                  (not (in-circle-p (point-ref r)
-                                    (point-ref i)
-                                    (point-ref j)
-                                    (point-ref k))))
-                 (t (< (min k r) (min i j)))))
              (legalize-edge (r i j tr)
                (block body
                  (when (and (bounding-point-p i) (bounding-point-p j))
@@ -241,7 +244,7 @@
                    (return-from body))
                  (multiple-value-bind
                        (ts k) (%find-adjacent-trig i j tr vises flags)
-                   (when (not (legalp r i j k))
+                   (when (not (%legalp r i j k point-array))
                      (nullify-vise tr)
                      (nullify-vise ts)
                      (let ((t1 (push-vise `#(,r ,i ,k)))
