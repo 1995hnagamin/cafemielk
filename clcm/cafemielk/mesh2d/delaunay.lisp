@@ -233,8 +233,7 @@
          (vises (make-array 0 :adjustable t :fill-pointer 0))
          (flags (make-array 0 :adjustable t :fill-pointer 0))
          (indexes (get-shuffled-indexes point-array))
-         (pzero (aref indexes 0))
-         (super-trig `#(-2 -1 ,pzero)))
+         (pzero (aref indexes 0)))
     (labels ((push-vise (vise)
                (aref-let1 (i j k) vise
                  (assert (and (/= i j) (/= j k) (/= k i)))
@@ -265,7 +264,7 @@
                        (legalize-edge r k j t2)))))))
       (loop
         :initially
-           (push-vise super-trig)
+           (push-vise `#(-2 -1 ,pzero))
         :for r-index :from 1 :below npoint
         :for r := (aref indexes r-index)
         :for tr := (%find-trig r vises flags point-array)
