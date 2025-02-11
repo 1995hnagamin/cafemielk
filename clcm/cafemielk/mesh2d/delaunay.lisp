@@ -105,6 +105,21 @@
      :start 0 :end (length clauses)
      :initial-value nil)))
 
+(defun %highest-point-index (point-array)
+  (flet ((lex< (i j)
+           (declare (type fixnum i j))
+           (lexicographic< (i j)
+               (k)
+               ((point-array-yref point-array k))
+               ((point-array-xref point-array k)))))
+    (loop
+      :with m := 0
+      :for i :from 1 :below (point-array-count point-array)
+      :when (lex< m i)
+        :do (setf m i)
+      :finally
+         (return m))))
+
 (defun get-shuffled-indexes (point-array)
   (declare (type (array * (* *)) point-array))
   (flet ((lex< (i j)
