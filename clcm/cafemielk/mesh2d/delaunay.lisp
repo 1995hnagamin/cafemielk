@@ -158,6 +158,24 @@
             ((= j -1) (lex< i r))
             (t (go-loop i j r)))))))
 
+(defun %clockwisep (r i j point-array)
+  (declare (type fixnum r i j))
+  (labels ((point (k)
+             (declare (type fixnum k))
+             (point-array-nth k point-array))
+           (lex< (a b)
+             (%lex< a b :point-array point-array)))
+    (if (and (>= r 0) (>= i 0) (>= j 0))
+        ;; Normal case
+        (clockwisep (point r) (point i) (point j))
+        ;; Parameters involve at least one virtual point
+        (let/goer ((r r) (i i) (j j)) go-loop
+          (declare (type fixnum r i j))
+          (cond
+            ((= i -2) (lex< r j))
+            ((= j -1) (lex< r i))
+            (t (go-loop i j r)))))))
+
 (defun %innerp (r trig-vise point-array)
   (flet ((ccwp (r i j)
            (%counterclockwisep r i j point-array)))
