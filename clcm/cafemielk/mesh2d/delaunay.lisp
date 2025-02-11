@@ -122,21 +122,10 @@
 
 (defun get-shuffled-indexes (point-array)
   (declare (type (array * (* *)) point-array))
-  (flet ((lex< (i j)
-           (declare (type fixnum i j))
-           (lexicographic< (i j)
-               (k)
-               ((point-array-yref point-array k))
-               ((point-array-xref point-array k)))))
+  (flet ()
     (let* ((npoint (point-array-count point-array))
            (indexes (iota-array npoint :element-type 'fixnum))
-           (highest-point-index (loop
-                                  :with m := 0
-                                  :for i :from 1 :below npoint
-                                  :when (lex< m i)
-                                    :do (setf m i)
-                                  :finally
-                                     (return m))))
+           (highest-point-index (%highest-point-index point-array)))
       (declare (type (array fixnum (*)) indexes)
                (type fixnum npoint))
       (rotatef (aref indexes 0) (aref indexes highest-point-index))
