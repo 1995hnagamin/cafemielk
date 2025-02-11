@@ -234,11 +234,14 @@
          (flags (make-array 0 :adjustable t :fill-pointer 0))
          (indexes (get-shuffled-indexes point-array))
          (pzero (aref indexes 0)))
-    (labels ((push-vise (vise)
-               (aref-let1 (i j k) vise
-                 (assert (and (/= i j) (/= j k) (/= k i)))
-                 (assert (%counterclockwisep i j k point-array)))
-               (vector-push-extend vise vises)
+    (labels ((push-vise (i j k)
+               (declare (type fixnum i j k))
+               (assert (and (/= i j) (/= j k) (/= k i)))
+               (assert (%counterclockwisep i j k point-array))
+               (vector-push-extend
+                (make-array 3 :initial-contents `(,i ,j ,k)
+                              :element-type 'fixnum)
+                vises)
                (vector-push-extend t flags))
              (nullify-vise (vise-index)
                (setf (aref flags vise-index) nil))
@@ -258,13 +261,13 @@
                    (when (not (%legalp r i j k point-array))
                      (nullify-vise tr)
                      (nullify-vise ts)
-                     (let ((t1 (push-vise `#(,r ,i ,k)))
-                           (t2 (push-vise `#(,r ,k ,j))))
+                     (let ((t1 (push-vise r i k))
+                           (t2 (push-vise r k j)))
                        (legalize-edge r i k t1)
                        (legalize-edge r k j t2)))))))
       (loop
         :initially
-           (push-vise `#(-2 -1 ,pzero))
+           (push-vise -2 -1 pzero)
         :for r-index :from 1 :below npoint
         :for r := (aref indexes r-index)
         :for tr := (%find-trig r vises flags point-array)
@@ -272,9 +275,9 @@
           (aref-let1 (i j k) (aref vises tr)
             (nullify-vise tr)
             ;; add edges r-i, r-j, r-k
-            (let ((tr1 (push-vise `#(,r ,i ,j)))
-                  (tr2 (push-vise `#(,r ,j ,k)))
-                  (tr3 (push-vise `#(,r ,k ,i))))
+            (let ((tr1 (push-vise r i j))
+                  (tr2 (push-vise r j k))
+                  (tr3 (push-vise r k i)))
               ;; legalize edges
               (legalize-edge r i j tr1)
               (legalize-edge r j k tr2)
