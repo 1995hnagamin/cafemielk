@@ -120,17 +120,6 @@
       :finally
          (return m))))
 
-(defun get-shuffled-indexes (point-array)
-  (declare (type (array * (* *)) point-array))
-  (flet ()
-    (let* ((npoint (point-array-count point-array))
-           (indexes (iota-array npoint :element-type 'fixnum))
-           (highest-point-index (%highest-point-index point-array)))
-      (declare (type (array fixnum (*)) indexes)
-               (type fixnum npoint))
-      (rotatef (aref indexes 0) (aref indexes highest-point-index))
-      (fisher-yates-shuffle indexes 1 npoint))))
-
 (declaim (inline min&max))
 (defun min&max (x y)
   (if (< x y)
@@ -236,8 +225,7 @@
   (let* ((npoint (array-dimension point-array 0))
          (vises (make-array 0 :adjustable t :fill-pointer 0))
          (flags (make-array 0 :adjustable t :fill-pointer 0))
-         (indexes (get-shuffled-indexes point-array))
-         (pzero (aref indexes 0)))
+         (pzero (%highest-point-index point-array)))
     (labels ((push-vise (i j k)
                (declare (type fixnum i j k))
                (assert (and (/= i j) (/= j k) (/= k i)))
@@ -272,6 +260,12 @@
       (loop
         :initially
            (push-vise -2 -1 pzero)
+        :with indexes
+          := (let ((indexes (iota-array npoint :element-type 'fixnum)))
+               (declare (type (array fixnum (*)) indexes))
+               (rotatef (aref indexes 0) (aref indexes pzero))
+               (fisher-yates-shuffle indexes 1 npoint))
+
         :for r-index :from 1 :below npoint
         :for r := (aref indexes r-index)
         :for tr := (%find-trig r vises flags point-array)
