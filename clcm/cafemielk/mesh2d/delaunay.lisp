@@ -184,12 +184,20 @@
            (ccwp r j k)
            (ccwp r k i)))))
 
+(defun %adherentp (r trig-vise point-array)
+  (flet ((not-cw-p (r i j)
+           (not (%clockwisep r i j point-array))))
+    (aref-let1 (i j k) trig-vise
+      (and (not-cw-p r i j)
+           (not-cw-p r j k)
+           (not-cw-p r k i)))))
+
 (defun %find-trig (r vises flags point-array)
   (loop
     :for vise-index :from 0 :below (length vises)
     :for vise := (aref vises vise-index)
     :when (and (elt flags vise-index)
-               (%innerp r vise point-array))
+               (%adherentp r vise point-array))
       :do
          (return vise-index)
     :finally
@@ -258,8 +266,6 @@
              (bounding-point-p (i)
                (declare (type fixnum i))
                (or (= i -2) (= i -1) (= i pzero)))
-             (adherent-p (r vise)
-               (%innerp r vise point-array))
              (legalize-edge (r i j tr)
                (block body
                  (when (and (bounding-point-p i)
@@ -287,7 +293,7 @@
         :for r-index :from 1 :below npoint
         :for r := (aref indexes r-index)
         :for tr := (%find-trig r vises flags point-array)
-        :if (adherent-p r (aref vises tr)) :do
+        :if (%innerp r (aref vises tr) point-array) :do
           (aref-let1 (i j k) (aref vises tr)
             (nullify-vise tr)
             ;; add edges r-i, r-j, r-k
