@@ -192,6 +192,24 @@
            (not-cw-p r j k)
            (not-cw-p r k i)))))
 
+(defun %opposite-vertex (trig-vise e1 e2)
+  (declare (type fixnum e1 e2))
+  (aref-let1 (i j k) trig-vise
+    (declare (type fixnum i j k))
+    (cond
+      ((and (= j e1) (= k e2)) i)
+      ((and (= k e1) (= i e2)) j)
+      ((and (= i e1) (= j e2)) k))))
+
+(defun %opposite-edge (trig-vise vertex-index)
+  (declare (type fixnum vertex-index))
+  (aref-let1 (i j k) trig-vise
+    (declare (type fixnum i j k))
+    (cond
+      ((= i vertex-index) (values j k))
+      ((= j vertex-index) (values k i))
+      ((= k vertex-index) (values i j)))))
+
 (defun %find-trig (r vises flags point-array)
   (loop
     :for vise-index :from 0 :below (length vises)
