@@ -199,7 +199,8 @@
     (cond
       ((and (= j e1) (= k e2)) i)
       ((and (= k e1) (= i e2)) j)
-      ((and (= i e1) (= j e2)) k))))
+      ((and (= i e1) (= j e2)) k)
+      (t nil))))
 
 (defun %opposite-edge (trig-vise vertex-index)
   (declare (type fixnum vertex-index))
@@ -208,7 +209,8 @@
     (cond
       ((= i vertex-index) (values j k))
       ((= j vertex-index) (values k i))
-      ((= k vertex-index) (values i j)))))
+      ((= k vertex-index) (values i j))
+      (t (values nil nil)))))
 
 (defun %find-trig (r vises flags point-array)
   (loop
