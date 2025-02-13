@@ -196,7 +196,7 @@
 
 (defun %innerp (r trig-vise point-array)
   (declare (type fixnum r)
-           (type (array * (3)) trig-vise)
+           (type (simple-array fixnum (3)) trig-vise)
            (type (simple-array * (* 2)) point-array)
            (values boolean &optional))
   (flet ((ccwp (r i j)
@@ -210,6 +210,7 @@
 
 (defun %adherentp (r trig-vise point-array)
   (declare (type fixnum r)
+           (type (simple-array fixnum (3)) trig-vise)
            (type (simple-array * (* 2)) point-array)
            (values boolean &optional))
   (flet ((not-cw-p (r i j)
@@ -222,6 +223,7 @@
 
 (defun %opposite-vertex (trig-vise e1 e2)
   (declare (type fixnum e1 e2)
+           (type (simple-array fixnum (3)) trig-vise)
            (values (or null fixnum) &optional))
   (aref-let1 (i j k) trig-vise
     (declare (type fixnum i j k))
@@ -233,6 +235,7 @@
 
 (defun %opposite-edge (trig-vise vertex-index)
   (declare (type fixnum vertex-index)
+           (type (simple-array fixnum (3)) trig-vise)
            (values (or null fixnum) (or null fixnum) &optional))
   (aref-let1 (i j k) trig-vise
     (declare (type fixnum i j k))
@@ -289,10 +292,12 @@
       (t (< (min k r) (min i j))))))
 
 (defun %remove-virtual-points (vises flags)
+  (declare (type (array (simple-array fixnum (3)) (*)) vises)
+           (type (array boolean (*)) flags))
   (loop
     :with array := (make-array 0 :fill-pointer 0 :adjustable t)
     :for i :of-type fixnum :below (length vises)
-    :for vise := (aref vises i)
+    :for vise :of-type (simple-array fixnum (3)) := (aref vises i)
     :when (and (aref flags i)
                (every #'non-negative-p vise))
       :do
@@ -308,7 +313,9 @@
          (vises (make-array 0 :adjustable t :fill-pointer 0))
          (flags (make-array 0 :adjustable t :fill-pointer 0))
          (pzero (%highest-point-index point-array)))
-    (declare (type fixnum pzero))
+    (declare (type (array (simple-array * (3)) (*)) vises)
+             (type (array boolean (*)) flags)
+             (type fixnum npoint pzero))
     (labels ((push-vise (i j k)
                (declare (type fixnum i j k))
                (assert (and (/= i j) (/= j k) (/= k i)))
@@ -343,7 +350,7 @@
       (loop
         :initially
            (push-vise -2 -1 pzero)
-        :with indexes
+        :with indexes :of-type (simple-array fixnum (*))
           := (let ((indexes (iota-array npoint :element-type 'fixnum)))
                (declare (type (simple-array fixnum (*)) indexes))
                (rotatef (aref indexes 0) (aref indexes pzero))
