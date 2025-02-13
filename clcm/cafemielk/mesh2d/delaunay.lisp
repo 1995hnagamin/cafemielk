@@ -221,16 +221,24 @@
            (not-cw-p r j k)
            (not-cw-p r k i)))))
 
-(defun %opposite-vertex (trig-vise e1 e2)
-  (declare (type fixnum e1 e2)
+(defun %opposite-vertex (trig-vise v1 v2)
+  "Returns the vertex opposite to the edge (V1,V2) in the triangle TRIG-VISE.
+The edge must be oriented counterclockwise with respect to the triangle.
+Returns NIL if V1 and V2 do not form a counterclockwise edge of the triangle.
+
+     v3
+    /  \\
+   /    \\
+v1 -----> v2"
+  (declare (type fixnum v1 v2)
            (type (simple-array fixnum (3)) trig-vise)
            (values (or null fixnum) &optional))
   (aref-let1 (i j k) trig-vise
     (declare (type fixnum i j k))
     (cond
-      ((and (= j e1) (= k e2)) i)
-      ((and (= k e1) (= i e2)) j)
-      ((and (= i e1) (= j e2)) k)
+      ((and (= j v1) (= k v2)) i)
+      ((and (= k v1) (= i v2)) j)
+      ((and (= i v1) (= j v2)) k)
       (t nil))))
 
 (defun %opposite-edge (trig-vise vertex-index)
