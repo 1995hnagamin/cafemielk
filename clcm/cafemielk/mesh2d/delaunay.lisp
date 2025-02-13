@@ -136,7 +136,7 @@
       (values x y)
       (values y x)))
 
-(defun %lex< (i k &key point-array)
+(defun %lex< (i k point-array)
   (declare (type fixnum i k)
            (type (simple-array * (* 2)) point-array)
            (values boolean &optional))
@@ -161,7 +161,7 @@
              (point-array-nth k point-array))
            (lex< (a b)
              (declare (type fixnum a b))
-             (%lex< a b :point-array point-array)))
+             (%lex< a b point-array)))
     (if (and (>= r 0) (>= i 0) (>= j 0))
         ;; Normal case
         (counterclockwisep (point-ref r) (point-ref i) (point-ref j))
@@ -182,7 +182,7 @@
              (point-array-nth k point-array))
            (lex< (a b)
              (declare (type fixnum a b))
-             (%lex< a b :point-array point-array)))
+             (%lex< a b point-array)))
     (if (and (>= r 0) (>= i 0) (>= j 0))
         ;; Normal case
         (clockwisep (point r) (point i) (point j))
