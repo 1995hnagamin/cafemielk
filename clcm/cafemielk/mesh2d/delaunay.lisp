@@ -23,12 +23,15 @@
        (return array)))
 
 (defun random-range (start end)
+  (declare (type fixnum start end))
   (+ start (random (- end start))))
 
 (defun fisher-yates-shuffle (array start end)
+  (declare (type array array)
+           (type fixnum start end))
   (loop
-    :for i :downfrom (1- end) :above start
-    :for j := (random-range start (1+ i))
+    :for i :of-type fixnum :downfrom (1- end) :above start
+    :for j :of-type fixnum := (random-range start (1+ i))
     :do
        (rotatef (aref array i) (aref array j))
     :finally
@@ -62,10 +65,14 @@
 
 (declaim (inline point-array-xref))
 (defun point-array-xref (point-array i)
+  (declare (type fixnum i)
+           (type (simple-array * (* 2)) point-array))
   (aref point-array i 0))
 
 (declaim (inline point-array-yref))
 (defun point-array-yref (point-array i)
+  (declare (type fixnum i)
+           (type (simple-array * (* 2)) point-array))
   (aref point-array i 1))
 
 (defun vise->trig (point-array vise)
@@ -78,12 +85,13 @@
 
 (declaim (inline point-array-count))
 (defun point-array-count (point-array)
+  (declare (type (simple-array * (* 2)) point-array))
   (array-dimension point-array 0))
 
 (declaim (inline point-array-nth))
 (defun point-array-nth (n point-array)
   (declare (type fixnum n)
-           (type (array * (* *)) point-array))
+           (type (simple-array * (* 2)) point-array))
   `#(,(point-array-xref point-array n)
      ,(point-array-yref point-array n)))
 
@@ -106,6 +114,8 @@
      :initial-value nil)))
 
 (defun %highest-point-index (point-array)
+  (declare (type (simple-array * (* 2)) point-array)
+           (values fixnum &optional))
   (flet ((lex< (i j)
            (declare (type fixnum i j))
            (lexicographic< (i j)
@@ -113,8 +123,8 @@
                ((point-array-yref point-array k))
                ((point-array-xref point-array k)))))
     (loop
-      :with m := 0
-      :for i :from 1 :below (point-array-count point-array)
+      :with m :of-type fixnum := 0
+      :for i :of-type fixnum :from 1 :below (point-array-count point-array)
       :when (lex< m i)
         :do (setf m i)
       :finally
@@ -127,7 +137,9 @@
       (values y x)))
 
 (defun %lex< (i k &key point-array)
-  (declare (type fixnum i k))
+  (declare (type fixnum i k)
+           (type (simple-array * (* 2)) point-array)
+           (values boolean &optional))
   (cond
     ((= i -2) nil)
     ((= k -2) t)
@@ -141,11 +153,14 @@
            (t (< xi xk))))))) ; rightmost is the highest
 
 (defun %counterclockwisep (r i j point-array)
-  (declare (type fixnum r i j))
+  (declare (type fixnum r i j)
+           (type (simple-array * (* 2)) point-array)
+           (values boolean &optional))
   (labels ((point-ref (k)
              (declare (type fixnum k))
              (point-array-nth k point-array))
            (lex< (a b)
+             (declare (type fixnum a b))
              (%lex< a b :point-array point-array)))
     (if (and (>= r 0) (>= i 0) (>= j 0))
         ;; Normal case
@@ -159,11 +174,14 @@
             (t (go-loop i j r)))))))
 
 (defun %clockwisep (r i j point-array)
-  (declare (type fixnum r i j))
+  (declare (type fixnum r i j)
+           (type (array * (* 2)) point-array)
+           (values boolean &optional))
   (labels ((point (k)
              (declare (type fixnum k))
              (point-array-nth k point-array))
            (lex< (a b)
+             (declare (type fixnum a b))
              (%lex< a b :point-array point-array)))
     (if (and (>= r 0) (>= i 0) (>= j 0))
         ;; Normal case
@@ -177,15 +195,25 @@
             (t (go-loop i j r)))))))
 
 (defun %innerp (r trig-vise point-array)
+  (declare (type fixnum r)
+           (type (array * (3)) trig-vise)
+           (type (simple-array * (* 2)) point-array)
+           (values boolean &optional))
   (flet ((ccwp (r i j)
+           (declare (type fixnum r i j))
            (%counterclockwisep r i j point-array)))
     (aref-let1 (i j k) trig-vise
+      (declare (type fixnum i j k))
       (and (ccwp r i j)
            (ccwp r j k)
            (ccwp r k i)))))
 
 (defun %adherentp (r trig-vise point-array)
+  (declare (type fixnum r)
+           (type (simple-array * (* 2)) point-array)
+           (values boolean &optional))
   (flet ((not-cw-p (r i j)
+           (declare (type fixnum r i j))
            (not (%clockwisep r i j point-array))))
     (aref-let1 (i j k) trig-vise
       (and (not-cw-p r i j)
@@ -193,7 +221,8 @@
            (not-cw-p r k i)))))
 
 (defun %opposite-vertex (trig-vise e1 e2)
-  (declare (type fixnum e1 e2))
+  (declare (type fixnum e1 e2)
+           (values (or null fixnum) &optional))
   (aref-let1 (i j k) trig-vise
     (declare (type fixnum i j k))
     (cond
@@ -203,7 +232,8 @@
       (t nil))))
 
 (defun %opposite-edge (trig-vise vertex-index)
-  (declare (type fixnum vertex-index))
+  (declare (type fixnum vertex-index)
+           (values (or null fixnum) (or null fixnum) &optional))
   (aref-let1 (i j k) trig-vise
     (declare (type fixnum i j k))
     (cond
@@ -237,9 +267,14 @@
        (error "adjacent triangle not found")))
 
 (defun %legalp (r i j k point-array)
+  (declare (type fixnum r i j k)
+           (type (simple-array * (* 2)) point-array)
+           (values boolean &optional))
   (flet ((ccwp (r i j)
+           (declare (type fixnum r i j))
            (%counterclockwisep r i j point-array))
          (point-ref (i)
+           (declare (type fixnum i))
            (point-array-nth i point-array)))
     (cond
       ;; If not flippable, return t
@@ -256,7 +291,7 @@
 (defun %remove-virtual-points (vises flags)
   (loop
     :with array := (make-array 0 :fill-pointer 0 :adjustable t)
-    :for i :below (length vises)
+    :for i :of-type fixnum :below (length vises)
     :for vise := (aref vises i)
     :when (and (aref flags i)
                (every #'non-negative-p vise))
@@ -268,10 +303,12 @@
 ;; Mark Berg, Otfried Cheong, Marc Kreveld, and Mark Overmars
 ;; _Computational Geometry: Algorithms and Applications_
 (defun delaunay-triangulate (point-array)
+  (declare (type (simple-array * (* 2)) point-array))
   (let* ((npoint (array-dimension point-array 0))
          (vises (make-array 0 :adjustable t :fill-pointer 0))
          (flags (make-array 0 :adjustable t :fill-pointer 0))
          (pzero (%highest-point-index point-array)))
+    (declare (type fixnum pzero))
     (labels ((push-vise (i j k)
                (declare (type fixnum i j k))
                (assert (and (/= i j) (/= j k) (/= k i)))
@@ -287,6 +324,7 @@
                (declare (type fixnum i))
                (or (= i -2) (= i -1) (= i pzero)))
              (legalize-edge (r i j tr)
+               (declare (type fixnum r i j tr))
                (block body
                  (when (and (bounding-point-p i)
                             (bounding-point-p j))
@@ -294,6 +332,7 @@
                    (return-from body))
                  (multiple-value-bind
                        (ts k) (%find-adjacent-trig i j tr vises flags)
+                   (declare (type fixnum ts k))
                    (when (not (%legalp r i j k point-array))
                      (nullify-vise tr)
                      (nullify-vise ts)
@@ -306,15 +345,16 @@
            (push-vise -2 -1 pzero)
         :with indexes
           := (let ((indexes (iota-array npoint :element-type 'fixnum)))
-               (declare (type (array fixnum (*)) indexes))
+               (declare (type (simple-array fixnum (*)) indexes))
                (rotatef (aref indexes 0) (aref indexes pzero))
                (fisher-yates-shuffle indexes 1 npoint))
 
-        :for r-index :from 1 :below npoint
-        :for r := (aref indexes r-index)
-        :for tr := (%find-trig r vises flags point-array)
+        :for r-index :of-type fixnum :from 1 :below npoint
+        :for r :of-type fixnum := (aref indexes r-index)
+        :for tr :of-type fixnum := (%find-trig r vises flags point-array)
         :if (%innerp r (aref vises tr) point-array) :do
           (aref-let1 (i j k) (aref vises tr)
+            (declare (type fixnum i j k))
             (nullify-vise tr)
             ;; add edges r-i, r-j, r-k
             (let ((tr1 (push-vise r i j))
