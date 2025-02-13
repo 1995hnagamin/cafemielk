@@ -316,7 +316,8 @@ v1 -----> v2"
 ;; Mark Berg, Otfried Cheong, Marc Kreveld, and Mark Overmars
 ;; _Computational Geometry: Algorithms and Applications_
 (defun delaunay-triangulate (point-array)
-  (declare (type (simple-array * (* 2)) point-array))
+  (declare (type (simple-array * (* 2)) point-array)
+           (optimize (speed 3)))
   (let* ((npoint (array-dimension point-array 0))
          (vises (make-array 0 :adjustable t :fill-pointer 0))
          (flags (make-array 0 :adjustable t :fill-pointer 0))
@@ -367,8 +368,9 @@ v1 -----> v2"
         :for r-index :of-type fixnum :from 1 :below npoint
         :for r :of-type fixnum := (aref indexes r-index)
         :for tr :of-type fixnum := (%find-trig r vises flags point-array)
-        :if (%innerp r (aref vises tr) point-array) :do
-          (aref-let1 (i j k) (aref vises tr)
+        :for vise :of-type (simple-array fixnum (3)) := (aref vises tr)
+        :if (%innerp r vise point-array) :do
+          (aref-let1 (i j k) vise
             (declare (type fixnum i j k))
             (nullify-vise tr)
             ;; add edges r-i, r-j, r-k
