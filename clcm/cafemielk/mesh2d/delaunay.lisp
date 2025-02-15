@@ -295,6 +295,13 @@ v1 -----> v2"
                                     :element-type 'fixnum)
                       (%history-dag-adjacent-trig-array hdag)))
 
+(defun %history-dag-push-vise (v1 v2 v3 hdag)
+  (declare (type fixnum v1 v2 v3)
+           (type %history-dag hdag))
+  (%history-dag-push (make-array '(3) :initial-contents `(,v1 ,v2 ,v3)
+                                      :element-type 'fixnum)
+                     hdag))
+
 (defun %find-leaf-containing-edge (hdag trig-index e1 e2)
   (declare (type %history-dag hdag)
            (type fixnum trig-index e1 e2)
