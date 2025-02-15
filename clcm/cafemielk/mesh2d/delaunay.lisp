@@ -310,6 +310,18 @@ v1 -----> v2"
                                       :element-type 'fixnum)
                      hdag))
 
+(defun %history-dag-add-child (hdag parent-index child-index)
+  (declare (type %history-dag hdag)
+           (type fixnum parent-index child-index))
+  (if (%history-dag-children hdag parent-index)
+      (vector-push child-index
+                   (aref (%history-dag-children-array hdag) parent-index))
+      (let1 array (make-array '(3) :element-type 'fixnum
+                                   :adjustable t
+                                   :fill-pointer 0)
+        (vector-push child-index array)
+        (setf (aref (%history-dag-children-array hdag) parent-index) array))))
+
 (defun %find-leaf-containing-edge (hdag trig-index e1 e2)
   (declare (type %history-dag hdag)
            (type fixnum trig-index e1 e2)
