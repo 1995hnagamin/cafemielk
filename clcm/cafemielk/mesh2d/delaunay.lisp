@@ -375,30 +375,6 @@ v1 -----> v2"
                       (error "not found")))))
     (walk 0)))
 
-(defun %find-trig (r vises flags point-array)
-  (loop
-    :for vise-index :from 0 :below (length vises)
-    :for vise := (aref vises vise-index)
-    :when (and (elt flags vise-index)
-               (%adherentp r vise point-array))
-      :do
-         (return vise-index)
-    :finally
-       (error "not found")))
-
-(defun %find-adjacent-trig (i j tr vises flags)
-  (loop
-    :for ti :from 0 :below (length vises)
-    :when (and (/= ti tr)
-               (elt flags ti)
-               (find i (aref vises ti))
-               (find j (aref vises ti)))
-      :do
-         (let1 k (- (reduce #'+ (aref vises ti)) i j)
-           (return (values ti k)))
-    :finally
-       (error "adjacent triangle not found")))
-
 (defun %legalp (r i j k point-array)
   (declare (type fixnum r i j k)
            (type (point-array-2d * *) point-array)
@@ -420,20 +396,6 @@ v1 -----> v2"
                          (point-ref j)
                          (point-ref k))))
       (t (< (min k r) (min i j))))))
-
-(defun %remove-virtual-points (vises flags)
-  (declare (type (vector (vertex-index-sequence 3)) vises)
-           (type (vector boolean) flags))
-  (loop
-    :with array := (make-array 0 :fill-pointer 0 :adjustable t)
-    :for i :of-type fixnum :below (length vises)
-    :for vise :of-type (vertex-index-sequence 3) := (aref vises i)
-    :when (and (aref flags i)
-               (every #'non-negative-p vise))
-      :do
-         (vector-push-extend vise array)
-    :finally
-       (return array)))
 
 (defun %history-dag-remove-virtual-points (hdag)
   (declare (type %history-dag hdag))
