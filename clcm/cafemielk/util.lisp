@@ -191,8 +191,8 @@
 
 (declaim (inline cross2d))
 (defun cross2d (u v)
-  (- (* (aref u 0) (aref v 1))
-     (* (aref u 1) (aref v 0))))
+  (- (* (xref u) (yref v))
+     (* (yref u) (xref v))))
 
 (declaim (inline cross3d))
 (defun cross3d (u v)

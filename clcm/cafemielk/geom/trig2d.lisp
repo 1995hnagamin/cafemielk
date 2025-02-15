@@ -25,8 +25,8 @@
   "Returns A - B."
   (declare (type (simple-array * (2)) a b)
            (values (simple-array * (2)) &optional))
-  (vector (- (aref a 0) (aref b 0))
-          (- (aref a 1) (aref b 1))))
+  (vector (- (xref a) (xref b))
+          (- (yref a) (yref b))))
 
 (declaim (inline counterclockwisep))
 (defun counterclockwisep (origin pivot target)
