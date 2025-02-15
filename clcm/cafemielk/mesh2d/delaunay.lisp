@@ -274,7 +274,7 @@ v1 -----> v2"
 
 (defun %remove-virtual-points (vises flags)
   (declare (type (vector (vertex-index-sequence 3)) vises)
-           (type (array boolean (*)) flags))
+           (type (vector boolean) flags))
   (loop
     :with array := (make-array 0 :fill-pointer 0 :adjustable t)
     :for i :of-type fixnum :below (length vises)
@@ -301,7 +301,7 @@ v1 -----> v2"
                               :fill-pointer 0))
          (pzero (%highest-point-index point-array)))
     (declare (type (vector (vertex-index-sequence 3)) vises)
-             (type (array boolean (*)) flags)
+             (type (vector boolean) flags)
              (type fixnum npoint pzero))
     (labels ((push-vise (i j k)
                (declare (type fixnum i j k))
