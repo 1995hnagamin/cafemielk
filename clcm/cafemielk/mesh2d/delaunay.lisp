@@ -1,7 +1,11 @@
 ;;;; Delaunay triangulation
 
 (defpackage :cafemielk/mesh2d/delaunay
-  (:use :cl :cafemielk/geom/trig2d :cafemielk/util)
+  (:use
+   :cl
+   :cafemielk/geom/trig2d
+   :cafemielk/point-array
+   :cafemielk/util)
   (:export
    ))
 (in-package :cafemielk/mesh2d/delaunay)
@@ -63,38 +67,6 @@
     :finally
        (vector-pop vector)))
 
-(declaim (inline point-array-xref))
-(defun point-array-xref (point-array i)
-  (declare (type fixnum i)
-           (type (simple-array * (* 2)) point-array))
-  (aref point-array i 0))
-
-(declaim (inline point-array-yref))
-(defun point-array-yref (point-array i)
-  (declare (type fixnum i)
-           (type (simple-array * (* 2)) point-array))
-  (aref point-array i 1))
-
-(defun vise->trig (point-array vise)
-  `#(,(point-array-xref point-array (aref vise 0))
-     ,(point-array-xref point-array (aref vise 1))
-     ,(point-array-xref point-array (aref vise 2))
-     ,(point-array-yref point-array (aref vise 0))
-     ,(point-array-yref point-array (aref vise 1))
-     ,(point-array-yref point-array (aref vise 2))))
-
-(declaim (inline point-array-count))
-(defun point-array-count (point-array)
-  (declare (type (simple-array * (* 2)) point-array))
-  (array-dimension point-array 0))
-
-(declaim (inline point-array-nth))
-(defun point-array-nth (n point-array)
-  (declare (type fixnum n)
-           (type (simple-array * (* 2)) point-array))
-  `#(,(point-array-xref point-array n)
-     ,(point-array-yref point-array n)))
-
 (defmacro lexicographic< ((i j) (param) &rest clauses)
   (once-only (i j)
     (reduce
@@ -114,14 +86,14 @@
      :initial-value nil)))
 
 (defun %highest-point-index (point-array)
-  (declare (type (simple-array * (* 2)) point-array)
+  (declare (type (point-array-2d * *) point-array)
            (values fixnum &optional))
   (flet ((lex< (i j)
            (declare (type fixnum i j))
            (lexicographic< (i j)
                (k)
-               ((point-array-yref point-array k))
-               ((point-array-xref point-array k)))))
+               ((point-aref-x point-array k))
+               ((point-aref-y point-array k)))))
     (loop
       :with m :of-type fixnum := 0
       :for i :of-type fixnum :from 1 :below (point-array-count point-array)
@@ -138,15 +110,15 @@
 
 (defun %lex< (i k point-array)
   (declare (type fixnum i k)
-           (type (simple-array * (* 2)) point-array)
+           (type (point-array-2d * *) point-array)
            (values boolean &optional))
   (cond
     ((= i -2) nil)
     ((= k -2) t)
     ((= k -1) nil)
     ((= i -1) t)
-    (t (aref-let (((xi yi) (point-array-nth i point-array))
-                  ((xk yk) (point-array-nth k point-array)))
+    (t (with-point-coords* (((xi yi) point-array i)
+                            ((xk yk) point-array k))
          (cond
            ((< yi yk) t)
            ((< yk yi) nil)
@@ -154,11 +126,11 @@
 
 (defun %counterclockwisep (r i j point-array)
   (declare (type fixnum r i j)
-           (type (simple-array * (* 2)) point-array)
+           (type (point-array-2d * *) point-array)
            (values boolean &optional))
   (labels ((point-ref (k)
              (declare (type fixnum k))
-             (point-array-nth k point-array))
+             (coord-vec-2d point-array k))
            (lex< (a b)
              (declare (type fixnum a b))
              (%lex< a b point-array)))
@@ -175,11 +147,11 @@
 
 (defun %clockwisep (r i j point-array)
   (declare (type fixnum r i j)
-           (type (array * (* 2)) point-array)
+           (type (point-array-2d * *) point-array)
            (values boolean &optional))
   (labels ((point (k)
              (declare (type fixnum k))
-             (point-array-nth k point-array))
+             (coord-vec-2d point-array k))
            (lex< (a b)
              (declare (type fixnum a b))
              (%lex< a b point-array)))
@@ -197,7 +169,7 @@
 (defun %innerp (r trig-vise point-array)
   (declare (type fixnum r)
            (type (simple-array fixnum (3)) trig-vise)
-           (type (simple-array * (* 2)) point-array)
+           (type (point-array-2d * *) point-array)
            (values boolean &optional))
   (flet ((ccwp (r i j)
            (declare (type fixnum r i j))
@@ -211,7 +183,7 @@
 (defun %adherentp (r trig-vise point-array)
   (declare (type fixnum r)
            (type (simple-array fixnum (3)) trig-vise)
-           (type (simple-array * (* 2)) point-array)
+           (type (point-array-2d * *) point-array)
            (values boolean &optional))
   (flet ((not-cw-p (r i j)
            (declare (type fixnum r i j))
@@ -279,14 +251,14 @@ v1 -----> v2"
 
 (defun %legalp (r i j k point-array)
   (declare (type fixnum r i j k)
-           (type (simple-array * (* 2)) point-array)
+           (type (point-array-2d * *) point-array)
            (values boolean &optional))
   (flet ((ccwp (r i j)
            (declare (type fixnum r i j))
            (%counterclockwisep r i j point-array))
          (point-ref (i)
            (declare (type fixnum i))
-           (point-array-nth i point-array)))
+           (coord-vec-2d point-array i)))
     (cond
       ;; If not flippable, return t
       ((not (ccwp r i k)) t)
@@ -316,7 +288,7 @@ v1 -----> v2"
 ;; Mark Berg, Otfried Cheong, Marc Kreveld, and Mark Overmars
 ;; _Computational Geometry: Algorithms and Applications_
 (defun delaunay-triangulate (point-array)
-  (declare (type (simple-array * (* 2)) point-array)
+  (declare (type (point-array-2d * *) point-array)
            (values (vector (simple-array fixnum (3))) &optional)
            (optimize (speed 3)))
   (let* ((npoint (array-dimension point-array 0))

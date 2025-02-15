@@ -1,12 +1,16 @@
 ;;;; 2-D Triangle Geometry
 
 (defpackage :cafemielk/geom/trig2d
-  (:use :cl :cafemielk/util)
+  (:use
+   :cl
+   :cafemielk/point-array
+   :cafemielk/util)
   (:export
    :clockwisep
    :counterclockwisep
    :in-circle
    :in-circle-p
+   :trig2d
    :trig2d-from-3points
    :trig2d-adherent-p
    :trig2d-area
@@ -59,26 +63,35 @@
            (values boolean &optional))
   (plusp (in-circle a b c target)))
 
+(deftype trig2d (&optional (element-type '*))
+  `(point-array ,element-type 3 2))
+
 (defun trig2d-from-3points (a b c &key (element-type t))
+  (declare (values (trig2d)))
   (flet ((make (a b c)
            (aref-let (((ax ay) a) ((bx by) b) ((cx cy) c))
-             (make-array 6 :initial-contents (map 'vector
-                                                  #'(lambda (z)
-                                                      (coerce z element-type))
-                                                  (vector ax bx cx ay by cy))
-                           :element-type element-type
-                           :adjustable nil))))
+             (make-array '(3 2)
+                         :initial-contents `((,(coerce ax element-type)
+                                              ,(coerce ay element-type))
+                                             (,(coerce bx element-type)
+                                              ,(coerce by element-type))
+                                             (,(coerce cx element-type)
+                                              ,(coerce cy element-type)))
+                         :element-type element-type
+                         :adjustable nil))))
     (if (counterclockwisep a b c)
         (make a b c)
         (make a c b))))
 
 (declaim (inline trig2d-xref))
 (defun trig2d-xref (trig i)
-  (aref trig i))
+  (declare (type (trig2d) trig))
+  (aref trig i 0))
 
 (declaim (inline trig2d-yref))
 (defun trig2d-yref (trig i)
-  (aref trig (+ i 3)))
+  (declare (type (trig2d) trig))
+  (aref trig i 1))
 
 (defmacro with-trig2d-accessors
     ((trig &key (x nil) (y nil) (dx nil) (dy nil) (dd nil))
@@ -97,23 +110,24 @@
 
 (declaim (inline trig2d-dx))
 (defun trig2d-dx (trig i j)
-  (declare (type (simple-array * (6)) trig))
+  (declare (type (trig2d) trig))
   (with-trig2d-accessors (trig :x x)
     (- (x j) (x i))))
 
 (declaim (inline trig2d-dy))
 (defun trig2d-dy (trig i j)
+  (declare (type (trig2d) trig))
   (with-trig2d-accessors (trig :y y)
     (- (y j) (y i))))
 
 (declaim (inline trig2d-area))
 (defun trig2d-area (trig)
-  (declare (type (simple-array * (6)) trig))
+  (declare (type (trig2d) trig))
   (with-trig2d-accessors (trig :dd dd)
     (/ (cross2d (dd 0 1) (dd 0 2)) 2)))
 
 (defun trig2d-adherent-p (trig pt)
-  (declare (type (simple-array * (6)) trig)
+  (declare (type (trig2d) trig)
            (type (simple-array * (2)) pt))
   (with-trig2d-accessors (trig :x tx :y ty)
     (aref-let1 (px py) pt

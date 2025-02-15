@@ -6,6 +6,7 @@
   (:use
    :cl
    :cafemielk/geom/trig2d
+   :cafemielk/point-array
    :cafemielk/util)
   (:export
    :mesh2d-trig
@@ -24,7 +25,7 @@
 
 
 (defstruct mesh2d-trig
-  (vertices nil :type (array * (* 2)))
+  (vertices nil :type (point-array-2d * *))
   (vises nil :type (array fixnum (* 3))))
 
 (defun mesh2d-trig-coordinate-type (mesh)
@@ -50,10 +51,11 @@
       array)))
 
 (defun mesh2d-trig-vise-elt (mesh vise-index)
+  (declare (type mesh2d-trig mesh)
+           (values (simple-array fixnum (3)) &optional))
   (with-slots (vises) mesh
     (loop
-      :with array := (make-array 3
-                                 :element-type (array-element-type vises))
+      :with array := (make-array 3 :element-type 'fixnum)
       :for i :below 3
       :do (setf (aref array i) (aref vises vise-index i))
       :finally (return array))))
@@ -69,14 +71,13 @@
 (defun mesh2d-trig-vise->trig2d (mesh vise)
   (with-mesh2d-trig-vertex-accessors (mesh :x x :y y)
     (loop
-      :with cv := (make-array
-                   6
-                   :element-type (mesh2d-trig-coordinate-type mesh))
+      :with cv := (make-array '(3 2)
+                              :element-type (mesh2d-trig-coordinate-type mesh))
       :for i :from 0
       :for vertex-index :across vise
       :do
-         (setf (aref cv i) (x vertex-index))
-         (setf (aref cv (+ i 3)) (y vertex-index))
+         (setf (point-aref-x cv i) (x vertex-index))
+         (setf (point-aref-y cv i) (y vertex-index))
       :finally
          (return cv))))
 
