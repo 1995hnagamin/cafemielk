@@ -7,6 +7,7 @@
    :cafemielk/mesh2d
    :cafemielk/mesh2d/base
    :cafemielk/mesh2d-quad
+   :cafemielk/point-array
    :cafemielk/vtk/legacy
    :cafemielk/package-info))
 
