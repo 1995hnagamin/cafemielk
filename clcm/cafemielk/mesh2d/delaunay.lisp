@@ -325,21 +325,22 @@ v1 -----> v2"
 (defun %find-leaf-containing-edge (hdag trig-index e1 e2)
   (declare (type %history-dag hdag)
            (type fixnum trig-index e1 e2)
-           (values (or null fixnum) &optional))
+           (values (or null fixnum) (or null fixnum) &optional))
   (labels ((search-node (tr)
              (declare (type fixnum tr))
              (if (%history-dag-leafp hdag tr)
-                 tr
+                 (let1 k (- (reduce #'+ (%history-dag-vise hdag tr)) e1 e2)
+                   (values tr k))
                  (loop
                    :for child :of-type fixnum
                      :across (%history-dag-children hdag tr)
                    :when (%opposite-vertex (%history-dag-vise hdag child) e1 e2)
                      :do (return (search-node child))
                    :finally
-                      (return nil)))))
+                      (return (values nil nil))))))
     (if (>= trig-index 0)
         (search-node trig-index)
-        trig-index)))
+        (values trig-index nil))))
 
 (defun %adjacent-trig-index (hdag trig-index vertex-index)
   (declare (type fixnum trig-index vertex-index)
