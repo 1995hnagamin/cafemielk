@@ -456,27 +456,15 @@ v1 -----> v2"
            (values (vector (vertex-index-sequence 3)) &optional)
            (optimize (speed 3)))
   (let* ((npoint (array-dimension point-array 0))
-         (vises (make-array 0 :element-type '(vertex-index-sequence 3)
-                              :adjustable t
-                              :fill-pointer 0))
-         (flags (make-array 0 :element-type 'boolean
-                              :adjustable t
-                              :fill-pointer 0))
+         (hdag (%create-empty-history-dag))
          (pzero (%highest-point-index point-array)))
-    (declare (type (vector (vertex-index-sequence 3)) vises)
-             (type (vector boolean) flags)
+    (declare (type %history-dag hdag)
              (type fixnum npoint pzero))
     (labels ((push-vise (i j k)
                (declare (type fixnum i j k))
                (assert (and (/= i j) (/= j k) (/= k i)))
                (assert (%counterclockwisep i j k point-array))
-               (vector-push-extend
-                (make-array 3 :initial-contents `(,i ,j ,k)
-                              :element-type 'fixnum)
-                vises)
-               (vector-push-extend t flags))
-             (nullify-vise (vise-index)
-               (setf (aref flags vise-index) nil))
+               (%history-dag-push-vise i j k hdag))
              (bounding-point-p (i)
                (declare (type fixnum i))
                (or (= i -2) (= i -1) (= i pzero)))
@@ -488,18 +476,30 @@ v1 -----> v2"
                    ;; Super-triangle edges are not flippable
                    (return-from body))
                  (multiple-value-bind
-                       (ts k) (%find-adjacent-trig i j tr vises flags)
-                   (declare (type fixnum ts k))
+                       (ts k) (%adjacent-trig-index hdag tr r)
+                   (when (not ts)
+                     (return-from body))
                    (when (not (%legalp r i j k point-array))
-                     (nullify-vise tr)
-                     (nullify-vise ts)
-                     (let ((t1 (push-vise r i k))
-                           (t2 (push-vise r k j)))
+                     (let* ((tsj (%adjacent-trig-index hdag ts j))
+                            (trj (%adjacent-trig-index hdag tr j))
+                            (tsi (%adjacent-trig-index hdag ts i))
+                            (tri (%adjacent-trig-index hdag tr i))
+                            (t1 (push-vise r i k))
+                            (t2 (push-vise r k j)))
+                       (%history-dag-set-adjacency hdag t1
+                                                   tsj t2 trj)
+                       (%history-dag-set-adjacency hdag t2
+                                                   tsi tri t1)
+                       (%history-dag-add-child hdag tr t1)
+                       (%history-dag-add-child hdag tr t2)
+                       (%history-dag-add-child hdag ts t1)
+                       (%history-dag-add-child hdag ts t2)
                        (legalize-edge r i k t1)
                        (legalize-edge r k j t2)))))))
       (loop
         :initially
            (push-vise -2 -1 pzero)
+           (%history-dag-set-adjacency hdag 0 -1002 -1001 -1000)
         :with indexes :of-type (simple-array fixnum (*))
           := (let ((indexes (iota-array npoint :element-type 'fixnum)))
                (declare (type (simple-array fixnum (*)) indexes))
@@ -508,16 +508,28 @@ v1 -----> v2"
 
         :for r-index :of-type fixnum :from 1 :below npoint
         :for r :of-type fixnum := (aref indexes r-index)
-        :for tr :of-type fixnum := (%find-trig r vises flags point-array)
-        :for vise :of-type (vertex-index-sequence 3) := (aref vises tr)
+        :for tr :of-type fixnum
+          := (%find-leaf-containing-vertex r hdag point-array)
+        :for vise :of-type (vertex-index-sequence 3)
+          := (%history-dag-vise hdag tr)
         :if (%innerp r vise point-array) :do
-          (aref-let1 (i j k) vise
+          (aref-let (((i j k) vise)
+                     ((adi adj adk) (%history-dag-adjacent-trig hdag tr)))
             (declare (type fixnum i j k))
-            (nullify-vise tr)
             ;; add edges r-i, r-j, r-k
             (let ((tr1 (push-vise r i j))
                   (tr2 (push-vise r j k))
                   (tr3 (push-vise r k i)))
+              (declare (type fixnum tr1 tr2 tr3))
+              (%history-dag-set-adjacency hdag tr1
+                                          adk tr2 tr3)
+              (%history-dag-set-adjacency hdag tr2
+                                          adi tr3 tr1)
+              (%history-dag-set-adjacency hdag tr3
+                                          adj tr1 tr2)
+              (%history-dag-add-child hdag tr tr1)
+              (%history-dag-add-child hdag tr tr2)
+              (%history-dag-add-child hdag tr tr3)
               ;; legalize edges
               (legalize-edge r i j tr1)
               (legalize-edge r j k tr2)
@@ -526,7 +538,7 @@ v1 -----> v2"
           (error "not implemented")
         :end
         :finally
-           (return (%remove-virtual-points vises flags))))))
+           (return (%history-dag-remove-virtual-points hdag))))))
 
 ;;; Local Variables:
 ;;; mode: lisp
