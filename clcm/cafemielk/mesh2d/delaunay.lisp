@@ -357,6 +357,23 @@ v1 -----> v2"
          (%find-leaf-containing-edge hdag (aref adj-trigs 2) vj vi))
         (t (error "yee"))))))
 
+(defun %find-leaf-containing-vertex (vertex-index hdag point-array)
+  (declare (type %history-dag hdag)
+           (values fixnum &optional))
+  (labels ((walk (trig-index)
+             (declare (type fixnum trig-index))
+             (if (%history-dag-leafp hdag trig-index)
+                 trig-index
+                 (loop
+                   :for child-index
+                     :across (%history-dag-children hdag trig-index)
+                   :for child := (%history-dag-vise hdag child-index)
+                   :if (%adherentp vertex-index child point-array) :do
+                     (return (walk child-index))
+                   :finally
+                      (error "not found")))))
+    (walk 0)))
+
 (defun %find-trig (r vises flags point-array)
   (loop
     :for vise-index :from 0 :below (length vises)
