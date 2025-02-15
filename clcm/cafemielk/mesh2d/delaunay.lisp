@@ -4,6 +4,7 @@
   (:use
    :cl
    :cafemielk/geom/trig2d
+   :cafemielk/mesh2d/base
    :cafemielk/point-array
    :cafemielk/util)
   (:export
@@ -168,7 +169,7 @@
 
 (defun %innerp (r trig-vise point-array)
   (declare (type fixnum r)
-           (type (simple-array fixnum (3)) trig-vise)
+           (type (vertex-index-sequence 3) trig-vise)
            (type (point-array-2d * *) point-array)
            (values boolean &optional))
   (flet ((ccwp (r i j)
@@ -182,7 +183,7 @@
 
 (defun %adherentp (r trig-vise point-array)
   (declare (type fixnum r)
-           (type (simple-array fixnum (3)) trig-vise)
+           (type (vertex-index-sequence 3) trig-vise)
            (type (point-array-2d * *) point-array)
            (values boolean &optional))
   (flet ((not-cw-p (r i j)
@@ -203,7 +204,7 @@ Returns NIL if V1 and V2 do not form a counterclockwise edge of the triangle.
    /    \\
 v1 -----> v2"
   (declare (type fixnum v1 v2)
-           (type (simple-array fixnum (3)) trig-vise)
+           (type (vertex-index-sequence 3) trig-vise)
            (values (or null fixnum) &optional))
   (aref-let1 (i j k) trig-vise
     (declare (type fixnum i j k))
@@ -215,7 +216,7 @@ v1 -----> v2"
 
 (defun %opposite-edge (trig-vise vertex-index)
   (declare (type fixnum vertex-index)
-           (type (simple-array fixnum (3)) trig-vise)
+           (type (vertex-index-sequence 3) trig-vise)
            (values (or null fixnum) (or null fixnum) &optional))
   (aref-let1 (i j k) trig-vise
     (declare (type fixnum i j k))
@@ -272,12 +273,12 @@ v1 -----> v2"
       (t (< (min k r) (min i j))))))
 
 (defun %remove-virtual-points (vises flags)
-  (declare (type (array (simple-array fixnum (3)) (*)) vises)
+  (declare (type (vector (vertex-index-sequence 3)) vises)
            (type (array boolean (*)) flags))
   (loop
     :with array := (make-array 0 :fill-pointer 0 :adjustable t)
     :for i :of-type fixnum :below (length vises)
-    :for vise :of-type (simple-array fixnum (3)) := (aref vises i)
+    :for vise :of-type (vertex-index-sequence 3) := (aref vises i)
     :when (and (aref flags i)
                (every #'non-negative-p vise))
       :do
@@ -289,17 +290,17 @@ v1 -----> v2"
 ;; _Computational Geometry: Algorithms and Applications_
 (defun delaunay-triangulate (point-array)
   (declare (type (point-array-2d * *) point-array)
-           (values (vector (simple-array fixnum (3))) &optional)
+           (values (vector (vertex-index-sequence 3)) &optional)
            (optimize (speed 3)))
   (let* ((npoint (array-dimension point-array 0))
-         (vises (make-array 0 :element-type '(simple-array fixnum (3))
+         (vises (make-array 0 :element-type '(vertex-index-sequence 3)
                               :adjustable t
                               :fill-pointer 0))
          (flags (make-array 0 :element-type 'boolean
                               :adjustable t
                               :fill-pointer 0))
          (pzero (%highest-point-index point-array)))
-    (declare (type (array (simple-array * (3)) (*)) vises)
+    (declare (type (vector (vertex-index-sequence 3)) vises)
              (type (array boolean (*)) flags)
              (type fixnum npoint pzero))
     (labels ((push-vise (i j k)
@@ -345,7 +346,7 @@ v1 -----> v2"
         :for r-index :of-type fixnum :from 1 :below npoint
         :for r :of-type fixnum := (aref indexes r-index)
         :for tr :of-type fixnum := (%find-trig r vises flags point-array)
-        :for vise :of-type (simple-array fixnum (3)) := (aref vises tr)
+        :for vise :of-type (vertex-index-sequence 3) := (aref vises tr)
         :if (%innerp r vise point-array) :do
           (aref-let1 (i j k) vise
             (declare (type fixnum i j k))
