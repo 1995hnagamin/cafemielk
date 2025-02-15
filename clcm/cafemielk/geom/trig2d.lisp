@@ -19,18 +19,22 @@
 
 (defun 2d- (a b)
   "Returns A - B."
+  (declare (type (simple-array * (2)) a b)
+           (values (simple-array * (2)) &optional))
   (vector (- (aref a 0) (aref b 0))
           (- (aref a 1) (aref b 1))))
 
 (declaim (inline counterclockwisep))
 (defun counterclockwisep (origin pivot target)
-  (declare (type (array * (2)) origin pivot target))
+  (declare (type (simple-array * (2)) origin pivot target)
+           (values boolean &optional))
   (plusp (cross2d (2d- pivot origin)
                   (2d- target origin))))
 
 (declaim (inline clockwisep))
 (defun clockwisep (origin pivot target)
-  (declare (type (array * (2)) origin pivot target))
+  (declare (type (simple-array * (2)) origin pivot target)
+           (values boolean &optional))
   (minusp (cross2d (2d- pivot origin)
                    (2d- target origin))))
 
@@ -39,7 +43,7 @@
 
 (declaim (inline in-circle in-circle-p))
 (defun in-circle (a b c target)
-  (declare (type (array * (2)) a b c target))
+  (declare (type (simple-array * (2)) a b c target))
   (aref-let (((ax ay) (2d- a target))
              ((bx by) (2d- b target))
              ((cx cy) (2d- c target)))
@@ -51,6 +55,8 @@
        (- (* cx by (sum-square ax ay))))))
 
 (defun in-circle-p (a b c target)
+  (declare (type (simple-array * (2)) a b c target)
+           (values boolean &optional))
   (plusp (in-circle a b c target)))
 
 (defun trig2d-from-3points (a b c &key (element-type t))

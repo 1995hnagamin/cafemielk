@@ -317,10 +317,15 @@ v1 -----> v2"
 ;; _Computational Geometry: Algorithms and Applications_
 (defun delaunay-triangulate (point-array)
   (declare (type (simple-array * (* 2)) point-array)
+           (values (vector (simple-array fixnum (3))) &optional)
            (optimize (speed 3)))
   (let* ((npoint (array-dimension point-array 0))
-         (vises (make-array 0 :adjustable t :fill-pointer 0))
-         (flags (make-array 0 :adjustable t :fill-pointer 0))
+         (vises (make-array 0 :element-type '(simple-array fixnum (3))
+                              :adjustable t
+                              :fill-pointer 0))
+         (flags (make-array 0 :element-type 'boolean
+                              :adjustable t
+                              :fill-pointer 0))
          (pzero (%highest-point-index point-array)))
     (declare (type (array (simple-array * (3)) (*)) vises)
              (type (array boolean (*)) flags)
