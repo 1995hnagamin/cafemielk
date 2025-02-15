@@ -9,6 +9,7 @@
    :point-array-2d
    :point-array-count
    :point-array-dimension
+   :point-aref
    :point-aref-x
    :point-aref-y
    :point-aref-z))
@@ -32,13 +33,21 @@
 (defun point-aref (point-array index dimension-index)
   (aref point-array index dimension-index))
 
+(declaim (inline (setf point-aref)))
+
+(defun (setf point-aref) (new-value point-array index dimension-index)
+  (setf (aref point-array index dimension-index) new-value))
+
 (defmacro define-coordinate-ref (name dimension-index)
   `(progn
      (declaim (inline ,name))
      (defun ,name (point-array index)
        (declare (type (point-array * * *) point-array)
                 (type fixnum index))
-       (point-aref point-array index ,dimension-index))))
+       (point-aref point-array index ,dimension-index))
+     (declaim (inline (setf ,name)))
+     (defun (setf ,name) (new-value point-array index)
+       (setf (point-aref point-array index ,dimension-index) new-value))))
 
 (define-coordinate-ref point-aref-x 0)
 (define-coordinate-ref point-aref-y 1)
