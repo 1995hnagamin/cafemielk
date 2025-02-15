@@ -344,7 +344,8 @@ v1 -----> v2"
 
 (defun %adjacent-trig-index (hdag trig-index vertex-index)
   (declare (type fixnum trig-index vertex-index)
-           (type %history-dag hdag))
+           (type %history-dag hdag)
+           (values (or null fixnum)))
   (let ((vise (%history-dag-vise hdag trig-index))
         (adj-trigs (%history-dag-adjacent-trig hdag trig-index)))
     (aref-let1 (vi vj vk) vise
