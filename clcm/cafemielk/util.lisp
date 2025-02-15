@@ -28,7 +28,10 @@
    :vec3d-tab
    :cross2d
    :cross3d
-   :dot-product))
+   :dot-product
+   :xref
+   :yref
+   :zref))
 (in-package :cafemielk/util)
 
 
@@ -172,6 +175,19 @@
 
 (defmacro vec3d-tab ((i j k) expr)
   `(collect-substitute-a3 vector (,i ,j ,k) ,expr))
+
+(defmacro define-coordinate-ref (function-name dimension-index)
+  `(progn
+     (declaim (inline ,function-name))
+     (defun ,function-name (vector)
+       (aref vector ,dimension-index))
+     (declaim (inline (setf ,function-name)))
+     (defun (setf ,function-name) (new-value vector)
+       (setf (aref vector ,dimension-index) new-value))))
+
+(define-coordinate-ref xref 0)
+(define-coordinate-ref yref 1)
+(define-coordinate-ref zref 2)
 
 (declaim (inline cross2d))
 (defun cross2d (u v)
