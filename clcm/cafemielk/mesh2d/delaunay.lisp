@@ -295,6 +295,14 @@ v1 -----> v2"
                                     :element-type 'fixnum)
                       (%history-dag-adjacent-trig-array hdag)))
 
+(defun %history-dag-set-adjacency (hdag trig-index tr1 tr2 tr3)
+  (declare (type %history-dag hdag)
+           (type fixnum trig-index tr1 tr2 tr3))
+  (let1 adj (aref (%history-dag-adjacent-trig-array hdag) trig-index)
+    (setf (aref adj 0) tr1)
+    (setf (aref adj 1) tr2)
+    (setf (aref adj 2) tr3)))
+
 (defun %history-dag-push-vise (v1 v2 v3 hdag)
   (declare (type fixnum v1 v2 v3)
            (type %history-dag hdag))
