@@ -51,10 +51,11 @@
       array)))
 
 (defun mesh2d-trig-vise-elt (mesh vise-index)
+  (declare (type mesh2d-trig mesh)
+           (values (simple-array fixnum (3)) &optional))
   (with-slots (vises) mesh
     (loop
-      :with array := (make-array 3
-                                 :element-type (array-element-type vises))
+      :with array := (make-array 3 :element-type 'fixnum)
       :for i :below 3
       :do (setf (aref array i) (aref vises vise-index i))
       :finally (return array))))
