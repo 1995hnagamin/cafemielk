@@ -8,7 +8,7 @@
    :cafemielk/point-array
    :cafemielk/util)
   (:export
-   ))
+   :delaunay-triangulate))
 (in-package :cafemielk/mesh2d/delaunay)
 
 (defun square (nx ny &key (element-type t))
