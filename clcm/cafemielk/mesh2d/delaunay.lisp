@@ -226,6 +226,103 @@ v1 -----> v2"
       ((= k vertex-index) (values i j))
       (t (values nil nil)))))
 
+
+;; Point location structure for Delaunay triangulation
+;; (Guibas et al., 1992)
+(defstruct %history-dag
+  ;; Vertex index sequences for each node
+  (vises nil
+   :type (array (vertex-index-sequence 3) (*)))
+  ;; Child triangle indices for each node (nil for leaf nodes)
+  (children-array nil
+   :type (array (or null (array fixnum (3))) (*)))
+  ;; Adjacent triangle indices for each node
+  (adjacent-trig-array nil
+   :type (array (simple-array fixnum (3)) (*))))
+
+(defun %create-empty-history-dag ()
+  (make-%history-dag
+   :vises
+   (make-array 0 :element-type '(vertex-index-sequence 3)
+                 :adjustable t
+                 :fill-pointer 0)
+   :children-array
+   (make-array 0 :element-type '(or null (array fixnum (3)))
+                 :adjustable t
+                 :fill-pointer 0)
+   :adjacent-trig-array
+   (make-array 0 :element-type '(array fixnum (3))
+                 :adjustable t
+                 :fill-pointer 0)))
+
+(declaim (inline %history-dag-children))
+(defun %history-dag-children (hdag trig-index)
+  (aref (%history-dag-children-array hdag) trig-index))
+
+(declaim (inline %history-dag-vise))
+(defun %history-dag-vise (hdag trig-index)
+  (declare (type fixnum trig-index)
+           (type %history-dag hdag)
+           (values (vertex-index-sequence 3) &optional))
+  (aref (%history-dag-vises hdag) trig-index))
+
+(declaim (inline %history-dag-adjacent-trig))
+(defun %history-dag-adjacent-trig (hdag trig-index)
+  (declare (type fixnum trig-index)
+           (type %history-dag hdag)
+           (values (simple-array fixnum (3)) &optional))
+  (aref (%history-dag-adjacent-trig-array hdag) trig-index))
+
+(defun %history-dag-leafp (hdag trig-index)
+  (declare (type fixnum trig-index)
+           (type %history-dag hdag)
+           (values boolean))
+  (null (%history-dag-children hdag trig-index)))
+
+(defconstant +invalid-triangle-index+ -1000)
+(defun %history-dag-push (vise hdag)
+  (declare (type (vertex-index-sequence 3) vise)
+           (type %history-dag hdag))
+  (vector-push-extend vise (%history-dag-vises hdag))
+  (vector-push-extend nil (%history-dag-children-array hdag))
+  (vector-push-extend (make-array 3 :initial-element +invalid-triangle-index+
+                                    :element-type 'fixnum)
+                      (%history-dag-adjacent-trig-array hdag)))
+
+(defun %find-leaf-containing-edge (hdag trig-index e1 e2)
+  (declare (type %history-dag hdag)
+           (type fixnum trig-index e1 e2)
+           (values (or null fixnum) &optional))
+  (labels ((search-node (tr)
+             (declare (type fixnum tr))
+             (if (%history-dag-leafp hdag tr)
+                 tr
+                 (loop
+                   :for child :of-type fixnum
+                     :across (%history-dag-children hdag tr)
+                   :when (%opposite-vertex (%history-dag-vise hdag child) e1 e2)
+                     :do (return (search-node child))
+                   :finally
+                      (return nil)))))
+    (if (>= trig-index 0)
+        (search-node trig-index)
+        trig-index)))
+
+(defun %adjacent-trig-index (hdag trig-index vertex-index)
+  (declare (type fixnum trig-index vertex-index)
+           (type %history-dag hdag))
+  (let ((vise (%history-dag-vise hdag trig-index))
+        (adj-trigs (%history-dag-adjacent-trig hdag trig-index)))
+    (aref-let1 (vi vj vk) vise
+      (cond
+        ((= vi vertex-index)
+         (%find-leaf-containing-edge hdag (aref adj-trigs 0) vk vj))
+        ((= vj vertex-index)
+         (%find-leaf-containing-edge hdag (aref adj-trigs 1) vi vk))
+        ((= vk vertex-index)
+         (%find-leaf-containing-edge hdag (aref adj-trigs 2) vj vi))
+        (t (error "yee"))))))
+
 (defun %find-trig (r vises flags point-array)
   (loop
     :for vise-index :from 0 :below (length vises)
