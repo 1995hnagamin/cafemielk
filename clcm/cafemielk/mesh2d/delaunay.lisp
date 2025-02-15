@@ -273,6 +273,12 @@ v1 -----> v2"
            (values (simple-array fixnum (3)) &optional))
   (aref (%history-dag-adjacent-trig-array hdag) trig-index))
 
+(declaim (inline %history-dag-count))
+(defun %history-dag-count (hdag)
+  (declare (type %history-dag hdag)
+           (values fixnum &optional))
+  (length (%history-dag-vises hdag)))
+
 (defun %history-dag-leafp (hdag trig-index)
   (declare (type fixnum trig-index)
            (type %history-dag hdag)
