@@ -15,7 +15,7 @@
 
 ;; WolframAlpha: `triangle (3,653) (141,589) (592,793)`
 (test test-trig2d-area
-  (is (= (cm:trig2d-area #(3 141 592 653 589 793))
+  (is (= (cm:trig2d-area #2a((3 653) (141 589) (592 793)))
          28508)))
 
 (test test-rvd
@@ -100,8 +100,7 @@
                 (cm:mesh2d-trig-vertex-elt mesh 12)))
     (is (equalp #(5 0 6)
                 (cm:mesh2d-trig-vise-elt mesh 0)))
-    (is (equalp #(  0   0 1/4
-                  1/4   0 1/4)
+    (is (equalp #2a((0 1/4) (0 0) (1/4 1/4))
                 (cm:mesh2d-trig-vise->trig2d mesh #(5 0 6))))))
 
 ;;; Local Variables:
