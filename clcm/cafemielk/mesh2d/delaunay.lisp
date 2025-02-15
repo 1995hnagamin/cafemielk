@@ -87,10 +87,6 @@
      ,(point-array-yref point-array (aref vise 1))
      ,(point-array-yref point-array (aref vise 2))))
 
-(declaim (inline point-array-count))
-(defun point-array-count (point-array)
-  (declare (type (simple-array * (* 2)) point-array))
-  (array-dimension point-array 0))
 
 (declaim (inline point-array-nth))
 (defun point-array-nth (n point-array)
