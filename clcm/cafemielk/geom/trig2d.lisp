@@ -1,12 +1,16 @@
 ;;;; 2-D Triangle Geometry
 
 (defpackage :cafemielk/geom/trig2d
-  (:use :cl :cafemielk/util)
+  (:use
+   :cl
+   :cafemielk/point-array
+   :cafemielk/util)
   (:export
    :clockwisep
    :counterclockwisep
    :in-circle
    :in-circle-p
+   :trig2d
    :trig2d-from-3points
    :trig2d-adherent-p
    :trig2d-area
@@ -58,6 +62,9 @@
   (declare (type (simple-array * (2)) a b c target)
            (values boolean &optional))
   (plusp (in-circle a b c target)))
+
+(deftype trig2d (&optional (element-type '*))
+  `(point-array ,element-type 3 2))
 
 (defun trig2d-from-3points (a b c &key (element-type t))
   (flet ((make (a b c)
