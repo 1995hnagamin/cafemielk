@@ -435,6 +435,20 @@ v1 -----> v2"
     :finally
        (return array)))
 
+(defun %history-dag-remove-virtual-points (hdag)
+  (declare (type %history-dag hdag))
+  (loop
+    :with array := (make-array 0 :fill-pointer 0 :adjustable t)
+    :for i :of-type fixnum :below (%history-dag-count hdag)
+    :for vise :of-type (vertex-index-sequence 3)
+      := (%history-dag-vise hdag i)
+    :when (and (%history-dag-leafp hdag i)
+               (every #'non-negative-p vise))
+      :do
+         (vector-push-extend vise array)
+    :finally
+       (return array)))
+
 ;; Mark Berg, Otfried Cheong, Marc Kreveld, and Mark Overmars
 ;; _Computational Geometry: Algorithms and Applications_
 (defun delaunay-triangulate (point-array)
