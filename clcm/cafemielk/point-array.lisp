@@ -12,7 +12,11 @@
    :point-aref
    :point-aref-x
    :point-aref-y
-   :point-aref-z))
+   :point-aref-z
+   :coord-vec-2d
+   :coord-vec-3d
+   :with-point-coords
+   :with-point-coords*))
 (in-package :cafemielk/point-array)
 
 (deftype point-array (element-type count dimension)
