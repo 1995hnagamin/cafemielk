@@ -503,12 +503,7 @@ v1 -----> v2"
          (pzero (%highest-point-index point-array)))
     (declare (type %history-dag hdag)
              (type fixnum npoint pzero))
-    (labels ((push-vise (i j k)
-               (declare (type fixnum i j k))
-               (assert (and (/= i j) (/= j k) (/= k i)))
-               (assert (%counterclockwisep i j k point-array))
-               (%history-dag-push-vise i j k hdag))
-             (bounding-point-p (i)
+    (labels ((bounding-point-p (i)
                (declare (type fixnum i))
                (or (= i -2) (= i -1) (= i pzero)))
              (legalize-edge (r i j tr)
@@ -536,7 +531,7 @@ v1 -----> v2"
                        (legalize-edge r k j t2)))))))
       (loop
         :initially
-           (push-vise -2 -1 pzero)
+           (%history-dag-push-vise -2 -1 pzero hdag)
            (%history-dag-set-adjacency hdag 0 -1002 -1001 -1000)
         :with indexes :of-type (simple-array fixnum (*))
           := (let ((indexes (iota-array npoint :element-type 'fixnum)))
