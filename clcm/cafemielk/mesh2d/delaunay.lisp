@@ -501,7 +501,8 @@ v1 -----> v2"
   (declare (type (point-array-2d * *) point-array)
            (values (vector (vertex-index-sequence 3)) &optional))
   (let* ((npoint (array-dimension point-array 0))
-         (hdag (%create-empty-history-dag))
+         (hdag (%create-empty-history-dag
+                :initial-capacity npoint))
          (pzero (%highest-point-index point-array)))
     (declare (type %history-dag hdag)
              (type fixnum npoint pzero))
