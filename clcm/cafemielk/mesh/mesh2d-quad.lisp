@@ -1,13 +1,13 @@
-(defpackage :cafemielk/mesh2d-quad
+(defpackage :cafemielk/mesh/mesh2d-quad
   (:use
    :cl
    :cafemielk/util)
-  (:import-from :cafemielk/mesh2d
+  (:import-from :cafemielk/mesh/mesh2d-trig
                 :create-square-point-array)
   (:export
    :mesh2d-quad
    :mesh2d-quad-unit-square))
-(in-package :cafemielk/mesh2d-quad)
+(in-package :cafemielk/mesh/mesh2d-quad)
 
 (defstruct mesh2d-quad
   (vertices nil :type (array * (* 2)))
