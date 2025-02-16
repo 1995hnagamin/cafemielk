@@ -2,9 +2,12 @@
   (:use :cl)
   (:local-nicknames (:cm :cafemielk))
   (:export
-   :run-analysis))
+   :run-triangulation))
 
 (in-package :clcm-delaunay-vtk)
+
+(defvar *vertex-count* 2000)
+(defvar *box-size* 10.0d0)
 
 (defun create-random-point-array (vertex-count box-size)
   (declare (type fixnum vertex-count)
@@ -31,6 +34,19 @@
         (setf (aref array i j) (aref vise j)))
     :finally (return array)))
 
-(defun run-analysis ()
+(defun run-triangulation ()
   (format t "Cafemielk version: ~a~%~%" (cm:cafemielk-version))
+  (let* ((point-array (create-random-point-array
+                       *vertex-count*
+                       *box-size*))
+         (vises (cm:delaunay-triangulate point-array))
+         (mesh (cm:make-mesh2d-trig
+                :vertices point-array
+                :vises (convert-vise-vector vises))))
+    (with-open-file (stream #P"output.vtk"
+                            :if-does-not-exist :create
+                            :if-exists :supersede
+                            :direction :output)
+      (cm:legacyvtk-print-header stream)
+      (cm:legacyvtk-print-unstructured-grid stream mesh)))
   (format t "Bye.~%"))
