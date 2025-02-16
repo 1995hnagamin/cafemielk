@@ -5,8 +5,8 @@
    :cafemielk/geom/trig2d
    :cafemielk/linalg
    :cafemielk/mesh2d
-   :cafemielk/mesh2d/base
-   :cafemielk/mesh2d/delaunay
+   :cafemielk/mesh/base
+   :cafemielk/mesh/delaunay2d
    :cafemielk/mesh2d-quad
    :cafemielk/point-array
    :cafemielk/vtk/legacy

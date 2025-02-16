@@ -1,15 +1,15 @@
 ;;;; Delaunay triangulation
 
-(defpackage :cafemielk/mesh2d/delaunay
+(defpackage :cafemielk/mesh/delaunay2d
   (:use
    :cl
    :cafemielk/geom/trig2d
-   :cafemielk/mesh2d/base
+   :cafemielk/mesh/base
    :cafemielk/point-array
    :cafemielk/util)
   (:export
    :delaunay-triangulate))
-(in-package :cafemielk/mesh2d/delaunay)
+(in-package :cafemielk/mesh/delaunay2d)
 
 (defun square (nx ny &key (element-type t))
   (loop
