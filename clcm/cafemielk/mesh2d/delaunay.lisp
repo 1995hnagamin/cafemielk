@@ -492,9 +492,50 @@ v1 -----> v2"
           := (%find-leaf-containing-vertex r hdag point-array)
         :for vise :of-type (vertex-index-sequence 3)
           := (%history-dag-vise hdag tr)
-        :if (not (%innerp r vise point-array)) :do
+        :for (e1 e2 tr-opposite)
+          := (multiple-value-list (%find-adherent-edge r vise point-array))
+        :if e1 :do
           ;; Point R is on the edge (E1, E2) of Triangle TR
-          (error "not implemented")
+          (multiple-value-bind (ts ts-opposite)
+              (%adjacent-trig-index hdag tr tr-opposite)
+            (declare (type fixnum ts)) ;; TS must not be nil
+            (if ts-opposite
+                (let* ((tre1 (%adjacent-trig-index hdag tr e1))
+                       (tre2 (%adjacent-trig-index hdag tr e2))
+                       (tse1 (%adjacent-trig-index hdag ts e1))
+                       (tse2 (%adjacent-trig-index hdag ts e2))
+                       (t1 (push-vise r e2 tr-opposite))
+                       (t2 (push-vise r tr-opposite e1))
+                       (t3 (push-vise r e1 ts-opposite))
+                       (t4 (push-vise r ts-opposite e2)))
+                  (%history-dag-set-adjacency hdag t1
+                                              tre1 t2 t4)
+                  (%history-dag-set-adjacency hdag t2
+                                              tre2 t3 t1)
+                  (%history-dag-set-adjacency hdag t3
+                                              tse2 t4 t2)
+                  (%history-dag-set-adjacency hdag t4
+                                              tse1 t1 t3)
+                  (%history-dag-add-child hdag tr t1)
+                  (%history-dag-add-child hdag tr t2)
+                  (%history-dag-add-child hdag ts t3)
+                  (%history-dag-add-child hdag ts t4)
+                  (legalize-edge r e2 tr-opposite t1)
+                  (legalize-edge r tr-opposite e1 t2)
+                  (legalize-edge r e1 ts-opposite t3)
+                  (legalize-edge r ts-opposite e2 t4))
+                (let* ((tre1 (%adjacent-trig-index hdag tr e1))
+                       (tre2 (%adjacent-trig-index hdag tr e2))
+                       (t1 (push-vise r e2 tr-opposite))
+                       (t2 (push-vise r tr-opposite e1)))
+                  (%history-dag-set-adjacency hdag t1
+                                              tre1 t2 ts)
+                  (%history-dag-set-adjacency hdag t2
+                                              tre2 ts t1)
+                  (%history-dag-add-child hdag tr t1)
+                  (%history-dag-add-child hdag tr t2)
+                  (legalize-edge r e2 tr-opposite t1)
+                  (legalize-edge r tr-opposite e1 t2))))
         :else :do
           ;; Point R is interior of Triangle TR
           (aref-let (((i j k) vise)
