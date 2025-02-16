@@ -103,6 +103,15 @@
     (is (equalp #2a((0 1/4) (0 0) (1/4 1/4))
                 (cm:mesh2d-trig-vise->trig2d mesh #(5 0 6))))))
 
+(test test-delaunay-triangulate
+  (let ((point-array (cm:create-square-point-array
+                      (cm:vector-linspace 0d0 1d0 6
+                                          :element-type 'double-float)
+                      (cm:vector-linspace 0d0 1d0 6
+                                          :element-type 'double-float)
+                      :element-type 'double-float)))
+    (is (= 50 (length (cm:delaunay-triangulate point-array))))))
+
 ;;; Local Variables:
 ;;; mode: lisp
 ;;; indent-tabs-mode: nil

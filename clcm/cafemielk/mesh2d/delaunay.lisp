@@ -8,7 +8,7 @@
    :cafemielk/point-array
    :cafemielk/util)
   (:export
-   ))
+   :delaunay-triangulate))
 (in-package :cafemielk/mesh2d/delaunay)
 
 (defun square (nx ny &key (element-type t))
@@ -226,29 +226,172 @@ v1 -----> v2"
       ((= k vertex-index) (values i j))
       (t (values nil nil)))))
 
-(defun %find-trig (r vises flags point-array)
-  (loop
-    :for vise-index :from 0 :below (length vises)
-    :for vise := (aref vises vise-index)
-    :when (and (elt flags vise-index)
-               (%adherentp r vise point-array))
-      :do
-         (return vise-index)
-    :finally
-       (error "not found")))
 
-(defun %find-adjacent-trig (i j tr vises flags)
-  (loop
-    :for ti :from 0 :below (length vises)
-    :when (and (/= ti tr)
-               (elt flags ti)
-               (find i (aref vises ti))
-               (find j (aref vises ti)))
-      :do
-         (let1 k (- (reduce #'+ (aref vises ti)) i j)
-           (return (values ti k)))
-    :finally
-       (error "adjacent triangle not found")))
+;; Point location structure for Delaunay triangulation
+;; (Guibas et al., 1992)
+(defstruct %history-dag
+  ;; Vertex index sequences for each node
+  (vises nil
+   :type (array (vertex-index-sequence 3) (*)))
+  ;; Child triangle indices for each node (nil for leaf nodes)
+  (children-array nil
+   :type (array (or null (array fixnum (3))) (*)))
+  ;; Adjacent triangle indices for each node
+  (adjacent-trig-array nil
+   :type (array (simple-array fixnum (3)) (*))))
+
+(defun %create-empty-history-dag ()
+  (make-%history-dag
+   :vises
+   (make-array 0 :element-type '(vertex-index-sequence 3)
+                 :adjustable t
+                 :fill-pointer 0)
+   :children-array
+   (make-array 0 :element-type '(or null (array fixnum (3)))
+                 :adjustable t
+                 :fill-pointer 0)
+   :adjacent-trig-array
+   (make-array 0 :element-type '(array fixnum (3))
+                 :adjustable t
+                 :fill-pointer 0)))
+
+(declaim (inline %history-dag-children))
+(defun %history-dag-children (hdag trig-index)
+  (aref (%history-dag-children-array hdag) trig-index))
+
+(declaim (inline %history-dag-vise))
+(defun %history-dag-vise (hdag trig-index)
+  (declare (type fixnum trig-index)
+           (type %history-dag hdag)
+           (values (vertex-index-sequence 3) &optional))
+  (aref (%history-dag-vises hdag) trig-index))
+
+(declaim (inline %history-dag-adjacent-trig))
+(defun %history-dag-adjacent-trig (hdag trig-index)
+  (declare (type fixnum trig-index)
+           (type %history-dag hdag)
+           (values (simple-array fixnum (3)) &optional))
+  (aref (%history-dag-adjacent-trig-array hdag) trig-index))
+
+(declaim (inline %history-dag-count))
+(defun %history-dag-count (hdag)
+  (declare (type %history-dag hdag)
+           (values fixnum &optional))
+  (length (%history-dag-vises hdag)))
+
+(defun %history-dag-leafp (hdag trig-index)
+  (declare (type fixnum trig-index)
+           (type %history-dag hdag)
+           (values boolean))
+  (null (%history-dag-children hdag trig-index)))
+
+(defconstant +invalid-triangle-index+ -1000)
+(defun %history-dag-push (vise hdag)
+  (declare (type (vertex-index-sequence 3) vise)
+           (type %history-dag hdag))
+  (vector-push-extend vise (%history-dag-vises hdag))
+  (vector-push-extend nil (%history-dag-children-array hdag))
+  (vector-push-extend (make-array 3 :initial-element +invalid-triangle-index+
+                                    :element-type 'fixnum)
+                      (%history-dag-adjacent-trig-array hdag)))
+
+(defun %history-dag-set-adjacency (hdag trig-index tr1 tr2 tr3)
+  (declare (type %history-dag hdag)
+           (type fixnum trig-index tr1 tr2 tr3))
+  (let1 adj (aref (%history-dag-adjacent-trig-array hdag) trig-index)
+    (setf (aref adj 0) tr1)
+    (setf (aref adj 1) tr2)
+    (setf (aref adj 2) tr3)))
+
+(defun %history-dag-push-vise (v1 v2 v3 hdag)
+  (declare (type fixnum v1 v2 v3)
+           (type %history-dag hdag))
+  (%history-dag-push (make-array '(3) :initial-contents `(,v1 ,v2 ,v3)
+                                      :element-type 'fixnum)
+                     hdag))
+
+(defun %history-dag-add-child (hdag parent-index child-index)
+  (declare (type %history-dag hdag)
+           (type fixnum parent-index child-index))
+  (if (%history-dag-children hdag parent-index)
+      (vector-push child-index
+                   (aref (%history-dag-children-array hdag) parent-index))
+      (let1 array (make-array '(3) :element-type 'fixnum
+                                   :adjustable t
+                                   :fill-pointer 0)
+        (vector-push child-index array)
+        (setf (aref (%history-dag-children-array hdag) parent-index) array))))
+
+(defun %find-leaf-containing-edge (hdag trig-index e1 e2)
+  (declare (type %history-dag hdag)
+           (type fixnum trig-index e1 e2)
+           (values (or null fixnum) (or null fixnum) &optional))
+  (labels ((search-node (tr)
+             (declare (type fixnum tr))
+             (if (%history-dag-leafp hdag tr)
+                 (let1 k (- (reduce #'+ (%history-dag-vise hdag tr)) e1 e2)
+                   (values tr k))
+                 (loop
+                   :for child :of-type fixnum
+                     :across (%history-dag-children hdag tr)
+                   :when (%opposite-vertex (%history-dag-vise hdag child) e1 e2)
+                     :do (return (search-node child))
+                   :finally
+                      (return (values nil nil))))))
+    (if (>= trig-index 0)
+        (search-node trig-index)
+        (values trig-index nil))))
+
+(defun %adjacent-trig-index (hdag trig-index vertex-index)
+  (declare (type fixnum trig-index vertex-index)
+           (type %history-dag hdag)
+           (values (or null fixnum)))
+  (let ((vise (%history-dag-vise hdag trig-index))
+        (adj-trigs (%history-dag-adjacent-trig hdag trig-index)))
+    (aref-let1 (vi vj vk) vise
+      (cond
+        ((= vi vertex-index)
+         (%find-leaf-containing-edge hdag (aref adj-trigs 0) vk vj))
+        ((= vj vertex-index)
+         (%find-leaf-containing-edge hdag (aref adj-trigs 1) vi vk))
+        ((= vk vertex-index)
+         (%find-leaf-containing-edge hdag (aref adj-trigs 2) vj vi))
+        (t (error "yee"))))))
+
+(defun %find-leaf-containing-vertex (vertex-index hdag point-array)
+  (declare (type %history-dag hdag)
+           (values fixnum &optional))
+  (labels ((walk (trig-index)
+             (declare (type fixnum trig-index))
+             (if (%history-dag-leafp hdag trig-index)
+                 trig-index
+                 (loop
+                   :for child-index
+                     :across (%history-dag-children hdag trig-index)
+                   :for child := (%history-dag-vise hdag child-index)
+                   :if (%adherentp vertex-index child point-array) :do
+                     (return (walk child-index))
+                   :finally
+                      (error "not found")))))
+    (walk 0)))
+
+(defun %find-adherent-edge (vertex-index trig-vise point-array)
+  (declare (type fixnum vertex-index)
+           (type (vertex-index-sequence 3) trig-vise)
+           (type (point-array-2d * *) point-array)
+           (values (or null fixnum) (or null fixnum) (or null fixnum)
+                   &optional))
+  (flet ((on-line-p (p i j)
+           (declare (type fixnum p i j)
+                    (values boolean &optional))
+           (and (not (%counterclockwisep p i j point-array))
+                (not (%clockwisep p i j point-array)))))
+    (aref-let1 (vi vj vk) trig-vise
+      (cond
+        ((on-line-p vertex-index vj vk) (values vj vk vi))
+        ((on-line-p vertex-index vk vi) (values vk vi vj))
+        ((on-line-p vertex-index vi vj) (values vi vj vk))
+        (t (values nil nil nil))))))
 
 (defun %legalp (r i j k point-array)
   (declare (type fixnum r i j k)
@@ -272,19 +415,82 @@ v1 -----> v2"
                          (point-ref k))))
       (t (< (min k r) (min i j))))))
 
-(defun %remove-virtual-points (vises flags)
-  (declare (type (vector (vertex-index-sequence 3)) vises)
-           (type (vector boolean) flags))
+(defun %history-dag-remove-virtual-points (hdag)
+  (declare (type %history-dag hdag))
   (loop
     :with array := (make-array 0 :fill-pointer 0 :adjustable t)
-    :for i :of-type fixnum :below (length vises)
-    :for vise :of-type (vertex-index-sequence 3) := (aref vises i)
-    :when (and (aref flags i)
+    :for i :of-type fixnum :below (%history-dag-count hdag)
+    :for vise :of-type (vertex-index-sequence 3)
+      := (%history-dag-vise hdag i)
+    :when (and (%history-dag-leafp hdag i)
                (every #'non-negative-p vise))
       :do
          (vector-push-extend vise array)
     :finally
        (return array)))
+
+(defmacro with-new-trigs (hdag bindings &body body)
+  (once-only (hdag)
+    (let* ((trig-names
+             (mapcar (lambda (bind)
+                       (destructuring-bind
+                           (name &key vise parents adjacence) bind
+                         (declare (ignorable name vise parents adjacence))
+                         name))
+                     bindings))
+           (vises
+             (mapcar (lambda (bind)
+                       (destructuring-bind
+                           (name &key vise parents adjacence) bind
+                         (declare (ignorable name vise parents adjacence))
+                         vise))
+                     bindings))
+           (parent-lists
+             (mapcar (lambda (bind)
+                       (destructuring-bind
+                           (name &key vise parents adjacence) bind
+                         (declare (ignorable name vise parents adjacence))
+                         parents))
+                     bindings))
+           (adjacence-lists
+             (mapcar (lambda (bind)
+                       (destructuring-bind
+                           (name &key vise parents adjacence) bind
+                         (declare (ignorable name vise parents adjacence))
+                         adjacence))
+                     bindings))
+           (parent-gensym-list
+             (loop :for  parents :in parent-lists
+                   :collect (loop :for parent :in parents
+                                  :collect (gensym))))
+           (adjacence-gensym-list
+             (loop :for bind :in bindings
+                   :collect (loop :repeat 3 :collect (gensym)))))
+      `(let ,(loop :for name :in trig-names
+                   :for vise :in vises
+                   :collect `(,name (%history-dag-push-vise ,@vise hdag)))
+         (let (,@(loop
+                   :for adjacence-gensyms :in adjacence-gensym-list
+                   :for adjacence-list :in adjacence-lists
+                   :append (loop :for g :in adjacence-gensyms
+                                 :for expr :in adjacence-list
+                                 :collect `(,g ,expr)))
+               ,@(loop
+                   :for parent-gensyms :in parent-gensym-list
+                   :for parents :in parent-lists
+                   :append (loop :for g :in parent-gensyms
+                                 :for parent :in parents
+                                 :collect `(,g ,parent))))
+           ,@(loop :for name :in trig-names
+                   :for adjacence-gensyms :in adjacence-gensym-list
+                   :collect `(%history-dag-set-adjacency ,hdag ,name
+                                                         ,@adjacence-gensyms))
+           ,@(loop :for name :in trig-names
+                   :for parent-gensyms :in parent-gensym-list
+                   :append (loop
+                             :for g :in parent-gensyms
+                             :collect `(%history-dag-add-child ,hdag ,g ,name)))
+           ,@body)))))
 
 ;; Mark Berg, Otfried Cheong, Marc Kreveld, and Mark Overmars
 ;; _Computational Geometry: Algorithms and Applications_
@@ -293,28 +499,11 @@ v1 -----> v2"
            (values (vector (vertex-index-sequence 3)) &optional)
            (optimize (speed 3)))
   (let* ((npoint (array-dimension point-array 0))
-         (vises (make-array 0 :element-type '(vertex-index-sequence 3)
-                              :adjustable t
-                              :fill-pointer 0))
-         (flags (make-array 0 :element-type 'boolean
-                              :adjustable t
-                              :fill-pointer 0))
+         (hdag (%create-empty-history-dag))
          (pzero (%highest-point-index point-array)))
-    (declare (type (vector (vertex-index-sequence 3)) vises)
-             (type (vector boolean) flags)
+    (declare (type %history-dag hdag)
              (type fixnum npoint pzero))
-    (labels ((push-vise (i j k)
-               (declare (type fixnum i j k))
-               (assert (and (/= i j) (/= j k) (/= k i)))
-               (assert (%counterclockwisep i j k point-array))
-               (vector-push-extend
-                (make-array 3 :initial-contents `(,i ,j ,k)
-                              :element-type 'fixnum)
-                vises)
-               (vector-push-extend t flags))
-             (nullify-vise (vise-index)
-               (setf (aref flags vise-index) nil))
-             (bounding-point-p (i)
+    (labels ((bounding-point-p (i)
                (declare (type fixnum i))
                (or (= i -2) (= i -1) (= i pzero)))
              (legalize-edge (r i j tr)
@@ -325,18 +514,25 @@ v1 -----> v2"
                    ;; Super-triangle edges are not flippable
                    (return-from body))
                  (multiple-value-bind
-                       (ts k) (%find-adjacent-trig i j tr vises flags)
-                   (declare (type fixnum ts k))
+                       (ts k) (%adjacent-trig-index hdag tr r)
+                   (when (not ts)
+                     (return-from body))
                    (when (not (%legalp r i j k point-array))
-                     (nullify-vise tr)
-                     (nullify-vise ts)
-                     (let ((t1 (push-vise r i k))
-                           (t2 (push-vise r k j)))
+                     (with-new-trigs hdag
+                         ((t1 :parents (tr ts) :vise (r i k)
+                              :adjacence ((%adjacent-trig-index hdag ts j)
+                                          t2
+                                          (%adjacent-trig-index hdag tr j)))
+                          (t2 :parents (tr ts) :vise (r k j)
+                              :adjacence ((%adjacent-trig-index hdag ts i)
+                                          (%adjacent-trig-index hdag tr i)
+                                          t1)))
                        (legalize-edge r i k t1)
                        (legalize-edge r k j t2)))))))
       (loop
         :initially
-           (push-vise -2 -1 pzero)
+           (%history-dag-push-vise -2 -1 pzero hdag)
+           (%history-dag-set-adjacency hdag 0 -1002 -1001 -1000)
         :with indexes :of-type (simple-array fixnum (*))
           := (let ((indexes (iota-array npoint :element-type 'fixnum)))
                (declare (type (simple-array fixnum (*)) indexes))
@@ -345,25 +541,58 @@ v1 -----> v2"
 
         :for r-index :of-type fixnum :from 1 :below npoint
         :for r :of-type fixnum := (aref indexes r-index)
-        :for tr :of-type fixnum := (%find-trig r vises flags point-array)
-        :for vise :of-type (vertex-index-sequence 3) := (aref vises tr)
-        :if (%innerp r vise point-array) :do
-          (aref-let1 (i j k) vise
+        :for tr :of-type fixnum
+          := (%find-leaf-containing-vertex r hdag point-array)
+        :for vise :of-type (vertex-index-sequence 3)
+          := (%history-dag-vise hdag tr)
+        :for (e1 e2 tr-opposite)
+          := (multiple-value-list (%find-adherent-edge r vise point-array))
+        :if e1 :do
+          ;; Point R is on the edge (E1, E2) of Triangle TR
+          (multiple-value-bind (ts ts-opposite)
+              (%adjacent-trig-index hdag tr tr-opposite)
+            (declare (type fixnum ts)) ;; TS must not be nil
+            (if ts-opposite
+                (with-new-trigs hdag
+                    ((t1 :vise (r e2 tr-opposite) :parents (tr)
+                         :adjacence ((%adjacent-trig-index hdag tr e1) t2 t4))
+                     (t2 :vise (r tr-opposite e1) :parents (tr)
+                         :adjacence ((%adjacent-trig-index hdag tr e2) t3 t1))
+                     (t3 :vise (r e1 ts-opposite) :parents (ts)
+                         :adjacence ((%adjacent-trig-index hdag ts e2) t4 t2))
+                     (t4 :vise (r ts-opposite e2) :parents (ts)
+                         :adjacence ((%adjacent-trig-index hdag ts e1) t1 t3)))
+                  (legalize-edge r e2 tr-opposite t1)
+                  (legalize-edge r tr-opposite e1 t2)
+                  (legalize-edge r e1 ts-opposite t3)
+                  (legalize-edge r ts-opposite e2 t4))
+                (with-new-trigs hdag
+                    ((t1 :vise (r e2 tr-opposite) :parents (tr)
+                         :adjacence ((%adjacent-trig-index hdag tr e1) t2 ts))
+                     (t2 :vise (r tr-opposite e1) :parents (tr)
+                         :adjacence ((%adjacent-trig-index hdag tr e2) ts t1)))
+                  (legalize-edge r e2 tr-opposite t1)
+                  (legalize-edge r tr-opposite e1 t2))))
+        :else :do
+          ;; Point R is interior of Triangle TR
+          (aref-let (((i j k) vise)
+                     ((adi adj adk) (%history-dag-adjacent-trig hdag tr)))
             (declare (type fixnum i j k))
-            (nullify-vise tr)
             ;; add edges r-i, r-j, r-k
-            (let ((tr1 (push-vise r i j))
-                  (tr2 (push-vise r j k))
-                  (tr3 (push-vise r k i)))
+            (with-new-trigs hdag
+                ((tr1 :vise (r i j) :parents (tr)
+                      :adjacence (adk tr2 tr3))
+                 (tr2 :vise (r j k) :parents (tr)
+                      :adjacence (adi tr3 tr1))
+                 (tr3 :vise (r k i) :parents (tr)
+                      :adjacence (adj tr1 tr2)))
               ;; legalize edges
               (legalize-edge r i j tr1)
               (legalize-edge r j k tr2)
               (legalize-edge r k i tr3)))
-        :else :do
-          (error "not implemented")
         :end
         :finally
-           (return (%remove-virtual-points vises flags))))))
+           (return (%history-dag-remove-virtual-points hdag))))))
 
 ;;; Local Variables:
 ;;; mode: lisp
