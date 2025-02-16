@@ -240,20 +240,23 @@ v1 -----> v2"
   (adjacent-trig-array nil
    :type (array (simple-array fixnum (3)) (*))))
 
-(defun %create-empty-history-dag ()
+(defun %create-empty-history-dag (&key (initial-capacity 0))
   (make-%history-dag
    :vises
-   (make-array 0 :element-type '(vertex-index-sequence 3)
-                 :adjustable t
-                 :fill-pointer 0)
+   (make-array initial-capacity
+               :element-type '(vertex-index-sequence 3)
+               :adjustable t
+               :fill-pointer 0)
    :children-array
-   (make-array 0 :element-type '(or null (array fixnum (3)))
-                 :adjustable t
-                 :fill-pointer 0)
+   (make-array initial-capacity
+               :element-type '(or null (array fixnum (3)))
+               :adjustable t
+               :fill-pointer 0)
    :adjacent-trig-array
-   (make-array 0 :element-type '(array fixnum (3))
-                 :adjustable t
-                 :fill-pointer 0)))
+   (make-array initial-capacity
+               :element-type '(array fixnum (3))
+               :adjustable t
+               :fill-pointer 0)))
 
 (declaim (inline %history-dag-children))
 (defun %history-dag-children (hdag trig-index)
