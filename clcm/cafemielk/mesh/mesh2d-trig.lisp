@@ -1,8 +1,8 @@
 ;;;;
-;;;; 2-D Mesh Library
+;;;; 2D Triangular Mesh
 ;;;;
 
-(defpackage :cafemielk/mesh2d
+(defpackage :cafemielk/mesh/mesh2d-trig
   (:use
    :cl
    :cafemielk/geom/trig2d
@@ -21,7 +21,7 @@
    :mesh2d-unit-square
    :create-square-point-array
    :create-square-vise-array))
-(in-package :cafemielk/mesh2d)
+(in-package :cafemielk/mesh/mesh2d-trig)
 
 
 (defstruct mesh2d-trig

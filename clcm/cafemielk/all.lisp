@@ -4,7 +4,7 @@
    :cafemielk/util
    :cafemielk/geom/trig2d
    :cafemielk/linalg
-   :cafemielk/mesh2d
+   :cafemielk/mesh/mesh2d-trig
    :cafemielk/mesh/base
    :cafemielk/mesh/delaunay2d
    :cafemielk/mesh2d-quad
