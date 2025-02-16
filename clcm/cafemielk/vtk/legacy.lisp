@@ -4,7 +4,7 @@
   (:use
    :cl
    :cafemielk/util
-   :cafemielk/mesh2d)
+   :cafemielk/mesh/mesh2d-trig)
   (:export
    :legacyvtk-print-cell-types
    :legacyvtk-print-cells
