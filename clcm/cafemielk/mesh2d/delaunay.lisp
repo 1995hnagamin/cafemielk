@@ -474,7 +474,11 @@ v1 -----> v2"
           := (%find-leaf-containing-vertex r hdag point-array)
         :for vise :of-type (vertex-index-sequence 3)
           := (%history-dag-vise hdag tr)
-        :if (%innerp r vise point-array) :do
+        :if (not (%innerp r vise point-array)) :do
+          ;; Point R is on the edge (E1, E2) of Triangle TR
+          (error "not implemented")
+        :else :do
+          ;; Point R is interior of Triangle TR
           (aref-let (((i j k) vise)
                      ((adi adj adk) (%history-dag-adjacent-trig hdag tr)))
             (declare (type fixnum i j k))
@@ -496,8 +500,6 @@ v1 -----> v2"
               (legalize-edge r i j tr1)
               (legalize-edge r j k tr2)
               (legalize-edge r k i tr3)))
-        :else :do
-          (error "not implemented")
         :end
         :finally
            (return (%history-dag-remove-virtual-points hdag))))))
