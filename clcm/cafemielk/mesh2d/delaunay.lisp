@@ -496,8 +496,7 @@ v1 -----> v2"
 ;; _Computational Geometry: Algorithms and Applications_
 (defun delaunay-triangulate (point-array)
   (declare (type (point-array-2d * *) point-array)
-           (values (vector (vertex-index-sequence 3)) &optional)
-           (optimize (speed 3)))
+           (values (vector (vertex-index-sequence 3)) &optional))
   (let* ((npoint (array-dimension point-array 0))
          (hdag (%create-empty-history-dag))
          (pzero (%highest-point-index point-array)))
