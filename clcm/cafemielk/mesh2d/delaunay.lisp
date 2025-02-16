@@ -429,6 +429,69 @@ v1 -----> v2"
     :finally
        (return array)))
 
+(defmacro with-new-trigs (hdag bindings &body body)
+  (once-only (hdag)
+    (let* ((trig-names
+             (mapcar (lambda (bind)
+                       (destructuring-bind
+                           (name &key vise parents adjacence) bind
+                         (declare (ignorable name vise parents adjacence))
+                         name))
+                     bindings))
+           (vises
+             (mapcar (lambda (bind)
+                       (destructuring-bind
+                           (name &key vise parents adjacence) bind
+                         (declare (ignorable name vise parents adjacence))
+                         vise))
+                     bindings))
+           (parent-lists
+             (mapcar (lambda (bind)
+                       (destructuring-bind
+                           (name &key vise parents adjacence) bind
+                         (declare (ignorable name vise parents adjacence))
+                         parents))
+                     bindings))
+           (adjacence-lists
+             (mapcar (lambda (bind)
+                       (destructuring-bind
+                           (name &key vise parents adjacence) bind
+                         (declare (ignorable name vise parents adjacence))
+                         adjacence))
+                     bindings))
+           (parent-gensym-list
+             (loop :for  parents :in parent-lists
+                   :collect (loop :for parent :in parents
+                                  :collect (gensym))))
+           (adjacence-gensym-list
+             (loop :for bind :in bindings
+                   :collect (loop :repeat 3 :collect (gensym)))))
+      `(let ,(loop :for name :in trig-names
+                   :for vise :in vises
+                   :collect `(,name (%history-dag-push-vise ,@vise hdag)))
+         (let (,@(loop
+                   :for adjacence-gensyms :in adjacence-gensym-list
+                   :for adjacence-list :in adjacence-lists
+                   :append (loop :for g :in adjacence-gensyms
+                                 :for expr :in adjacence-list
+                                 :collect `(,g ,expr)))
+               ,@(loop
+                   :for parent-gensyms :in parent-gensym-list
+                   :for parents :in parent-lists
+                   :append (loop :for g :in parent-gensyms
+                                 :for parent :in parents
+                                 :collect `(,g ,parent))))
+           ,@(loop :for name :in trig-names
+                   :for adjacence-gensyms :in adjacence-gensym-list
+                   :collect `(%history-dag-set-adjacency ,hdag ,name
+                                                         ,@adjacence-gensyms))
+           ,@(loop :for name :in trig-names
+                   :for parent-gensyms :in parent-gensym-list
+                   :append (loop
+                             :for g :in parent-gensyms
+                             :collect `(%history-dag-add-child ,hdag ,g ,name)))
+           ,@body)))))
+
 ;; Mark Berg, Otfried Cheong, Marc Kreveld, and Mark Overmars
 ;; _Computational Geometry: Algorithms and Applications_
 (defun delaunay-triangulate (point-array)
