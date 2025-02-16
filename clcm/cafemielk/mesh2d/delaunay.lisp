@@ -375,6 +375,24 @@ v1 -----> v2"
                       (error "not found")))))
     (walk 0)))
 
+(defun %find-adherent-edge (vertex-index trig-vise point-array)
+  (declare (type fixnum vertex-index)
+           (type (vertex-index-sequence 3) trig-vise)
+           (type (point-array-2d * *) point-array)
+           (values (or null fixnum) (or null fixnum) (or null fixnum)
+                   &optional))
+  (flet ((on-line-p (p i j)
+           (declare (type fixnum p i j)
+                    (values boolean &optional))
+           (and (not (%counterclockwisep p i j point-array))
+                (not (%clockwisep p i j point-array)))))
+    (aref-let1 (vi vj vk) trig-vise
+      (cond
+        ((on-line-p vertex-index vj vk) (values vj vk vi))
+        ((on-line-p vertex-index vk vi) (values vk vi vj))
+        ((on-line-p vertex-index vi vj) (values vi vj vk))
+        (t (values nil nil nil))))))
+
 (defun %legalp (r i j k point-array)
   (declare (type fixnum r i j k)
            (type (point-array-2d * *) point-array)
