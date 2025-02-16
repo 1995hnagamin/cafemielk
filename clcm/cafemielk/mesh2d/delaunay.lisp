@@ -523,20 +523,15 @@ v1 -----> v2"
                    (when (not ts)
                      (return-from body))
                    (when (not (%legalp r i j k point-array))
-                     (let* ((tsj (%adjacent-trig-index hdag ts j))
-                            (trj (%adjacent-trig-index hdag tr j))
-                            (tsi (%adjacent-trig-index hdag ts i))
-                            (tri (%adjacent-trig-index hdag tr i))
-                            (t1 (push-vise r i k))
-                            (t2 (push-vise r k j)))
-                       (%history-dag-set-adjacency hdag t1
-                                                   tsj t2 trj)
-                       (%history-dag-set-adjacency hdag t2
-                                                   tsi tri t1)
-                       (%history-dag-add-child hdag tr t1)
-                       (%history-dag-add-child hdag tr t2)
-                       (%history-dag-add-child hdag ts t1)
-                       (%history-dag-add-child hdag ts t2)
+                     (with-new-trigs hdag
+                         ((t1 :parents (tr ts) :vise (r i k)
+                              :adjacence ((%adjacent-trig-index hdag ts j)
+                                          t2
+                                          (%adjacent-trig-index hdag tr j)))
+                          (t2 :parents (tr ts) :vise (r k j)
+                              :adjacence ((%adjacent-trig-index hdag ts i)
+                                          (%adjacent-trig-index hdag tr i)
+                                          t1)))
                        (legalize-edge r i k t1)
                        (legalize-edge r k j t2)))))))
       (loop
@@ -563,40 +558,24 @@ v1 -----> v2"
               (%adjacent-trig-index hdag tr tr-opposite)
             (declare (type fixnum ts)) ;; TS must not be nil
             (if ts-opposite
-                (let* ((tre1 (%adjacent-trig-index hdag tr e1))
-                       (tre2 (%adjacent-trig-index hdag tr e2))
-                       (tse1 (%adjacent-trig-index hdag ts e1))
-                       (tse2 (%adjacent-trig-index hdag ts e2))
-                       (t1 (push-vise r e2 tr-opposite))
-                       (t2 (push-vise r tr-opposite e1))
-                       (t3 (push-vise r e1 ts-opposite))
-                       (t4 (push-vise r ts-opposite e2)))
-                  (%history-dag-set-adjacency hdag t1
-                                              tre1 t2 t4)
-                  (%history-dag-set-adjacency hdag t2
-                                              tre2 t3 t1)
-                  (%history-dag-set-adjacency hdag t3
-                                              tse2 t4 t2)
-                  (%history-dag-set-adjacency hdag t4
-                                              tse1 t1 t3)
-                  (%history-dag-add-child hdag tr t1)
-                  (%history-dag-add-child hdag tr t2)
-                  (%history-dag-add-child hdag ts t3)
-                  (%history-dag-add-child hdag ts t4)
+                (with-new-trigs hdag
+                    ((t1 :vise (r e2 tr-opposite) :parents (tr)
+                         :adjacence ((%adjacent-trig-index hdag tr e1) t2 t4))
+                     (t2 :vise (r tr-opposite e1) :parents (tr)
+                         :adjacence ((%adjacent-trig-index hdag tr e2) t3 t1))
+                     (t3 :vise (r e1 ts-opposite) :parents (ts)
+                         :adjacence ((%adjacent-trig-index hdag ts e2) t4 t2))
+                     (t4 :vise (r ts-opposite e2) :parents (ts)
+                         :adjacence ((%adjacent-trig-index hdag ts e1) t1 t3)))
                   (legalize-edge r e2 tr-opposite t1)
                   (legalize-edge r tr-opposite e1 t2)
                   (legalize-edge r e1 ts-opposite t3)
                   (legalize-edge r ts-opposite e2 t4))
-                (let* ((tre1 (%adjacent-trig-index hdag tr e1))
-                       (tre2 (%adjacent-trig-index hdag tr e2))
-                       (t1 (push-vise r e2 tr-opposite))
-                       (t2 (push-vise r tr-opposite e1)))
-                  (%history-dag-set-adjacency hdag t1
-                                              tre1 t2 ts)
-                  (%history-dag-set-adjacency hdag t2
-                                              tre2 ts t1)
-                  (%history-dag-add-child hdag tr t1)
-                  (%history-dag-add-child hdag tr t2)
+                (with-new-trigs hdag
+                    ((t1 :vise (r e2 tr-opposite) :parents (tr)
+                         :adjacence ((%adjacent-trig-index hdag tr e1) t2 ts))
+                     (t2 :vise (r tr-opposite e1) :parents (tr)
+                         :adjacence ((%adjacent-trig-index hdag tr e2) ts t1)))
                   (legalize-edge r e2 tr-opposite t1)
                   (legalize-edge r tr-opposite e1 t2))))
         :else :do
@@ -605,19 +584,13 @@ v1 -----> v2"
                      ((adi adj adk) (%history-dag-adjacent-trig hdag tr)))
             (declare (type fixnum i j k))
             ;; add edges r-i, r-j, r-k
-            (let ((tr1 (push-vise r i j))
-                  (tr2 (push-vise r j k))
-                  (tr3 (push-vise r k i)))
-              (declare (type fixnum tr1 tr2 tr3))
-              (%history-dag-set-adjacency hdag tr1
-                                          adk tr2 tr3)
-              (%history-dag-set-adjacency hdag tr2
-                                          adi tr3 tr1)
-              (%history-dag-set-adjacency hdag tr3
-                                          adj tr1 tr2)
-              (%history-dag-add-child hdag tr tr1)
-              (%history-dag-add-child hdag tr tr2)
-              (%history-dag-add-child hdag tr tr3)
+            (with-new-trigs hdag
+                ((tr1 :vise (r i j) :parents (tr)
+                      :adjacence (adk tr2 tr3))
+                 (tr2 :vise (r j k) :parents (tr)
+                      :adjacence (adi tr3 tr1))
+                 (tr3 :vise (r k i) :parents (tr)
+                      :adjacence (adj tr1 tr2)))
               ;; legalize edges
               (legalize-edge r i j tr1)
               (legalize-edge r j k tr2)
