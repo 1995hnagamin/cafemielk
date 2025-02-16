@@ -39,7 +39,7 @@
   (let* ((point-array (create-random-point-array
                        *vertex-count*
                        *box-size*))
-         (vises (cm:delaunay-triangulate point-array))
+         (vises (time (cm:delaunay-triangulate point-array)))
          (mesh (cm:make-mesh2d-trig
                 :vertices point-array
                 :vises (convert-vise-vector vises))))
