@@ -93,8 +93,8 @@
            (declare (type fixnum i j))
            (lexicographic< (i j)
                (k)
-               ((point-aref-x point-array k))
-               ((point-aref-y point-array k)))))
+               ((point-aref-y point-array k))
+               ((point-aref-x point-array k)))))
     (loop
       :with m :of-type fixnum := 0
       :for i :of-type fixnum :from 1 :below (point-array-count point-array)
